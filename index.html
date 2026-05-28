@@ -28,6 +28,15 @@
 <link rel="prefetch" href="library.html" as="document" />
 <link rel="prefetch" href="flashcards.html" as="document" />
 
+<script>
+  /* Auth guard — redirect to login if not authenticated */
+  (function () {
+    var AUTH_KEY = 'mecee_auth';
+    if (sessionStorage.getItem(AUTH_KEY) !== '1' && localStorage.getItem(AUTH_KEY) !== '1') {
+      location.replace('login.html');
+    }
+  })();
+</script>
 <script src="mecee_keys.js"></script>
 <script defer src="cursor.js"></script>
 <script defer src="contextmenu.js"></script>

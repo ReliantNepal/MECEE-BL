@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MECEE-BL — Login</title>
+<link rel="icon" type="image/x-icon" href="Assets/Favicon/favicon.ico" />
+<link rel="icon" type="image/png" sizes="32x32" href="Assets/Favicon/favicon-32x32.png" />
+<link rel="icon" type="image/png" sizes="16x16" href="Assets/Favicon/favicon-16x16.png" />
+<style>
+  :root {
+    --bg: #ffffff;
+    --surface: #f6f6f6;
+    --surface-2: #ececec;
+    --text: #111111;
+    --muted: #6b6b6b;
+    --border: #dcdcdc;
+    --accent: #111111;
+    --accent-text: #ffffff;
+    --error: #c0392b;
+    --error-bg: #fdf0ef;
+  }
+  [data-theme="dark"] {
+    --bg: #0e0e0e;
+    --surface: #1a1a1a;
+    --surface-2: #232323;
+    --text: #f5f5f5;
+    --muted: #999;
+    --border: #2a2a2a;
+    --accent: #f5f5f5;
+    --accent-text: #0e0e0e;
+    --error: #e74c3c;
+    --error-bg: #2a1515;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .login-wrap {
+    width: 100%;
+    max-width: 400px;
+    padding: 24px;
+  }
+
+  .login-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 36px 32px 32px;
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.35);
+  }
+
+  .login-logo {
+    text-align: center;
+    margin-bottom: 28px;
+  }
+  .login-logo-icon {
+    font-size: 40px;
+    line-height: 1;
+    display: block;
+    margin-bottom: 10px;
+  }
+  .login-logo h1 {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    color: var(--text);
+  }
+  .login-logo p {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  .login-field {
+    margin-bottom: 16px;
+  }
+  .login-field label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+  }
+  .login-field input {
+    width: 100%;
+    padding: 11px 14px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    font-size: 14px;
+    color: var(--text);
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .login-field input:focus {
+    border-color: var(--accent);
+  }
+  .login-field input::placeholder {
+    color: var(--muted);
+    opacity: 0.6;
+  }
+
+  .login-remember {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 22px;
+    cursor: pointer;
+    user-select: none;
+    width: fit-content;
+  }
+  .login-remember input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--accent);
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .login-remember span {
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .login-btn {
+    width: 100%;
+    padding: 12px;
+    background: var(--accent);
+    color: var(--accent-text);
+    border: none;
+    border-radius: 9px;
+    font-size: 14px;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    letter-spacing: 0.2px;
+    transition: opacity 0.15s;
+  }
+  .login-btn:hover { opacity: 0.88; }
+  .login-btn:active { opacity: 0.75; }
+  .login-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+  .login-error {
+    display: none;
+    margin-top: 14px;
+    padding: 10px 14px;
+    background: var(--error-bg);
+    border: 1px solid var(--error);
+    border-radius: 8px;
+    font-size: 13px;
+    color: var(--error);
+  }
+  .login-error.show { display: block; }
+
+  /* shake animation on wrong password */
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    20%      { transform: translateX(-6px); }
+    40%      { transform: translateX(6px); }
+    60%      { transform: translateX(-4px); }
+    80%      { transform: translateX(4px); }
+  }
+  .login-card.shake { animation: shake 0.35s ease; }
+</style>
+</head>
+<body>
+
+<div class="login-wrap">
+  <div class="login-card" id="loginCard">
+    <div class="login-logo">
+      <span class="login-logo-icon">📚</span>
+      <h1>MECEE-BL 2027</h1>
+      <p>Sign in to continue</p>
+    </div>
+
+    <form id="loginForm" autocomplete="on" novalidate>
+      <div class="login-field">
+        <label for="username">Username</label>
+        <input
+          type="text"
+          id="username"
+          name="username"
+          placeholder="Enter username"
+          autocomplete="username"
+          spellcheck="false"
+          autofocus
+        />
+      </div>
+
+      <div class="login-field">
+        <label for="password">Password</label>
+        <input
+          type="password"
+          id="password"
+          name="password"
+          placeholder="Enter password"
+          autocomplete="current-password"
+        />
+      </div>
+
+      <label class="login-remember">
+        <input type="checkbox" id="rememberMe" />
+        <span>Remember me</span>
+      </label>
+
+      <button type="submit" class="login-btn" id="loginBtn">Login</button>
+
+      <div class="login-error" id="loginError">Incorrect username or password.</div>
+    </form>
+  </div>
+</div>
+
+<script>
+  /* Apply saved theme */
+  const savedTheme = localStorage.getItem('mecee_theme');
+  if (savedTheme) document.documentElement.setAttribute('data-theme', savedTheme);
+
+  /* Credentials (client-side gate for a local personal app) */
+  const VALID_USER = 'sameer';
+  const VALID_PASS = 'SameerPun123';
+  const AUTH_KEY   = 'mecee_auth';
+  const DEST       = 'index.html';
+
+  /* If already logged in, go straight to the app */
+  if (sessionStorage.getItem(AUTH_KEY) === '1' || localStorage.getItem(AUTH_KEY) === '1') {
+    location.replace(DEST);
+  }
+
+  const form      = document.getElementById('loginForm');
+  const userInput = document.getElementById('username');
+  const passInput = document.getElementById('password');
+  const remember  = document.getElementById('rememberMe');
+  const btn       = document.getElementById('loginBtn');
+  const errorBox  = document.getElementById('loginError');
+  const card      = document.getElementById('loginCard');
+
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    const user = userInput.value.trim();
+    const pass = passInput.value;
+
+    if (user === VALID_USER && pass === VALID_PASS) {
+      errorBox.classList.remove('show');
+      btn.disabled = true;
+      btn.textContent = 'Signing in…';
+      if (remember.checked) {
+        localStorage.setItem(AUTH_KEY, '1');
+      } else {
+        sessionStorage.setItem(AUTH_KEY, '1');
+      }
+      location.replace(DEST);
+    } else {
+      errorBox.classList.add('show');
+      passInput.value = '';
+      passInput.focus();
+      /* Shake the card */
+      card.classList.remove('shake');
+      void card.offsetWidth; /* reflow to restart animation */
+      card.classList.add('shake');
+      card.addEventListener('animationend', () => card.classList.remove('shake'), { once: true });
+    }
+  });
+</script>
+</body>
+</html>
