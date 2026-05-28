@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>MECEE-BL 2027</title>
+
+<!-- Favicon (avoids /favicon.ico 404 on every load) -->
+<link rel="icon" type="image/x-icon" href="Assets/Favicon/favicon.ico" />
+<link rel="icon" type="image/png" sizes="32x32" href="Assets/Favicon/favicon-32x32.png" />
+<link rel="icon" type="image/png" sizes="16x16" href="Assets/Favicon/favicon-16x16.png" />
+<link rel="apple-touch-icon" sizes="180x180" href="Assets/Favicon/apple-touch-icon.png" />
+<link rel="manifest" href="Assets/Favicon/site.webmanifest" />
+
+<link rel="stylesheet" href="theme.css" />
+<link rel="stylesheet" href="player.css" />
+<link rel="stylesheet" href="cursor.css" />
+<link rel="stylesheet" href="contextmenu.css" />
+<link rel="stylesheet" href="queue.css" />
+<link rel="stylesheet" href="notes.css" />
+
+<!-- Warm the browser cache for inner pages the user is likely to navigate to.
+     prefetch is implicitly low-priority, so it won't fight the iframe's
+     initial tracker.html load — but by the time the user clicks a nav link,
+     the page is already on disk. -->
+<link rel="prefetch" href="routine.html" as="document" />
+<link rel="prefetch" href="chat.html" as="document" />
+<link rel="prefetch" href="library.html" as="document" />
+<link rel="prefetch" href="flashcards.html" as="document" />
+
+<script src="mecee_keys.js"></script>
+<script defer src="cursor.js"></script>
+<script defer src="contextmenu.js"></script>
+<script defer src="queue.js"></script>
+<script defer src="notes.js"></script>
+<script defer src="sync.js"></script>
+<style>
+  :root {
+    --bg: #ffffff;
+    --surface: #f6f6f6;
+    --surface-2: #ececec;
+    --text: #111111;
+    --muted: #6b6b6b;
+    --border: #dcdcdc;
+    --accent: #111111;
+    --accent-text: #ffffff;
+  }
+  [data-theme="dark"] {
+    --bg: #0e0e0e;
+    --surface: #1a1a1a;
+    --surface-2: #232323;
+    --text: #f5f5f5;
+    --muted: #999;
+    --border: #2a2a2a;
+    --accent: #f5f5f5;
+    --accent-text: #0e0e0e;
+  }
+  html, body { margin: 0; padding: 0; height: 100%; height: 100dvh; width: 100%; background: var(--bg); overflow: hidden; }
+  /* Every navigable sub-page is its own <iframe class="appTab">, stacked in
+     the same viewport. We swap which one is visible via display: page
+     switches become a pure visibility toggle — no document teardown, no
+     script re-execution, no layout from scratch. */
+  /* 100dvh follows the visible viewport on mobile browsers (iOS Safari shrinks
+     it when the URL/tab bar is shown). Without this, the iframe extends behind
+     Safari's bottom toolbar and the inner page's bottom-anchored UI (e.g. the
+     PDF reader's prev/next bar) gets hidden by it. 100vh is the desktop
+     fallback for browsers that don't support dvh. */
+  .appTab { border: 0; width: 100vw; height: 100vh; height: 100dvh; display: none; background: var(--bg); }
+  .appTab.active { display: block; }
+
+  /* Shown only when index.html is opened from file:// and the local server is
+     not reachable. PDF.js can't load local PDFs over file://, and localStorage
+     under file:// won't match what the server-served version saved — so we hard
+     gate the app and tell the user to run Start-MECEE.bat. */
+  #fileGate {
+    position: fixed; inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    z-index: 9999;
+  }
+  #fileGate.open { display: flex; }
+  #fileGate .card {
+    max-width: 520px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 28px 28px 24px;
+    box-shadow: 0 20px 60px rgba(0,0,0,.45);
+  }
+  #fileGate h2 { margin: 0 0 8px; font-size: 22px; letter-spacing: -.3px; }
+  #fileGate p  { margin: 8px 0; line-height: 1.5; color: var(--muted); font-size: 14px; }
+  #fileGate code {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 13px;
+    color: var(--text);
+  }
+  #fileGate .row { display: flex; gap: 8px; margin-top: 18px; flex-wrap: wrap; }
+  #fileGate button {
+    background: var(--accent);
+    color: var(--accent-text);
+    border: 0;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  #fileGate button.secondary {
+    background: var(--surface-2);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+  #fileGate button:hover { filter: brightness(1.1); }
+  #fileGate .status { margin-top: 14px; font-size: 12px; color: var(--muted); min-height: 18px; }
+
+  /* ===== Phone / small-screen rules =====
+     The shell hosts three floating widgets: the music player, the notebook
+     FAB (injected by notes.js), and the sync FAB (injected by sync.js).
+     On phone-sized viewports we keep ONLY sync — the music player and
+     notebook are desktop-only conveniences that just eat vertical space on
+     a small screen. Pages inside the iframe can also use this breakpoint
+     via their own @media queries since each iframe gets the viewport width
+     of the shell. */
+  @media (max-width: 820px) {
+    /* notes.js wraps the notebook button in a <div class="notes-launcher">
+       that carries its own circle background + border — hiding only the
+       inner .notes-thumb left an empty styled wrapper visible at the same
+       (22px,22px) coords as the sync FAB, which looked like a second
+       phantom circle behind sync. Hide the wrapper too. */
+    .player-widget,
+    .notes-launcher,
+    .notes-thumb,
+    #__notesOpen,
+    #__notesWindow { display: none !important; }
+
+    /* Give the sync FAB a bit more breathing room and a thumb-friendly hit
+       area on touch. The actual button is injected by sync.js with class
+       .mecee-sync-launcher — sizing here so phones don't need a separate
+       CSS file. */
+    .mecee-sync-launcher {
+      min-width: 48px !important;
+      min-height: 48px !important;
+      font-size: 18px !important;
+    }
+  }
+</style>
+</head>
+<body>
+
+<!-- file:// gate — see CSS comment above. Hidden by default; shown only when
+     index.html is opened directly from disk. -->
+<div id="fileGate" role="dialog" aria-labelledby="fileGateTitle">
+  <div class="card">
+    <h2 id="fileGateTitle">📚 Start the local server first</h2>
+    <p>
+      You opened <code>index.html</code> directly from disk. The library reader
+      (and saved bookmarks / highlights) need the local server to work properly.
+    </p>
+    <p>
+      Double-click <code>Start-MECEE.bat</code> in this folder — that runs
+      <code>launcher.py</code> and opens the app on
+      <code>http://localhost:8000</code>.
+    </p>
+    <div class="row">
+      <button id="fileGateRetry" type="button">I started it — open the app</button>
+      <button id="fileGateClose" type="button" class="secondary">Continue anyway (limited)</button>
+    </div>
+    <div class="status" id="fileGateStatus"></div>
+  </div>
+</div>
+
+<!-- Sub-page iframes are created on demand by the shell router below; first one
+     spawns synchronously for the initial route, the rest are lazily preloaded
+     during idle time so subsequent nav clicks are pure display toggles. -->
+
+<!-- SHARED MUSIC PLAYER (lives in the shell so audio never stops on navigation) -->
+<div class="player-widget" id="playerWidget" title="Study music player">
+  <div class="player-thumb" id="playerThumb"><div class="player-thumb-spinner" id="playerThumbSpinner"></div><div class="player-thumb-note" id="playerThumbNote">♪</div></div>
+  <div class="player-body">
+    <div class="player-info">
+      <div class="player-title" id="playerTitle">—</div>
+      <div class="player-sub" id="playerSub">Now playing</div>
+    </div>
+    <div class="player-controls">
+      <button class="player-btn" id="playerPrev" title="Previous">⏮</button>
+      <button class="player-btn play" id="playerPlay" title="Play / Pause">▶</button>
+      <button class="player-btn" id="playerNext" title="Next">⏭</button>
+      <button class="player-btn" id="playerPlaylists" title="Playlists">📁</button>
+      <input type="range" class="player-vol" id="playerVol" min="0" max="100" value="60" title="Volume" />
+    </div>
+  </div>
+  <div class="player-progress"><div class="player-progress-bar" id="playerProgress"></div></div>
+  <audio id="playerAudio" preload="none"></audio>
+</div>
+
+<!-- PLAYLIST PICKER MODAL (PC only — player widget is hidden on phone, so the
+     picker doesn't need its own breakpoint). Flat track view: every song
+     across every playlist shows as a tile up front. When you have multiple
+     playlists, a thin header divides them. Upload + Rescan in the header. -->
+<div class="pl-modal" id="plModal" hidden>
+  <div class="pl-backdrop"></div>
+  <div class="pl-card" role="dialog" aria-modal="true" aria-labelledby="plTitle">
+    <div class="pl-head">
+      <div class="pl-head-text">
+        <div>
+          <div class="pl-title" id="plTitle">🎵 Music</div>
+          <div class="pl-sub"   id="plSub">All your tracks — click any to play</div>
+        </div>
+      </div>
+      <div class="pl-head-btns">
+        <button type="button" class="pl-upload" id="plUpload" title="Upload an MP3">⬆ Upload</button>
+        <button type="button" class="pl-rescan" id="plRescan" title="Re-scan the Playlist/ folder">🔄 Rescan</button>
+        <button type="button" class="pl-close"  id="plClose"  title="Close">×</button>
+      </div>
+    </div>
+    <div class="pl-grid" id="plGrid"></div>
+  </div>
+</div>
+
+<!-- UPLOAD SUB-MODAL — sits over the playlist picker (z-index 9600 via .pl-up-modal) -->
+<div class="pl-modal pl-up-modal" id="plUpModal" hidden>
+  <div class="pl-backdrop"></div>
+  <div class="pl-card" role="dialog" aria-modal="true" aria-labelledby="plUpTitle">
+    <div class="pl-head">
+      <div class="pl-head-text">
+        <div>
+          <div class="pl-title" id="plUpTitle">⬆ Upload Music</div>
+          <div class="pl-sub">Save an MP3 directly to your playlist</div>
+        </div>
+      </div>
+      <div class="pl-head-btns">
+        <button type="button" class="pl-close" id="plUpClose" title="Close">×</button>
+      </div>
+    </div>
+    <div class="pl-up-body">
+      <div class="pl-up-field">
+        <span>MP3 File *</span>
+        <input type="file" id="plUpMp3" accept=".mp3,audio/mpeg" />
+        <div class="pl-up-hint">Required. The audio file to add to your playlist.</div>
+      </div>
+      <div class="pl-up-field">
+        <span>Cover Image</span>
+        <input type="file" id="plUpCover" accept=".jpg,.jpeg,.png,.webp,image/*" />
+        <div class="pl-up-hint">Optional (.jpg / .png / .webp). Shown in the player and track grid.</div>
+      </div>
+      <div class="pl-up-error" id="plUpError"></div>
+      <div class="pl-up-progress" id="plUpProgress" style="display:none">
+        <div class="pl-up-bar"><div id="plUpBarFill"></div></div>
+        <div class="pl-up-pct" id="plUpPct">0%</div>
+      </div>
+      <div class="pl-up-actions">
+        <button type="button" class="pl-up-cancel" id="plUpCancel">Cancel</button>
+        <button type="button" class="pl-up-save"   id="plUpSave">Upload</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  /* Public base URL for MP3 + cover art. Leave empty to serve from the same
+     origin as the page (local dev / static hosting of Playlist/ next to the
+     HTML). Set to a Cloudflare R2 public r2.dev URL to stream music from R2
+     instead — keys in the bucket must match the relative paths in tracks.js
+     (e.g. tracks.js references "Playlist/foo.mp3", so R2 must contain a
+     "Playlist/foo.mp3" object). Trailing slash is stripped. */
+  window.R2_MUSIC_BASE = '';
+</script>
+<script src="Playlist/tracks.js"></script>
+<script src="player.js"></script>
+<script>
+  /* ===== Playlist picker UI (shell-only — the player widget lives here) =====
+     Reads from window.MeceePlayer (exposed by player.js after it initialises).
+     Selecting a tile calls MeceePlayer.switchPlaylist(id) which loads the
+     first track and autoplays. */
+  (function () {
+    const modal   = document.getElementById('plModal');
+    const grid    = document.getElementById('plGrid');
+    const openBtn = document.getElementById('playerPlaylists');
+    const closeBtn= document.getElementById('plClose');
+    const rescan  = document.getElementById('plRescan');
+    const subEl   = document.getElementById('plSub');
+    if (!modal || !openBtn) return;
+
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    }
+    function coverDiv(coverPath, fallbackEmoji) {
+      /* <img loading="lazy" decoding="async"> + content-visibility on the tile
+         keeps scroll jank away even with hundreds of tracks. Path is resolved
+         through meceeMediaUrl so it picks up R2_MUSIC_BASE if set. */
+      if (coverPath) {
+        const url  = window.meceeMediaUrl ? window.meceeMediaUrl(coverPath) : coverPath;
+        const safe = encodeURI(url).replace(/"/g, '&quot;');
+        return `<div class="pl-tile-cover"><img src="${safe}" alt="" loading="lazy" decoding="async" /></div>`;
+      }
+      return `<div class="pl-tile-cover pl-tile-cover-empty">${fallbackEmoji || '♪'}</div>`;
+    }
+
+    /* Single flat view: every track in every playlist as its own tile.
+       When more than one playlist exists, we insert a thin section header
+       between groups so the grouping is still visible without making the
+       user click into a folder first. */
+    function renderAllTracks() {
+      const groups  = (window.MeceePlayer && window.MeceePlayer.getGroups()) || (window.PLAYLIST_GROUPS || []);
+      const current = (window.MeceePlayer && window.MeceePlayer.getCurrent()) || null;
+      const totalTracks = groups.reduce((n, g) => n + (g.tracks ? g.tracks.length : 0), 0);
+
+      subEl.textContent = totalTracks
+        ? `${totalTracks} track${totalTracks === 1 ? '' : 's'} · click any to play`
+        : 'No music yet';
+
+      if (!totalTracks) {
+        grid.innerHTML = `<div class="pl-empty">No music yet. Click <b>⬆️ Upload</b> to add an MP3, or drop files into <code>Playlist/</code> and hit Rescan.</div>`;
+        return;
+      }
+
+      const showHeaders = groups.filter(g => g.tracks && g.tracks.length).length > 1;
+      let html = '';
+      groups.forEach(g => {
+        if (!g.tracks || !g.tracks.length) return;
+        if (showHeaders) {
+          html += `<div class="pl-group-head">${escapeHtml(g.name)} <span>· ${g.tracks.length}</span></div>`;
+        }
+        const playingHere = current && current.id === g.id;
+        html += `<div class="pl-grid-inner">${g.tracks.map((t, i) => {
+          const isActive = playingHere && current.trackIdx === i;
+          const cover = t.cover || g.cover || '';
+          return `<button class="pl-tile pl-tile-track${isActive ? ' is-active' : ''}"
+                          data-pl="${escapeHtml(g.id)}" data-idx="${i}" type="button">
+            ${coverDiv(cover, '♪')}
+            <div class="pl-tile-meta">
+              <div class="pl-tile-name">${escapeHtml(t.title)}</div>
+              <div class="pl-tile-count">${isActive ? '▶ Playing' : 'Track ' + (i + 1)}</div>
+            </div>
+          </button>`;
+        }).join('')}</div>`;
+      });
+      grid.innerHTML = html;
+      grid.querySelectorAll('.pl-tile').forEach(t => {
+        t.addEventListener('click', () => {
+          const pl  = t.dataset.pl;
+          const idx = parseInt(t.dataset.idx, 10) || 0;
+          if (window.MeceePlayer) window.MeceePlayer.playTrack(pl, idx);
+          close();
+        });
+      });
+    }
+
+    function open() {
+      renderAllTracks();
+      modal.hidden = false;
+      requestAnimationFrame(() => modal.classList.add('open'));
+    }
+    function close() {
+      modal.classList.remove('open');
+      setTimeout(() => { modal.hidden = true; }, 180);
+    }
+
+    openBtn.addEventListener('click', open);
+    closeBtn.addEventListener('click', close);
+    modal.querySelector('.pl-backdrop').addEventListener('click', close);
+    document.addEventListener('keydown', e => {
+      if (modal.hidden) return;
+      if (e.key === 'Escape') close();
+    });
+
+    /* Rescan: ask the launcher to re-run update_playlist.py, then refetch
+       Playlist/tracks.js so the new groups appear without a hard reload. */
+    rescan.addEventListener('click', async () => {
+      const orig = rescan.textContent;
+      rescan.disabled = true;
+      rescan.textContent = '⏳ Scanning…';
+      try {
+        const res = await fetch('/api/playlists/rescan', { method: 'POST' });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        await reloadManifest();
+        rescan.textContent = '✓ Updated';
+        renderAllTracks();
+        setTimeout(() => { rescan.textContent = orig; rescan.disabled = false; }, 1200);
+      } catch (err) {
+        rescan.textContent = '✗ Failed';
+        setTimeout(() => { rescan.textContent = orig; rescan.disabled = false; }, 1500);
+      }
+    });
+
+    /* ---- Upload sub-modal ---- */
+    const upModal    = document.getElementById('plUpModal');
+    const upOpenBtn  = document.getElementById('plUpload');
+    const upCloseBtn = document.getElementById('plUpClose');
+    const upCancel   = document.getElementById('plUpCancel');
+    const upSave     = document.getElementById('plUpSave');
+    const upMp3      = document.getElementById('plUpMp3');
+    const upCover    = document.getElementById('plUpCover');
+    const upError    = document.getElementById('plUpError');
+    const upProgress = document.getElementById('plUpProgress');
+    const upBarFill  = document.getElementById('plUpBarFill');
+    const upPct      = document.getElementById('plUpPct');
+
+    function openUpload() {
+      upError.textContent = '';
+      upMp3.value = '';
+      upCover.value = '';
+      upProgress.style.display = 'none';
+      upBarFill.style.width = '0%';
+      upPct.textContent = '0%';
+      upSave.disabled = false;
+      upModal.hidden = false;
+      requestAnimationFrame(() => upModal.classList.add('open'));
+    }
+    function closeUpload() {
+      upModal.classList.remove('open');
+      setTimeout(() => { upModal.hidden = true; }, 180);
+    }
+
+    function xhrUpload(file, offsetPct, sharePct, overrideFilename) {
+      return new Promise((resolve, reject) => {
+        const name = overrideFilename || file.name;
+        const xhr  = new XMLHttpRequest();
+        xhr.open('POST', '/api/upload-music?filename=' + encodeURIComponent(name));
+        xhr.upload.addEventListener('progress', e => {
+          if (!e.lengthComputable) return;
+          const pct = offsetPct + (e.loaded / e.total) * sharePct;
+          upBarFill.style.width = Math.round(pct) + '%';
+          upPct.textContent = Math.round(pct) + '%';
+        });
+        xhr.onload = () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            try { resolve(JSON.parse(xhr.responseText)); } catch { resolve({}); }
+          } else {
+            let msg = 'Upload failed (' + xhr.status + ')';
+            try { msg = JSON.parse(xhr.responseText).error || msg; } catch {}
+            reject(new Error(msg));
+          }
+        };
+        xhr.onerror = () => reject(new Error('Network error during upload'));
+        xhr.send(file);
+      });
+    }
+
+    upSave.addEventListener('click', async () => {
+      const mp3File   = upMp3.files[0];
+      const coverFile = upCover.files[0];
+      if (!mp3File) { upError.textContent = 'Please select an MP3 file.'; return; }
+      if (!mp3File.name.toLowerCase().endsWith('.mp3')) {
+        upError.textContent = 'Audio file must be an .mp3'; return;
+      }
+      upError.textContent = '';
+      upSave.disabled = true;
+      upProgress.style.display = 'flex';
+
+      try {
+        const hasCover = !!coverFile;
+        const mp3Share = hasCover ? 65 : 85;
+
+        const mp3Result = await xhrUpload(mp3File, 0, mp3Share);
+
+        if (hasCover) {
+          /* Name the cover identically to the (possibly sanitized) MP3 stem so
+             update_playlist.py's find_track_cover() picks it up automatically. */
+          const serverFile = (mp3Result.file || '').split('/').pop() || mp3File.name;
+          const serverStem = serverFile.replace(/\.[^.]+$/, '');
+          const coverExt   = '.' + (coverFile.name.split('.').pop() || 'jpg').toLowerCase();
+          await xhrUpload(coverFile, mp3Share, 15, serverStem + coverExt);
+        }
+
+        upBarFill.style.width = '92%';
+        upPct.textContent = '92%';
+        try {
+          const res = await fetch('/api/playlists/rescan', { method: 'POST' });
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+        } catch (_) {}
+        await reloadManifest();
+
+        upBarFill.style.width = '100%';
+        upPct.textContent = '100%';
+        renderAllTracks();
+        setTimeout(closeUpload, 700);
+      } catch (err) {
+        upError.textContent = err.message || 'Upload failed.';
+        upSave.disabled = false;
+      }
+    });
+
+    upOpenBtn.addEventListener('click', openUpload);
+    upCloseBtn.addEventListener('click', closeUpload);
+    upCancel.addEventListener('click', closeUpload);
+    upModal.querySelector('.pl-backdrop').addEventListener('click', closeUpload);
+    document.addEventListener('keydown', e => {
+      if (upModal.hidden) return;
+      if (e.key === 'Escape') closeUpload();
+    });
+
+    /* Re-execute Playlist/tracks.js in place so window.PLAYLIST_GROUPS reflects
+       what update_playlist.py just wrote, then tell player.js to re-pick. */
+    function reloadManifest() {
+      return new Promise((resolve, reject) => {
+        const s = document.createElement('script');
+        s.src = 'Playlist/tracks.js?ts=' + Date.now();
+        s.onload  = () => {
+          if (window.MeceePlayer) window.MeceePlayer.refreshFromManifest();
+          resolve();
+        };
+        s.onerror = () => reject(new Error('failed to load tracks.js'));
+        document.head.appendChild(s);
+      });
+    }
+
+  })();
+</script>
+<script>
+  /* Shell routing — sub-page iframes never reload, they're hidden and shown,
+     so audio survives AND nav is effectively free after first load. */
+  const PAGES = {
+    tracker:    'tracker.html',
+    routine:    'routine.html',
+    chat:       'chat.html',
+    library:    'library.html',
+    flashcards: 'flashcards.html',
+    /* aliases for typos / singular forms */
+    flashcard:  'flashcards.html',
+    cards:      'flashcards.html'
+  };
+
+  /* Warm-iframe pool: canonical name → <iframe class="appTab">. Each entry
+     is a live document that stays mounted in the DOM; navigate() just toggles
+     which one has .active.
+     Aliases (e.g. "flashcard" → "flashcards") all share the canonical entry,
+     so we never spawn two iframes pointing at the same page. */
+  const tabs = {};
+  let activeTab = null;
+
+  function spawnTab(name, src) {
+    const f = document.createElement('iframe');
+    f.className = 'appTab';
+    f.title = name;
+    f.setAttribute('src', src);
+    document.body.appendChild(f);
+    tabs[name] = f;
+    return f;
+  }
+
+  function showTab(name, src) {
+    let f = tabs[name];
+    if (!f) {
+      f = spawnTab(name, src);
+    } else if (f.getAttribute('src') !== src) {
+      /* Same tab, but the deep-link query changed (e.g. library ?book=A vs
+         ?book=B). Reload just this iframe; other tabs stay warm. */
+      f.setAttribute('src', src);
+    }
+    if (activeTab && activeTab !== f) activeTab.classList.remove('active');
+    f.classList.add('active');
+    activeTab = f;
+    return f;
+  }
+
+  /* Resolve a target name to a (canonical, file) pair. Falls back to fuzzy
+     match — e.g. "#flashcrd" still routes if it starts with the same letters
+     as a known page. */
+  function resolveTarget(target) {
+    if (!target) return null;
+    if (PAGES[target]) {
+      /* find canonical name (skip aliases pointing to same file) */
+      const file = PAGES[target];
+      const canonical = Object.keys(PAGES).find(k => PAGES[k] === file && k.length === file.replace('.html', '').length) || target;
+      return { name: canonical, file };
+    }
+    const lower = target.toLowerCase();
+    for (const k of Object.keys(PAGES)) {
+      if (lower.startsWith(k) || k.startsWith(lower)) return { name: k, file: PAGES[k] };
+    }
+    return null;
+  }
+
+  function navigate(target, extra) {
+    const t = resolveTarget(target);
+    if (!t) return;
+    let src = t.file;
+    if (extra && extra.book) {
+      src += `?book=${encodeURIComponent(extra.book)}`;
+      if (extra.page) src += `&page=${encodeURIComponent(extra.page)}`;
+    }
+    showTab(t.name, src);
+    const newHash = '#' + t.name;
+    /* pushState so the browser Back button returns to the previous page.
+       (replaceState would silently overwrite — that's what broke
+       back-from-flashcards-to-tracker.) */
+    if (location.hash !== newHash) history.pushState(null, '', newHash);
+  }
+
+  /* React to browser back/forward by re-running the hash router. */
+  window.addEventListener('popstate', () => {
+    const initial = (location.hash || '').replace('#', '');
+    const t = resolveTarget(initial) || resolveTarget('tracker');
+    if (t) showTab(t.name, t.file);
+  });
+
+  /* Inner pages post {type:'nav', href:'tracker'|'routine'|'chat'} when their nav links are clicked */
+  window.addEventListener('message', e => {
+    if (!e.data) return;
+    if (e.data.type === 'nav') navigate(e.data.href, { book: e.data.book, page: e.data.page });
+    if (e.data.type === 'requestFullscreen') {
+      const el = document.documentElement;
+      const req = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
+      if (req && !document.fullscreenElement) req.call(el).catch(() => {});
+    }
+    if (e.data.type === 'exitFullscreen' && document.fullscreenElement) {
+      (document.exitFullscreen || document.webkitExitFullscreen || document.msExitFullscreen).call(document);
+    }
+  });
+
+  /* Notify the *active* inner page when the shell's fullscreen state changes
+     so it can toggle its UI (e.g. hide the reader header). Hidden tabs don't
+     need to know — they'll learn on next show if it matters. */
+  function pingFullscreenState() {
+    if (!activeTab) return;
+    try {
+      activeTab.contentWindow.postMessage({ type: 'fullscreenState', inFullscreen: !!document.fullscreenElement }, '*');
+    } catch (_) {}
+  }
+  document.addEventListener('fullscreenchange', pingFullscreenState);
+
+  /* Deep-link via hash, e.g. index.html#routine or #flashcards. We use the
+     resolver so typos/aliases (e.g. #flashcard) still route. Default to
+     tracker when there's no hash so we always spawn an initial tab. */
+  const initial   = (location.hash || '').replace('#', '');
+  const initialT  = resolveTarget(initial) || resolveTarget('tracker');
+  showTab(initialT.name, initialT.file);
+  /* Normalize the URL hash to the canonical name. replaceState (not push)
+     so we don't dirty the back-button history with the unresolved alias. */
+  const canonicalHash = '#' + initialT.name;
+  if (location.hash !== canonicalHash) history.replaceState(null, '', canonicalHash);
+
+  /* Idle-time preload of the remaining sub-pages: each one spawns a hidden
+     warm iframe so the next nav click is a pure display toggle. We dedupe
+     by file (so the "flashcard"/"cards" aliases don't spawn duplicates) and
+     skip whichever tab we already mounted for the initial route.
+     requestIdleCallback yields to user input — preload pauses while typing
+     or scrolling so it never costs perceived smoothness. */
+  window.addEventListener('load', () => {
+    const seen = new Set([initialT.file]);
+    const queue = [];
+    for (const name of Object.keys(PAGES)) {
+      const file = PAGES[name];
+      if (seen.has(file)) continue;
+      seen.add(file);
+      /* Pick the canonical name for this file so we don't end up with the
+         tab keyed under an alias like "flashcard". */
+      const canonical = Object.keys(PAGES).find(k => PAGES[k] === file && k.length === file.replace('.html', '').length) || name;
+      if (!tabs[canonical]) queue.push({ name: canonical, file });
+    }
+    const idle = window.requestIdleCallback || (cb => setTimeout(cb, 200));
+    function preloadNext() {
+      const next = queue.shift();
+      if (!next) return;
+      if (!tabs[next.name]) spawnTab(next.name, next.file);
+      idle(preloadNext, { timeout: 2000 });
+    }
+    idle(preloadNext, { timeout: 1500 });
+  });
+
+  /* Sync theme cookie/storage so iframe inherits the user's theme if it reads it */
+  const savedTheme = localStorage.getItem(MeceeKeys.THEME);
+  if (savedTheme) document.documentElement.setAttribute('data-theme', savedTheme);
+
+  /* Register the service worker — cache-first for the UI shell so page
+     switches feel instant after the first visit. Only register when served
+     over http(s); file:// doesn't allow SW registration, and there's no
+     server to fetch from in that case anyway. */
+  if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+    /* Register after the page has settled so SW install doesn't compete with
+       the iframe's initial load on the very first visit. */
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js').catch(err => {
+        console.warn('[shell] service worker registration failed:', err);
+      });
+    });
+  }
+
+  /* ===== file:// detection + launcher hand-off =====
+     If this page is opened directly from disk, three things break:
+       1. PDF.js can't fetch local PDFs (Chrome blocks file:// XHR).
+       2. localStorage under file:// is a different origin than http://localhost,
+          so bookmarks/highlights/progress don't sync between the two.
+       3. There's no way for a browser to spawn `python launcher.py` directly.
+     So we gate the app and ask the user to double-click Start-MECEE.bat.
+     If they say they've started it, we ping the server and redirect when it's up. */
+  const SERVER_URL = 'http://localhost:8000/index.html';
+  const onFileScheme = location.protocol === 'file:';
+
+  async function isServerUp() {
+    try {
+      // no-cors gives us an opaque response but a successful fetch still resolves.
+      await fetch(SERVER_URL, { method: 'HEAD', mode: 'no-cors', cache: 'no-store' });
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  function redirectToServer(hash) {
+    const target = SERVER_URL + (hash ? ('#' + hash) : '');
+    location.replace(target);
+  }
+
+  if (onFileScheme) {
+    const gate    = document.getElementById('fileGate');
+    const retry   = document.getElementById('fileGateRetry');
+    const closeBt = document.getElementById('fileGateClose');
+    const status  = document.getElementById('fileGateStatus');
+
+    // First, silently check if the server is already running — if so, just go there.
+    isServerUp().then(up => {
+      if (up) { redirectToServer((location.hash || '').replace('#', '')); return; }
+      gate.classList.add('open');
+    });
+
+    retry.addEventListener('click', async () => {
+      status.textContent = 'Checking http://localhost:8000 …';
+      const up = await isServerUp();
+      if (up) redirectToServer((location.hash || '').replace('#', ''));
+      else status.textContent = 'Server not reachable yet. Make sure Start-MECEE.bat is running, then try again.';
+    });
+    closeBt.addEventListener('click', () => gate.classList.remove('open'));
+  }
+
+  /* When on file://, navigating to the library would just show broken PDFs.
+     Intercept that nav specifically and re-show the gate (with a hint). */
+  const originalNavigate = navigate;
+  navigate = function(target, extra) {
+    if (onFileScheme && target === 'library') {
+      const gate   = document.getElementById('fileGate');
+      const status = document.getElementById('fileGateStatus');
+      gate.classList.add('open');
+      status.textContent = 'The library needs the local server. Start-MECEE.bat → then click "I started it".';
+      // Try to auto-redirect once the server is up.
+      isServerUp().then(up => { if (up) redirectToServer('library'); });
+      return;
+    }
+    return originalNavigate(target, extra);
+  };
+</script>
+</body>
+</html>

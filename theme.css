@@ -1,0 +1,339 @@
+/* Shared base: universal reset + nav button styles + theme toggle.
+   Page-specific :root colour palettes stay in each HTML file because the
+   exact shades differ slightly per page (e.g. chat uses #161616 for --surface
+   while library uses #1a1a1a — intentional, don't unify here). */
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+
+/* ===== Custom scrollbars (loaded on every page) =====
+   Goal: a slim, transparent overlay-style scrollbar. The track is invisible,
+   the thumb is faintly visible while idle and darkens on hover. Applies to
+   all scrollable elements via the universal selector; opt-out is `.no-scroll`
+   or per-element overrides.
+
+   Firefox: `scrollbar-width: thin` is the only knob — sets a 7-ish px thumb
+   and uses the colors from `scrollbar-color`. Track set to `transparent`
+   removes the gutter background.
+
+   WebKit / Blink: scrollbars are styled via ::-webkit-scrollbar pseudos.
+   Track gets a transparent background; thumb is a translucent pill that
+   uses theme colors so it shows up on both light and dark backgrounds. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(127, 127, 127, 0.35) transparent;
+}
+*:hover {
+  scrollbar-color: rgba(127, 127, 127, 0.55) transparent;
+}
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track,
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(127, 127, 127, 0.32);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;       /* keeps the rounded pill shape with the inset border */
+  transition: background-color .15s ease;
+}
+::-webkit-scrollbar-thumb:hover  { background-color: rgba(127, 127, 127, 0.55); }
+::-webkit-scrollbar-thumb:active { background-color: rgba(127, 127, 127, 0.75); }
+
+/* Light theme: thumb a bit darker so it shows on white backgrounds. */
+[data-theme="light"] ::-webkit-scrollbar-thumb         { background: rgba(0, 0, 0, 0.22); }
+[data-theme="light"] ::-webkit-scrollbar-thumb:hover   { background-color: rgba(0, 0, 0, 0.40); }
+[data-theme="light"] ::-webkit-scrollbar-thumb:active  { background-color: rgba(0, 0, 0, 0.55); }
+[data-theme="light"] * { scrollbar-color: rgba(0, 0, 0, 0.22) transparent; }
+[data-theme="light"] *:hover { scrollbar-color: rgba(0, 0, 0, 0.40) transparent; }
+
+/* ===== Sync launcher + modal (sync.js) =====
+   Floating round button at bottom-left, just above the notes launcher
+   (which lives at bottom: 22px). Same visual language: 48px disc, subtle
+   shadow, hover lift. */
+.mecee-sync-launcher {
+  position: fixed;
+  bottom: 78px;     /* notes launcher is 48px tall starting at bottom 22px → leaves 8px gap */
+  left: 22px;
+  z-index: 9000;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  font: inherit;
+  font-size: 22px;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.30), 0 2px 6px rgba(0,0,0,0.18);
+  transition: box-shadow .2s, transform .15s;
+}
+.mecee-sync-launcher:hover { transform: translateY(-1px); box-shadow: 0 14px 36px rgba(0,0,0,0.36), 0 3px 8px rgba(0,0,0,0.22); }
+.mecee-sync-launcher .mecee-sync-icon { display: inline-block; }
+.mecee-sync-launcher.busy .mecee-sync-icon { animation: mecee-spin 1s linear infinite; }
+@keyframes mecee-spin { to { transform: rotate(360deg); } }
+
+/* Modal — semi-transparent backdrop + centred card with per-category rows. */
+.mecee-sync-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 9500;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+.mecee-sync-modal.open { display: flex; }
+.mecee-sync-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(2px);
+}
+.mecee-sync-card {
+  position: relative;
+  width: 460px;
+  max-width: calc(100vw - 32px);
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 20px 22px 16px;
+  box-shadow: 0 30px 60px rgba(0,0,0,0.45);
+  font-family: inherit;
+  animation: mecee-sync-pop .18s ease-out;
+}
+@keyframes mecee-sync-pop {
+  from { transform: translateY(8px) scale(.985); opacity: 0; }
+  to   { transform: translateY(0)    scale(1);    opacity: 1; }
+}
+.mecee-sync-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.mecee-sync-title {
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+  line-height: 1.2;
+}
+.mecee-sync-sub {
+  font-size: 11px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 1.4px;
+  margin-top: 4px;
+  font-weight: 600;
+}
+.mecee-sync-close {
+  background: transparent;
+  border: 0;
+  color: var(--muted);
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-family: inherit;
+}
+.mecee-sync-close:hover:not(:disabled) { background: var(--surface-2); color: var(--text); }
+.mecee-sync-close:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* Banner sits between the head and the rows. Shows "Everything up to date"
+   on no-op syncs, or push/pull counts on real ones. */
+.mecee-sync-banner {
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  text-align: center;
+}
+.mecee-sync-banner.ok  { background: rgba(46, 125, 50, .12); color: var(--good, #2e7d32); border: 1px solid rgba(46, 125, 50, .25); }
+.mecee-sync-banner.err { background: rgba(239, 83, 80, .12); color: #ef5350;             border: 1px solid rgba(239, 83, 80, .25); }
+
+.mecee-sync-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.mecee-sync-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: transparent;
+  transition: background .15s;
+}
+.mecee-sync-row[data-state="syncing"]  { background: var(--surface-2); }
+.mecee-sync-row[data-state="done"]     { background: transparent; }
+.mecee-sync-row[data-state="error"]    { background: rgba(239, 83, 80, .07); }
+
+.mecee-sync-row-icon {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--surface-2);
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+}
+.mecee-sync-row-icon .dot {
+  width: 6px; height: 6px;
+  background: var(--muted);
+  border-radius: 50%;
+  display: block;
+}
+.mecee-sync-row[data-state="syncing"] .mecee-sync-row-icon { background: var(--surface-2); color: var(--text); }
+.mecee-sync-row[data-state="done"]    .mecee-sync-row-icon { background: rgba(46, 125, 50, .15); color: var(--good, #2e7d32); }
+.mecee-sync-row[data-state="error"]   .mecee-sync-row-icon { background: rgba(239, 83, 80, .15); color: #ef5350; }
+.mecee-sync-check { font-size: 14px; }
+.mecee-sync-check.muted { opacity: .55; }
+.mecee-sync-err   { font-size: 14px; }
+.mecee-sync-row-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.mecee-sync-row-label { font-weight: 600; font-size: 13.5px; flex-shrink: 0; }
+.mecee-sync-row-state {
+  font-size: 12px;
+  color: var(--muted);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  /* Long filenames (e.g. the "4 HOURS STUDY GIRL — Cozy lofi music…" track)
+     used to push past the modal edge. Truncate with ellipsis instead.
+     min-width:0 is needed for ellipsis to work inside a flex item. */
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1 1 auto;
+  text-align: right;
+}
+.mecee-sync-row-state.idle    { color: var(--muted); }
+.mecee-sync-row-state.syncing { color: var(--text); }
+.mecee-sync-row-state.done    { color: var(--good, #2e7d32); }
+.mecee-sync-row-state.done.muted { color: var(--muted); }
+.mecee-sync-row-state.error   { color: #ef5350; }
+.mecee-sync-spin { display: inline-block; animation: mecee-spin 1s linear infinite; }
+
+.mecee-sync-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+.mecee-sync-summary {
+  font-size: 11px;
+  color: var(--muted);
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  font-weight: 600;
+}
+.mecee-sync-summary.err   { color: #ef5350; }
+.mecee-sync-summary.ok    { color: var(--good, #2e7d32); }
+.mecee-sync-summary.muted { color: var(--muted); }
+.mecee-sync-action {
+  background: var(--accent);
+  color: var(--accent-text);
+  border: 0;
+  padding: 9px 18px;
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: .2px;
+}
+.mecee-sync-action:hover:not(:disabled) { filter: brightness(1.1); }
+.mecee-sync-action:disabled { opacity: 0.55; cursor: progress; }
+@media (max-width: 540px) {
+  .mecee-sync-card { padding: 16px; }
+  .mecee-sync-launcher { bottom: 76px; left: 16px; }
+}
+
+/* Nav pill buttons — baseline used by every page's topbar. Pages override
+   in their inline <style>, so keep this dimensionally identical to the thin
+   variants (chat.css / flashcards.html / tracker.html .theme-toggle) so a
+   missing override doesn't make a button look chunky. */
+.nav-btn {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 7px 13px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.2;
+  text-decoration: none;
+  transition: background .2s, border-color .2s;
+  font-family: inherit;
+}
+.nav-btn:hover { background: var(--surface-2); }
+.nav-btns { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+
+/* ============================================================
+   Phone preset (≤820px)
+   ------------------------------------------------------------
+   Loaded by every sub-page through theme.css, so adding rules here
+   automatically applies to MCQ / routine / tracker / library / chat.
+
+   Goals:
+     • Tap targets ≥44px (Apple HIG min) → fewer mis-taps.
+     • Slightly bigger base font on small screens.
+     • Allow horizontal flex containers to wrap so nothing overflows.
+     • Stretch nav rows full-width and right-align actions.
+   ============================================================ */
+@media (max-width: 820px) {
+  html { font-size: 16px; }
+  body { -webkit-text-size-adjust: 100%; }
+
+  .nav-btn {
+    padding: 11px 16px;
+    font-size: 14px;
+    min-height: 44px;
+  }
+  .nav-btns { gap: 6px; row-gap: 8px; }
+
+  /* Phones can't hover. Disable the hover-lift transform so the sync FAB
+     doesn't get stuck in a half-raised state after a tap. */
+  .mecee-sync-launcher:hover { transform: none; }
+}
+
+@media (max-width: 820px) {
+  /* Notes FAB is hidden on phones (see index.html shell CSS), so the sync
+     FAB can claim the lower-left slot all by itself. Cleaner placement and
+     a comfier thumb reach. */
+  .mecee-sync-launcher { bottom: 22px; left: 22px; }
+}
+
+@media (max-width: 540px) {
+  /* On the smallest phones, give the sync modal full-width breathing room. */
+  .mecee-sync-card { width: calc(100vw - 24px); }
+  .mecee-sync-launcher { bottom: 18px; left: 18px; }
+}

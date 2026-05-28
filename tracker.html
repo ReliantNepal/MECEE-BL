@@ -1,0 +1,1259 @@
+﻿<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MECEE-BL 2027 — My Syllabus Tracker</title>
+
+<!-- Favicon (avoids /favicon.ico 404 on every load) -->
+<link rel="icon" type="image/x-icon" href="Assets/Favicon/favicon.ico" />
+<link rel="icon" type="image/png" sizes="32x32" href="Assets/Favicon/favicon-32x32.png" />
+<link rel="icon" type="image/png" sizes="16x16" href="Assets/Favicon/favicon-16x16.png" />
+<link rel="apple-touch-icon" sizes="180x180" href="Assets/Favicon/apple-touch-icon.png" />
+<link rel="manifest" href="Assets/Favicon/site.webmanifest" />
+
+<link rel="stylesheet" href="theme.css" />
+<link rel="stylesheet" href="player.css" />
+<link rel="stylesheet" href="cursor.css" />
+<link rel="stylesheet" href="contextmenu.css" />
+<script src="mecee_keys.js"></script>
+<script defer src="cursor.js"></script>
+<script defer src="contextmenu.js"></script>
+<script defer src="sync.js"></script>
+<style>
+  :root {
+    --bg: #ffffff;
+    --surface: #f6f6f6;
+    --surface-2: #ececec;
+    --text: #111111;
+    --muted: #6b6b6b;
+    --border: #dcdcdc;
+    --accent: #111111;
+    --accent-text: #ffffff;
+    --done: #111111;
+  }
+  [data-theme="dark"] {
+    --bg: #0e0e0e;
+    --surface: #161616;
+    --surface-2: #1f1f1f;
+    --text: #f5f5f5;
+    --muted: #999999;
+    --border: #2a2a2a;
+    --accent: #ffffff;
+    --accent-text: #0e0e0e;
+    --done: #ffffff;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    line-height: 1.55;
+    transition: background .25s ease, color .25s ease;
+  }
+  .container { max-width: 960px; margin: 0 auto; padding: 28px 22px 80px; }
+
+  /* TOP BAR */
+  .topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+  }
+  .topbar h1 {
+    margin: 0;
+    font-size: clamp(22px, 4vw, 32px);
+    font-weight: 800;
+    letter-spacing: -0.5px;
+  }
+  .topbar .sub { color: var(--muted); font-size: 13px; margin-top: 2px; }
+  .theme-toggle {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 7px 13px;
+    border-radius: 999px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.2;
+    transition: background .2s, border-color .2s;
+  }
+  .theme-toggle:hover { background: var(--surface-2); }
+
+  /* OVERALL PROGRESS */
+  .overall {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px 22px;
+    margin-bottom: 22px;
+  }
+  .overall-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 10px;
+  }
+  .overall-head .label { font-size: 14px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+  .overall-head .num { font-size: 28px; font-weight: 800; }
+  .bar {
+    height: 8px;
+    background: var(--surface-2);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .bar > span {
+    display: block;
+    height: 100%;
+    background: var(--accent);
+    width: 0;
+    transition: width .5s ease;
+  }
+  .overall .meta {
+    margin-top: 10px;
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  /* RULES strip */
+  .rules {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px 20px;
+    margin-bottom: 22px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 10px 16px;
+    font-size: 13.5px;
+  }
+  .rules div { color: var(--muted); }
+  .rules div b { color: var(--text); display: block; font-size: 14px; margin-bottom: 2px; }
+
+  /* SUBJECT BLOCK */
+  .subject {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    margin-bottom: 14px;
+    overflow: hidden;
+  }
+  .subject-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 20px;
+    cursor: pointer;
+    user-select: none;
+    transition: background .2s;
+  }
+  .subject-head:hover { background: var(--surface-2); }
+  .subject-head .emoji { font-size: 22px; }
+  .subject-head .name {
+    flex: 1;
+    font-weight: 700;
+    font-size: 17px;
+  }
+  .subject-head .marks-pill {
+    background: var(--accent);
+    color: var(--accent-text);
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+  }
+  .subject-head .progress-text {
+    color: var(--muted);
+    font-size: 13px;
+    min-width: 58px;
+    text-align: right;
+  }
+  .subject-head .arrow {
+    transition: transform .3s ease;
+    color: var(--muted);
+    font-size: 12px;
+  }
+  .subject.open .subject-head .arrow { transform: rotate(180deg); }
+
+  .subject-bar {
+    height: 4px;
+    background: var(--surface-2);
+    overflow: hidden;
+  }
+  .subject-bar > span {
+    display: block;
+    height: 100%;
+    background: var(--done);
+    width: 0;
+    transition: width .5s ease;
+  }
+
+  .units-wrap {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height .45s cubic-bezier(.4,0,.2,1);
+  }
+  .subject.open .units-wrap { max-height: 5000px; }
+
+  .unit {
+    border-top: 1px solid var(--border);
+    padding: 0;
+  }
+  .unit-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    user-select: none;
+    padding: 14px 20px;
+    transition: background .2s;
+  }
+  .unit-head:hover { background: var(--surface-2); }
+  .unit-head .check {
+    width: 22px; height: 22px;
+    border-radius: 6px;
+    border: 1.5px solid var(--border);
+    background: var(--bg);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px;
+    color: var(--accent-text);
+    flex-shrink: 0;
+    cursor: pointer;
+    transition: all .2s ease;
+  }
+  .unit-head .check:hover { border-color: var(--text); transform: scale(1.08); }
+  .unit-head.done .check {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+  .unit-head.done .check::after { content: "✓"; color: var(--accent-text); font-weight: 800; }
+  .unit-head .u-title {
+    flex: 1;
+    font-weight: 600;
+    font-size: 15px;
+  }
+  .unit-head.done .u-title { text-decoration: line-through; color: var(--muted); }
+  .unit-head .u-marks {
+    background: var(--surface-2);
+    color: var(--text);
+    padding: 2px 9px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+  }
+  .unit-head .u-count {
+    color: var(--muted);
+    font-size: 12px;
+    min-width: 48px;
+    text-align: right;
+  }
+  .unit-head .arrow-small {
+    color: var(--muted);
+    font-size: 11px;
+    transition: transform .35s cubic-bezier(.4,0,.2,1);
+    width: 20px;
+    text-align: center;
+  }
+  .unit.open .arrow-small { transform: rotate(180deg); color: var(--text); }
+
+  /* unit-level progress bar */
+  .unit-bar {
+    height: 2px;
+    background: transparent;
+    overflow: hidden;
+    margin: 0 20px;
+  }
+  .unit-bar > span {
+    display: block;
+    height: 100%;
+    background: var(--done);
+    width: 0;
+    opacity: 0.6;
+    transition: width .5s ease;
+  }
+
+  .chapters {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height .5s cubic-bezier(.4,0,.2,1), padding .35s ease;
+    padding: 0 20px 0 52px;
+  }
+  .unit.open .chapters {
+    max-height: 1500px;
+    padding: 6px 20px 14px 52px;
+  }
+  .chapter {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+    cursor: pointer;
+    user-select: none;
+    opacity: 0;
+    transform: translateY(-4px);
+    transition: opacity .3s ease, transform .3s ease;
+  }
+  .unit.open .chapter {
+    opacity: 1;
+    transform: none;
+    transition-delay: calc(var(--i, 0) * 30ms);
+  }
+  .chapter .ch-check {
+    width: 18px; height: 18px;
+    border-radius: 5px;
+    border: 1.5px solid var(--border);
+    background: var(--bg);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px;
+    flex-shrink: 0;
+    transition: all .2s ease;
+  }
+  .chapter.done .ch-check {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+  .chapter.done .ch-check::after { content: "✓"; color: var(--accent-text); font-weight: 800; font-size: 11px; }
+  .chapter .ch-body { flex: 1; }
+  .chapter .ch-name { font-size: 14px; font-weight: 600; }
+  .chapter.done .ch-name { text-decoration: line-through; color: var(--muted); }
+  .ch-micro {
+    margin-top: 4px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 6px;
+  }
+  .ch-micro .mc {
+    font-size: 11.5px;
+    color: var(--muted);
+    background: var(--surface-2);
+    padding: 2px 8px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    transition: background .2s, color .2s;
+  }
+  .chapter.done .ch-micro .mc { opacity: 0.55; }
+  .mc.match { background: var(--accent); color: var(--accent-text); border-color: var(--accent); }
+  .ch-name .match { background: var(--accent); color: var(--accent-text); padding: 0 4px; border-radius: 4px; }
+  .ch-bookmark {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    margin-left: 8px;
+    padding: 1px 7px;
+    font-size: 11px;
+    font-weight: 600;
+    background: rgba(255,193,7,.15);
+    border: 1px solid rgba(255,193,7,.5);
+    color: #ffb300;
+    border-radius: 999px;
+    cursor: pointer;
+    vertical-align: middle;
+    white-space: nowrap;
+  }
+  .ch-bookmark:hover { background: rgba(255,193,7,.3); color: #fff; }
+
+  /* GLOBAL SEARCH */
+  .search {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: var(--bg);
+    padding: 10px 0;
+    margin-bottom: 14px;
+  }
+  .search input {
+    width: 100%;
+    padding: 12px 16px 12px 42px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    color: var(--text);
+    font-size: 14px;
+    outline: none;
+    transition: border-color .2s, background .2s;
+  }
+  .search input:focus { border-color: var(--text); }
+  .search .icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 16px;
+    opacity: 0.6;
+  }
+  .search .clear {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 18px;
+    display: none;
+  }
+  .search.has-value .clear { display: block; }
+  .search-stats {
+    margin-top: 6px;
+    font-size: 12px;
+    color: var(--muted);
+    text-align: center;
+  }
+  .subject.hidden, .unit.hidden, .chapter.hidden { display: none; }
+
+  /* EXPECTED MARKS in overall panel */
+  .overall-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+  }
+  .overall-stats .stat {
+    text-align: center;
+  }
+  .overall-stats .stat .val {
+    font-size: 22px;
+    font-weight: 800;
+    display: block;
+  }
+  .overall-stats .stat .lbl {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 2px;
+  }
+  .overall-stats .stat .val.big { font-size: 26px; }
+
+  /* ACHIEVEMENTS */
+  .achievements {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px 22px;
+    margin-bottom: 22px;
+  }
+  .ach-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+  }
+  .ach-head h2 {
+    margin: 0;
+    font-size: 17px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .ach-head .count {
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .badges {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 12px;
+  }
+  .badge {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 10px;
+    text-align: center;
+    cursor: help;
+    transition: all .25s ease;
+    position: relative;
+    opacity: 0.45;
+    filter: grayscale(1);
+  }
+  .badge:hover { transform: translateY(-3px); }
+  .badge .b-emoji {
+    font-size: 32px;
+    display: block;
+    margin-bottom: 6px;
+    transition: transform .3s ease;
+  }
+  .badge .b-name {
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.3;
+  }
+  .badge .b-desc {
+    font-size: 10.5px;
+    color: var(--muted);
+    margin-top: 4px;
+    line-height: 1.3;
+  }
+  .badge.unlocked {
+    opacity: 1;
+    filter: none;
+    border-color: var(--text);
+    box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+  }
+  .badge.unlocked .b-emoji { animation: pop .5s ease; }
+  @keyframes pop {
+    0% { transform: scale(0.5) rotate(-20deg); }
+    60% { transform: scale(1.2) rotate(8deg); }
+    100% { transform: scale(1) rotate(0); }
+  }
+  .badge.unlocked::after {
+    content: "✓";
+    position: absolute;
+    top: 6px; right: 8px;
+    width: 18px; height: 18px;
+    background: var(--accent);
+    color: var(--accent-text);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 800;
+  }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(150%);
+    background: var(--text);
+    color: var(--bg);
+    padding: 14px 20px;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 1000;
+    transition: transform .45s cubic-bezier(.4,0,.2,1);
+    max-width: 90%;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  .toast .t-emoji { font-size: 28px; }
+  .toast .t-text { font-size: 14px; }
+  .toast .t-text b { display: block; font-size: 15px; margin-bottom: 2px; }
+
+  /* RESET BUTTON */
+  .actions {
+    margin-top: 24px;
+    text-align: center;
+  }
+  .reset-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 8px 16px;
+    border-radius: 999px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: all .2s;
+  }
+  .reset-btn:hover { color: var(--text); border-color: var(--text); }
+
+  .footer-note {
+    margin-top: 24px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 12px;
+  }
+
+  @media (max-width: 600px) {
+    .subject-head .progress-text { display: none; }
+    .unit-head .u-count { display: none; }
+    .topbar h1 { font-size: 20px; }
+  }
+
+  /* ===== Phone topbar layout (≤820px) =====
+     Desktop layout = flex-row with space-between: heading on the left,
+     nav pills on the right. On a phone that forces the heading to wrap to
+     4 lines ("MECEE- / BL / 2027 / Tracker") while the nav row gets
+     pushed off-screen and the buttons themselves wrap their labels to
+     two lines ("AI / Tutor"), making them look like fat circles.
+     Stack the topbar vertically so each gets its own row at full width,
+     and keep the nav buttons as proper single-line pills. */
+  @media (max-width: 820px) {
+    .topbar {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 14px;
+    }
+    .topbar h1 {
+      font-size: 22px;
+      white-space: normal;
+    }
+    /* The right-hand wrapper holding the nav buttons. */
+    #trackerTopbarRight {
+      width: 100%;
+      flex-wrap: wrap;
+      row-gap: 8px;
+    }
+    /* Make the pill buttons behave like proper pills on phone:
+       single-line label, sensible padding, ≥44px tap height without
+       inflating into circles. */
+    .theme-toggle {
+      padding: 10px 14px !important;
+      font-size: 13px !important;
+      white-space: nowrap;
+      line-height: 1;
+      min-height: 40px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+  }
+
+  /* ===== Phone perf fixes (≤820px) =====
+     Desktop uses max-height transitions to "smooth-expand" the categories,
+     plus per-chapter staggered opacity/transform fades. On phones this lags
+     hard — animating max-height triggers a full layout pass per frame, and
+     dozens of staggered child animations multiply the work.
+     We replace the animation with an instant show/hide. The category opens
+     and closes snappily; same end state, no perceived lag. */
+  @media (max-width: 820px) {
+    .units-wrap {
+      transition: none;
+      max-height: none;
+      display: none;
+    }
+    .subject.open .units-wrap { display: block; max-height: none; }
+
+    .chapters {
+      transition: none;
+      max-height: none;
+      display: none;
+      padding: 0 20px 0 52px;
+    }
+    .unit.open .chapters {
+      display: block;
+      max-height: none;
+      padding: 6px 20px 14px 52px;
+    }
+
+    .chapter {
+      opacity: 1;
+      transform: none;
+      transition: none;
+    }
+    .unit.open .chapter {
+      transition-delay: 0s !important;
+    }
+
+    /* Cheap rotate-only transitions are fine, but kill the chapter-bar width
+       animation on phone — width transitions force layout. */
+    .unit-bar > span,
+    .subject-bar > span { transition: none; }
+
+    /* Disable hover lifts — they stay stuck on tap on touch screens. */
+    .unit-head .check:hover { transform: none; }
+  }
+
+</style>
+</head>
+<body>
+  <div class="container">
+
+    <!-- TOPBAR -->
+    <div class="topbar">
+      <div>
+        <h1>📚 MECEE-BL 2027 Tracker</h1>
+        <div class="sub">MBBS Entrance · Nepal · check off as you study</div>
+      </div>
+      <div style="display:flex; gap:8px; align-items:center;" id="trackerTopbarRight">
+        <a href="library.html" class="theme-toggle" style="text-decoration:none;">📚 Library</a>
+        <a href="flashcards.html" class="theme-toggle" style="text-decoration:none;">🧠 Flashcards</a>
+        <a href="chat.html" class="theme-toggle" style="text-decoration:none;">🤖 AI Tutor</a>
+        <a href="routine.html" class="theme-toggle" style="text-decoration:none;">📅 Routine</a>
+        <button class="theme-toggle" id="themeToggle">🌙 Dark</button>
+      </div>
+    </div>
+
+    <!-- OVERALL PROGRESS -->
+    <div class="overall">
+      <div class="overall-head">
+        <span class="label">Overall progress</span>
+        <span class="num" id="overallNum">0%</span>
+      </div>
+      <div class="bar"><span id="overallBar"></span></div>
+      <div class="meta" id="overallMeta">0 of 0 topics complete</div>
+      <div class="overall-stats">
+        <div class="stat">
+          <span class="val big" id="expectedMarks">0</span>
+          <span class="lbl">🎯 Expected / 200</span>
+        </div>
+        <div class="stat">
+          <span class="val" id="topicsDone">0</span>
+          <span class="lbl">📖 Topics done</span>
+        </div>
+        <div class="stat">
+          <span class="val" id="streakLevel">Rookie</span>
+          <span class="lbl">🏅 Rank</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ACHIEVEMENTS -->
+    <div class="achievements">
+      <div class="ach-head">
+        <h2>🏆 Achievements</h2>
+        <span class="count" id="achCount">0 / 0 unlocked</span>
+      </div>
+      <div class="badges" id="badges"></div>
+    </div>
+
+    <!-- RULES -->
+    <div class="rules">
+      <div><b>📝 200 MCQs</b>4 options each</div>
+      <div><b>⏱️ 3 hours</b>~54s per Q</div>
+      <div><b>➕ +1 / −0.25</b>negative marking</div>
+      <div><b>🧠 50:30:20</b>recall:understand:apply</div>
+      <div><b>🎓 50% / GPA 2.4</b>10+2 PCB</div>
+      <div><b>📊 50th percentile</b>merit cutoff</div>
+    </div>
+
+    <!-- GLOBAL SEARCH -->
+    <div class="search" id="searchWrap" style="position:relative;">
+      <span class="icon">🔍</span>
+      <input id="searchInput" type="text" placeholder="Search any chapter or micro-topic (e.g. photosynthesis, Bohr, Mendel, Krebs cycle)..." />
+      <button class="clear" id="searchClear" title="Clear">×</button>
+      <div class="search-stats" id="searchStats"></div>
+    </div>
+
+    <!-- SUBJECTS -->
+    <div id="subjects"></div>
+
+    <div class="actions">
+      <button class="reset-btn" id="resetBtn">🗑️ Reset all progress</button>
+    </div>
+
+    <div class="footer-note">Progress saves to your browser. Syllabus & micro-contents from the official MECEE-BL PDF (2020 revised 28 April 2026). Press <b>/</b> to search.</div>
+  </div>
+
+  <div class="toast" id="toast">
+    <div class="t-emoji" id="toastEmoji">🏆</div>
+    <div class="t-text"><b id="toastTitle">Achievement unlocked!</b><span id="toastDesc"></span></div>
+  </div>
+
+  <!-- MUSIC PLAYER WIDGET -->
+  <div class="player-widget" id="playerWidget" title="Study music player">
+    <div class="player-thumb" id="playerThumb"></div>
+    <div class="player-body">
+      <div class="player-info">
+        <div class="player-title" id="playerTitle">—</div>
+        <div class="player-sub" id="playerSub">Now playing</div>
+      </div>
+      <div class="player-controls">
+        <button class="player-btn" id="playerPrev" title="Previous">⏮</button>
+        <button class="player-btn play" id="playerPlay" title="Play / Pause">▶</button>
+        <button class="player-btn" id="playerNext" title="Next">⏭</button>
+        <input type="range" class="player-vol" id="playerVol" min="0" max="100" value="60" title="Volume" />
+      </div>
+    </div>
+    <div class="player-progress"><div class="player-progress-bar" id="playerProgress"></div></div>
+    <audio id="playerAudio" preload="none"></audio>
+  </div>
+
+<script src="syllabus.js"></script>
+<script>
+const SYLLABUS = window.SYLLABUS;
+
+/* Normalize: chapters may be strings or {n,m} objects */
+function chName(ch) { return typeof ch === 'string' ? ch : ch.n; }
+function chMicro(ch) { return typeof ch === 'string' ? [] : (ch.m || []); }
+
+const STORAGE_KEY = MeceeKeys.PROGRESS;
+const THEME_KEY   = MeceeKeys.THEME;
+const ACH_KEY     = "mecee_achievements_v1";   // tracker-only, stays local
+
+let progress = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+let unlockedAch = JSON.parse(localStorage.getItem(ACH_KEY) || "{}");
+
+/* ========== ACHIEVEMENTS ========== */
+const ACHIEVEMENTS = [
+  { id: "first_step",   emoji: "👟", name: "First Step",       desc: "Tick your very first topic",        check: s => s.totalDone >= 1 },
+  { id: "ten_topics",   emoji: "🔥", name: "On Fire",           desc: "Complete 10 topics",                check: s => s.totalDone >= 10 },
+  { id: "fifty_topics", emoji: "🚀", name: "Lift-off",          desc: "Complete 50 topics",                check: s => s.totalDone >= 50 },
+  { id: "century",      emoji: "💯", name: "Century Club",      desc: "Complete 100 topics",               check: s => s.totalDone >= 100 },
+  { id: "quarter",      emoji: "🎯", name: "Quarter Master",    desc: "Reach 25% overall",                 check: s => s.pct >= 25 },
+  { id: "half",         emoji: "🥈", name: "Half-way Hero",     desc: "Reach 50% overall",                 check: s => s.pct >= 50 },
+  { id: "three_q",      emoji: "🥇", name: "Three-Quarter Titan", desc: "Reach 75% overall",               check: s => s.pct >= 75 },
+  { id: "full",         emoji: "👑", name: "Syllabus Slayer",   desc: "Reach 100% overall",                check: s => s.pct >= 100 },
+  { id: "physics_done", emoji: "⚛️", name: "Physics Pioneer",   desc: "Finish all of Physics",             check: s => s.subjectPct.Physics === 100 },
+  { id: "chem_done",    emoji: "🧪", name: "Chemistry Champion",desc: "Finish all of Chemistry",           check: s => s.subjectPct.Chemistry === 100 },
+  { id: "zoo_done",     emoji: "🦋", name: "Zoology Master",    desc: "Finish all of Zoology",             check: s => s.subjectPct.Zoology === 100 },
+  { id: "bot_done",     emoji: "🌿", name: "Botany Boss",       desc: "Finish all of Botany",              check: s => s.subjectPct.Botany === 100 },
+  { id: "mat_done",     emoji: "🧠", name: "MAT Magician",      desc: "Finish all of MAT",                 check: s => s.subjectPct.MAT === 100 },
+  { id: "first_unit",   emoji: "⚡", name: "Speed Run",         desc: "Complete one full unit",            check: s => s.unitsDone >= 1 },
+  { id: "five_units",   emoji: "🎖️", name: "Veteran",           desc: "Complete 5 full units",             check: s => s.unitsDone >= 5 },
+  { id: "ten_units",    emoji: "🏅", name: "Decorated",         desc: "Complete 10 full units",            check: s => s.unitsDone >= 10 },
+  { id: "polymath",     emoji: "📚", name: "Polymath",          desc: "Tick a topic in every subject",     check: s => s.subjectsTouched === 5 },
+  { id: "pass_likely",  emoji: "🎓", name: "Pass Probable",     desc: "Expected marks ≥ 100",              check: s => s.expected >= 100 },
+  { id: "merit",        emoji: "🌟", name: "Merit Material",    desc: "Expected marks ≥ 150",              check: s => s.expected >= 150 },
+  { id: "elite",        emoji: "💎", name: "Top Tier",          desc: "Expected marks ≥ 180",              check: s => s.expected >= 180 }
+];
+
+function computeExpectedMarks() {
+  let expected = 0;
+  Object.entries(SYLLABUS).forEach(([sName, sData]) => {
+    Object.entries(sData.units).forEach(([uName, uData]) => {
+      const perChapter = uData.marks / uData.chapters.length;
+      uData.chapters.forEach((_, i) => {
+        if (isDone(sName, uName, i)) expected += perChapter;
+      });
+    });
+  });
+  return expected;
+}
+
+function fullStats() {
+  let totalDone = 0, totalAll = 0, unitsDone = 0, subjectsTouched = 0;
+  const subjectPct = {};
+  Object.entries(SYLLABUS).forEach(([sName, sData]) => {
+    let sDone = 0, sTotal = 0;
+    Object.entries(sData.units).forEach(([uName, uData]) => {
+      const st = unitStats(sName, uName);
+      sDone += st.done; sTotal += st.total;
+      if (st.total > 0 && st.done === st.total) unitsDone++;
+    });
+    if (sDone > 0) subjectsTouched++;
+    totalDone += sDone; totalAll += sTotal;
+    subjectPct[sName] = sTotal ? Math.round((sDone / sTotal) * 100) : 0;
+  });
+  const pct = totalAll ? (totalDone / totalAll) * 100 : 0;
+  const expected = computeExpectedMarks();
+  return { totalDone, totalAll, unitsDone, subjectsTouched, pct, subjectPct, expected };
+}
+
+function getRank(pct) {
+  if (pct >= 100) return "Legend 👑";
+  if (pct >= 80)  return "Elite 💎";
+  if (pct >= 60)  return "Pro 🌟";
+  if (pct >= 40)  return "Adept 🔥";
+  if (pct >= 20)  return "Apprentice ⚡";
+  if (pct > 0)    return "Starter 🌱";
+  return "Rookie";
+}
+
+function buildBadges() {
+  const host = document.getElementById('badges');
+  host.innerHTML = ACHIEVEMENTS.map(a => `
+    <div class="badge" data-id="${a.id}" title="${a.desc}">
+      <span class="b-emoji">${a.emoji}</span>
+      <div class="b-name">${a.name}</div>
+      <div class="b-desc">${a.desc}</div>
+    </div>
+  `).join('');
+}
+buildBadges();
+
+function showToast(emoji, title, desc) {
+  const t = document.getElementById('toast');
+  document.getElementById('toastEmoji').textContent = emoji;
+  document.getElementById('toastTitle').textContent = title;
+  document.getElementById('toastDesc').textContent = desc;
+  t.classList.add('show');
+  clearTimeout(showToast._tm);
+  showToast._tm = setTimeout(() => t.classList.remove('show'), 3200);
+}
+
+function checkAchievements(stats) {
+  let newlyUnlocked = [];
+  let changed = false;
+  ACHIEVEMENTS.forEach(a => {
+    const passes = a.check(stats);
+    if (passes && !unlockedAch[a.id]) {
+      unlockedAch[a.id] = Date.now();
+      newlyUnlocked.push(a);
+      changed = true;
+    } else if (!passes && unlockedAch[a.id]) {
+      // Dynamic: re-lock if criteria no longer met (e.g. you untick stuff)
+      delete unlockedAch[a.id];
+      changed = true;
+    }
+  });
+  if (changed) {
+    localStorage.setItem(ACH_KEY, JSON.stringify(unlockedAch));
+  }
+  // update badge UI
+  ACHIEVEMENTS.forEach(a => {
+    const el = document.querySelector(`.badge[data-id="${a.id}"]`);
+    if (el) el.classList.toggle('unlocked', !!unlockedAch[a.id]);
+  });
+  const total = ACHIEVEMENTS.length;
+  const got = Object.keys(unlockedAch).length;
+  document.getElementById('achCount').textContent = `${got} / ${total} unlocked`;
+  // toast only for NEW unlocks (silent re-lock if you untick)
+  if (newlyUnlocked.length) {
+    newlyUnlocked.forEach((a, i) => {
+      setTimeout(() => showToast(a.emoji, `Achievement: ${a.name}`, a.desc), i * 3400);
+    });
+  }
+}
+
+function chapterKey(s, u, i) { return `${s}::${u}::${i}`; }
+function isDone(s, u, i) { return !!progress[chapterKey(s, u, i)]; }
+function setDone(s, u, i, v) {
+  const k = chapterKey(s, u, i);
+  if (v) progress[k] = true;
+  else delete progress[k];
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
+  /* Sync stamp: track when this chapter last changed so per-item LWW merge
+     across devices does the right thing. Safe no-op if sync.js isn't loaded. */
+  try { window.MeceeSync && MeceeSync.stamp('tracker', k, v ? 'updated' : 'deleted'); } catch (_) {}
+}
+
+function unitStats(s, u) {
+  const chapters = SYLLABUS[s].units[u].chapters;
+  const done = chapters.filter((_, i) => isDone(s, u, i)).length;
+  return { done, total: chapters.length };
+}
+function subjectStats(s) {
+  let done = 0, total = 0;
+  Object.keys(SYLLABUS[s].units).forEach(u => {
+    const st = unitStats(s, u);
+    done += st.done; total += st.total;
+  });
+  return { done, total };
+}
+function overallStats() {
+  let done = 0, total = 0;
+  Object.keys(SYLLABUS).forEach(s => {
+    const st = subjectStats(s);
+    done += st.done; total += st.total;
+  });
+  return { done, total };
+}
+
+/* ---------- BOOKMARKS (set in library.html) ----------
+   Stored as { "Subject::Unit::idx": [ { flipId, page, note, ts, v }, ... ] }
+   v:2 = PDF page (post-PDF.js switch). Pre-v2 values stored printed page; we
+   add the legacy offset of 6 to convert. flipIds are normalized to new book ids. */
+const BOOKMARKS_KEY = MeceeKeys.BOOKMARKS;
+const LEGACY_FLIP_IDS = { '7cf699161c': 'bio11', '6619697548': 'bio12' };
+const LEGACY_PAGE_OFFSET = 6;
+const bookmarks = (() => {
+  let raw;
+  try { raw = JSON.parse(localStorage.getItem(BOOKMARKS_KEY) || '{}'); } catch (_) { return {}; }
+  let dirty = false;
+  const out = {};
+  function migrate(bm) {
+    if (bm && bm.v === 2) return bm;
+    dirty = true;
+    return {
+      flipId: LEGACY_FLIP_IDS[bm.flipId] || bm.flipId,
+      page:   (bm.page || 1) + LEGACY_PAGE_OFFSET,
+      note:   bm.note || '',
+      ts:     bm.ts || Date.now(),
+      v:      2
+    };
+  }
+  for (const [k, v] of Object.entries(raw)) {
+    if (Array.isArray(v)) out[k] = v.map(migrate);
+    else if (v && v.flipId && v.page) out[k] = [migrate(v)];
+  }
+  if (dirty) localStorage.setItem(BOOKMARKS_KEY, JSON.stringify(out));
+  return out;
+})();
+
+/* ---------- BUILD UI ---------- */
+const host = document.getElementById('subjects');
+Object.entries(SYLLABUS).forEach(([sName, sData]) => {
+  const sEl = document.createElement('div');
+  sEl.className = 'subject';
+  sEl.dataset.subject = sName;
+
+  let unitsHtml = '';
+  Object.entries(sData.units).forEach(([uName, uData]) => {
+    const chaps = uData.chapters.map((c, i) => {
+      const name = chName(c);
+      const micros = chMicro(c);
+      const microHtml = micros.length
+        ? `<div class="ch-micro">${micros.map(m => `<span class="mc">${m}</span>`).join('')}</div>`
+        : '';
+      const bms = bookmarks[`${sName}::${uName}::${i}`] || [];
+      const bmHtml = bms.map(bm => {
+        const noteTip = bm.note ? ' — ' + bm.note.replace(/"/g, '&quot;') : '';
+        return `<span class="ch-bookmark" data-flip="${bm.flipId}" data-page="${bm.page}" title="Open book at page ${bm.page}${noteTip}">📖 p.${bm.page}${bm.note ? ' "' + bm.note.replace(/</g,'&lt;').replace(/"/g,'&quot;') + '"' : ''}</span>`;
+      }).join('');
+      return `
+        <div class="chapter" data-chi="${i}" style="--i:${i}">
+          <div class="ch-check"></div>
+          <div class="ch-body">
+            <div class="ch-name">${name}${bmHtml}</div>
+            ${microHtml}
+          </div>
+        </div>
+      `;
+    }).join('');
+    unitsHtml += `
+      <div class="unit" data-unit="${uName}">
+        <div class="unit-head">
+          <div class="check" title="Mark unit complete"></div>
+          <div class="u-title">${uName}</div>
+          <span class="u-marks">${uData.marks} marks</span>
+          <span class="u-count">0/${uData.chapters.length}</span>
+          <span class="arrow-small">▼</span>
+        </div>
+        <div class="unit-bar"><span></span></div>
+        <div class="chapters">${chaps}</div>
+      </div>
+    `;
+  });
+
+  sEl.innerHTML = `
+    <div class="subject-head">
+      <span class="emoji">${sData.emoji}</span>
+      <span class="name">${sName}</span>
+      <span class="marks-pill">${sData.total} marks</span>
+      <span class="progress-text">0%</span>
+      <span class="arrow">▼</span>
+    </div>
+    <div class="subject-bar"><span></span></div>
+    <div class="units-wrap">${unitsHtml}</div>
+  `;
+  host.appendChild(sEl);
+});
+
+/* ---------- INTERACTIONS ---------- */
+/* Phones disable the open/close animation (see @media (max-width: 820px))
+   to avoid layout-thrash lag. With no animation, the 180 ms scroll delay
+   below becomes dead air that LOOKS like lag — the user taps, sees nothing
+   for 180 ms, then the page smooth-scrolls. On phone we open instantly and
+   skip the scroll entirely (the header is already where the user tapped). */
+const isPhoneViewport = () => window.matchMedia('(max-width: 820px)').matches;
+
+document.querySelectorAll('.subject').forEach(sEl => {
+  const subject = sEl.dataset.subject;
+
+  sEl.querySelector('.subject-head').addEventListener('click', () => {
+    const wasOpen = sEl.classList.contains('open');
+    sEl.classList.toggle('open');
+    if (isPhoneViewport()) return;       // no scroll on phone — instant feel
+    // Scroll to the subject head whether opening OR closing
+    setTimeout(() => {
+      const rect = sEl.getBoundingClientRect();
+      const targetY = window.scrollY + rect.top - 16;
+      window.scrollTo({ top: targetY, behavior: 'smooth' });
+    }, wasOpen ? 50 : 180);
+  });
+
+  sEl.querySelectorAll('.unit').forEach(uEl => {
+    const unitName = uEl.dataset.unit;
+    const chapters = SYLLABUS[subject].units[unitName].chapters;
+
+    // checkbox = mark all chapters in unit done/undone (does NOT expand)
+    uEl.querySelector('.check').addEventListener('click', (e) => {
+      e.stopPropagation();
+      const st = unitStats(subject, unitName);
+      const markAllDone = st.done < st.total;
+      chapters.forEach((_, i) => setDone(subject, unitName, i, markAllDone));
+      refresh();
+    });
+
+    // click anywhere else on the unit row = expand/collapse smoothly
+    uEl.querySelector('.unit-head').addEventListener('click', (e) => {
+      if (e.target.closest('.check')) return;
+      const wasOpen = uEl.classList.contains('open');
+      uEl.classList.toggle('open');
+      if (isPhoneViewport()) return;     // instant open on phone, no scroll
+      // smooth-scroll on both open AND close so the unit stays in view
+      setTimeout(() => {
+        const rect = uEl.getBoundingClientRect();
+        const targetY = window.scrollY + rect.top - 90; // leave 90px gap from top
+        window.scrollTo({ top: targetY, behavior: 'smooth' });
+      }, wasOpen ? 50 : 180);
+    });
+
+    // chapter clicks toggle individual completion + update overall bar
+    uEl.querySelectorAll('.chapter').forEach(chEl => {
+      chEl.addEventListener('click', (e) => {
+        if (e.target.closest('.ch-bookmark')) return;   // bookmark pill handles its own click
+        e.stopPropagation();
+        const i = parseInt(chEl.dataset.chi);
+        setDone(subject, unitName, i, !isDone(subject, unitName, i));
+        refresh();
+      });
+    });
+  });
+});
+
+function refresh() {
+  Object.entries(SYLLABUS).forEach(([sName, sData]) => {
+    const sEl = document.querySelector(`.subject[data-subject="${sName}"]`);
+    const sStat = subjectStats(sName);
+    const sPct = sStat.total ? Math.round((sStat.done / sStat.total) * 100) : 0;
+    sEl.querySelector('.progress-text').textContent = sPct + '%';
+    sEl.querySelector('.subject-bar > span').style.width = sPct + '%';
+
+    Object.entries(sData.units).forEach(([uName, uData]) => {
+      const uEl = sEl.querySelector(`.unit[data-unit="${CSS.escape(uName)}"]`);
+      const uStat = unitStats(sName, uName);
+      const uPct = uStat.total ? (uStat.done / uStat.total) * 100 : 0;
+      uEl.querySelector('.u-count').textContent = `${uStat.done}/${uStat.total}`;
+      uEl.querySelector('.unit-head').classList.toggle('done', uStat.done === uStat.total && uStat.total > 0);
+      uEl.querySelector('.unit-bar > span').style.width = uPct + '%';
+
+      uEl.querySelectorAll('.chapter').forEach(chEl => {
+        const i = parseInt(chEl.dataset.chi);
+        chEl.classList.toggle('done', isDone(sName, uName, i));
+      });
+    });
+  });
+
+  const o = overallStats();
+  const pct = o.total ? Math.round((o.done / o.total) * 100) : 0;
+  document.getElementById('overallNum').textContent = pct + '%';
+  document.getElementById('overallBar').style.width = pct + '%';
+  document.getElementById('overallMeta').textContent = `${o.done} of ${o.total} topics complete`;
+
+  const s = fullStats();
+  document.getElementById('expectedMarks').textContent = s.expected.toFixed(1);
+  document.getElementById('topicsDone').textContent = `${s.totalDone}/${s.totalAll}`;
+  document.getElementById('streakLevel').textContent = getRank(s.pct);
+  checkAchievements(s);
+}
+refresh();
+
+/* In-place refresh hook for sync.js. Re-reads the cached `progress` map from
+   localStorage (which the shell-side adapter just rewrote with the merged
+   snapshot) and repaints. Avoids the full-page reload that would otherwise
+   blow away scroll position. */
+window.onMeceeSyncApplied = function () {
+  try { progress = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}"); }
+  catch (_) { progress = {}; }
+  refresh();
+};
+
+/* ---------- THEME TOGGLE ---------- */
+const themeBtn = document.getElementById('themeToggle');
+function applyTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  themeBtn.textContent = t === 'dark' ? '☀️ Light' : '🌙 Dark';
+  localStorage.setItem(THEME_KEY, t);
+}
+applyTheme(localStorage.getItem(THEME_KEY) || 'dark');
+themeBtn.addEventListener('click', () => {
+  const cur = document.documentElement.getAttribute('data-theme');
+  applyTheme(cur === 'dark' ? 'light' : 'dark');
+});
+
+/* ---------- RESET ---------- */
+document.getElementById('resetBtn').addEventListener('click', () => {
+  if (confirm("Reset all progress AND achievements? This can't be undone.")) {
+    progress = {};
+    unlockedAch = {};
+    localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(ACH_KEY);
+    refresh();
+  }
+});
+
+/* Bookmark pills navigate to library at the saved page via the shell. */
+document.addEventListener('click', (e) => {
+  const bm = e.target.closest('.ch-bookmark');
+  if (!bm) return;
+  e.stopPropagation();
+  const flipId = bm.dataset.flip;
+  const page   = parseInt(bm.dataset.page, 10) || 1;
+  try { window.parent.postMessage({ type: 'nav', href: 'library', book: flipId, page }, '*'); } catch (_) {}
+}, true);   // capture phase, so the chapter listener never sees it
+
+/* ---------- GLOBAL SEARCH ---------- */
+const searchInput = document.getElementById('searchInput');
+const searchWrap = document.getElementById('searchWrap');
+const searchClear = document.getElementById('searchClear');
+const searchStats = document.getElementById('searchStats');
+
+function escapeRegex(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+
+function runSearch(qRaw) {
+  const q = qRaw.trim().toLowerCase();
+  searchWrap.classList.toggle('has-value', q.length > 0);
+
+  // reset prior highlights
+  document.querySelectorAll('.mc.match').forEach(el => el.classList.remove('match'));
+  document.querySelectorAll('.ch-name').forEach(el => {
+    if (el.dataset.orig) { el.innerHTML = el.dataset.orig; delete el.dataset.orig; }
+  });
+
+  if (!q) {
+    document.querySelectorAll('.subject, .unit, .chapter').forEach(el => el.classList.remove('hidden'));
+    searchStats.textContent = '';
+    return;
+  }
+
+  let matchCount = 0;
+  const re = new RegExp(`(${escapeRegex(q)})`, 'ig');
+
+  document.querySelectorAll('.subject').forEach(sEl => {
+    let subjectHasMatch = false;
+    sEl.querySelectorAll('.unit').forEach(uEl => {
+      let unitHasMatch = false;
+      uEl.querySelectorAll('.chapter').forEach(chEl => {
+        const nameEl = chEl.querySelector('.ch-name');
+        const nameTxt = nameEl.textContent;
+        const microEls = [...chEl.querySelectorAll('.mc')];
+        const microMatchEls = microEls.filter(m => m.textContent.toLowerCase().includes(q));
+        const nameMatch = nameTxt.toLowerCase().includes(q);
+
+        if (nameMatch || microMatchEls.length) {
+          chEl.classList.remove('hidden');
+          unitHasMatch = true;
+          matchCount++;
+          if (nameMatch) {
+            if (!nameEl.dataset.orig) nameEl.dataset.orig = nameEl.innerHTML;
+            nameEl.innerHTML = nameTxt.replace(re, '<span class="match">$1</span>');
+          }
+          microMatchEls.forEach(m => m.classList.add('match'));
+        } else {
+          chEl.classList.add('hidden');
+        }
+      });
+      uEl.classList.toggle('hidden', !unitHasMatch);
+      uEl.classList.toggle('open', unitHasMatch);
+      if (unitHasMatch) subjectHasMatch = true;
+    });
+    sEl.classList.toggle('hidden', !subjectHasMatch);
+    sEl.classList.toggle('open', subjectHasMatch);
+  });
+
+  searchStats.textContent = matchCount
+    ? `Found ${matchCount} matching topic${matchCount === 1 ? '' : 's'}`
+    : 'No matches — try a different keyword';
+}
+
+searchInput.addEventListener('input', e => runSearch(e.target.value));
+searchClear.addEventListener('click', () => {
+  searchInput.value = '';
+  runSearch('');
+  searchInput.focus();
+});
+// keyboard shortcut: / focuses search
+document.addEventListener('keydown', (e) => {
+  if (e.key === '/' && document.activeElement !== searchInput) {
+    e.preventDefault();
+    searchInput.focus();
+  }
+  if (e.key === 'Escape' && document.activeElement === searchInput) {
+    searchInput.value = '';
+    runSearch('');
+  }
+});
+
+
+</script>
+<script src="Playlist/tracks.js"></script>
+<script src="player.js"></script>
+<script src="nav-shim.js"></script>
+</body>
+</html>

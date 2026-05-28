@@ -1,0 +1,518 @@
+/* ===== SHARED STUDY MUSIC PLAYER ===== */
+
+.player-widget {
+  position: fixed;
+  bottom: 18px;
+  right: 18px;
+  z-index: 80;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--surface, #fff);
+  border: 1px solid var(--border, rgba(0,0,0,0.1));
+  box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+  box-sizing: border-box;
+  padding: 6px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  overflow: hidden;
+  /* Only transition layout props — not `all` — to keep the spinning thumb on its own layer */
+  transition: width .3s ease, border-radius .3s ease, padding .3s ease;
+  will-change: width;
+}
+
+.player-widget.expanded {
+  width: 510px;          /* slightly wider to fit the 📁 playlist button */
+  border-radius: 30px;
+  padding: 6px 14px 6px 6px;
+}
+
+.player-thumb {
+  /* Static frame — NOT animated, NOT composited. This is what the cursor
+     hit-tests against, so the custom Hand1 PNG renders correctly on hover. */
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  border: 1px solid var(--border, rgba(0,0,0,0.1));
+  background: var(--bg, #eee);
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.player-thumb-spinner {
+  /* Inner layer that actually holds the album-art background and does the
+     rotating. Sits on its own GPU compositor layer (because of the transform
+     animation), but `pointer-events: none` keeps it out of hit-testing, so
+     the cursor falls through to .player-thumb and uses the custom PNG. */
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background-image: var(--player-thumb-cover, none);
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  pointer-events: none;
+}
+
+.player-thumb-note {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 22px;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.6);
+  opacity: 0;
+  pointer-events: none;
+  /* No opacity transition — a CSS animation would promote this to its own
+     GPU compositor layer, which caches the system default cursor and ignores
+     our custom Hand1 PNG. Instant fade is the trade-off. */
+}
+.player-thumb:hover .player-thumb-note { opacity: 1; }
+
+.player-widget.playing .player-thumb-spinner {
+  animation: spinDisc 14s linear infinite;
+}
+@keyframes spinDisc {
+  from { transform: translateZ(0) rotate(0deg); }
+  to   { transform: translateZ(0) rotate(360deg); }
+}
+
+.player-body {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+  opacity: 0;
+  pointer-events: none;
+  /* Opacity transition removed — it was promoting this body to a GPU layer
+     and breaking the custom cursor on the title/sub text inside it. */
+}
+.player-widget.expanded .player-body {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.player-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+.player-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text, #111);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 180px;
+}
+.player-sub {
+  font-size: 10px;
+  color: var(--muted, #888);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.player-controls {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+.player-btn {
+  background: transparent;
+  border: none;
+  color: var(--text, #111);
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background .15s;
+  padding: 0;
+}
+.player-btn:hover { background: var(--surface-2, rgba(0,0,0,0.05)); }
+.player-btn.play {
+  background: var(--accent, #5b8def);
+  color: var(--accent-text, #fff);
+  width: 34px; height: 34px;
+  font-size: 13px;
+}
+.player-btn.play:hover { filter: brightness(1.1); }
+
+.player-vol {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 70px;
+  height: 4px;
+  background: var(--border, rgba(0,0,0,0.15));
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+}
+.player-vol::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 12px; height: 12px;
+  background: var(--text, #111);
+  border-radius: 50%;
+  cursor: pointer;
+}
+.player-vol::-moz-range-thumb {
+  width: 12px; height: 12px;
+  background: var(--text, #111);
+  border-radius: 50%;
+  cursor: pointer;
+  border: none;
+}
+
+.player-progress {
+  position: absolute;
+  bottom: 0; left: 28px; right: 14px;
+  height: 2px;
+  pointer-events: none;
+}
+.player-progress-bar {
+  height: 100%;
+  background: var(--accent, #5b8def);
+  border-radius: 1px;
+  width: 0%;
+  transition: width .25s linear;
+}
+
+@media (max-width: 600px) {
+  .player-widget { bottom: 12px; right: 12px; }
+  .player-widget.expanded { width: calc(100vw - 24px); }
+  .player-title { max-width: 120px; }
+  .player-vol { width: 50px; }
+}
+
+/* ===== Playlist picker modal (shell-only) =====
+   The picker lives in index.html alongside the player widget. PC only —
+   the player widget itself is hidden under (max-width: 820px) by the
+   shell, so the picker can never be opened on phone. */
+.pl-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 9500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  opacity: 0;
+  transition: opacity .18s ease;
+  pointer-events: none;
+}
+.pl-modal.open { opacity: 1; pointer-events: auto; }
+.pl-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(8,8,14,.55);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+.pl-card {
+  position: relative;
+  z-index: 1;
+  background: var(--surface, #fff);
+  color: var(--text, #111);
+  border: 1px solid var(--border, rgba(0,0,0,.1));
+  border-radius: 16px;
+  width: min(720px, calc(100vw - 48px));
+  max-height: calc(100vh - 80px);
+  box-shadow: 0 24px 80px rgba(0,0,0,.45);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transform: translateY(8px) scale(.985);
+  transition: transform .2s ease;
+}
+.pl-modal.open .pl-card { transform: none; }
+.pl-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 18px 20px 14px;
+  border-bottom: 1px solid var(--border, rgba(0,0,0,.08));
+}
+.pl-head-text { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.pl-back {
+  background: var(--surface-2, rgba(0,0,0,.05));
+  border: 1px solid var(--border, rgba(0,0,0,.1));
+  color: var(--text, #111);
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  font-size: 16px;
+  cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.pl-back:hover { background: var(--surface-3, rgba(0,0,0,.08)); }
+.pl-title { font-size: 17px; font-weight: 800; letter-spacing: -.2px; }
+.pl-sub {
+  margin-top: 2px;
+  color: var(--muted, #888);
+  font-size: 12px;
+}
+.pl-sub code {
+  background: var(--surface-2, rgba(0,0,0,.05));
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 11px;
+}
+.pl-head-btns { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
+.pl-rescan {
+  background: var(--surface-2, rgba(0,0,0,.05));
+  color: var(--text, #111);
+  border: 1px solid var(--border, rgba(0,0,0,.1));
+  border-radius: 999px;
+  padding: 7px 13px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: filter .15s, background .15s;
+}
+.pl-rescan:hover:not(:disabled) { filter: brightness(1.06); background: var(--surface-3, rgba(0,0,0,.08)); }
+.pl-rescan:disabled { opacity: .65; cursor: progress; }
+.pl-close {
+  background: var(--surface-2, rgba(0,0,0,.05));
+  color: var(--muted, #888);
+  border: 1px solid var(--border, rgba(0,0,0,.1));
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  font-size: 16px;
+  cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.pl-close:hover { color: var(--text, #111); }
+
+.pl-grid {
+  padding: 18px 20px 20px;
+  overflow-y: auto;
+  display: block;        /* nested .pl-grid-inner is the actual grid */
+}
+.pl-grid-inner {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 14px;
+  margin-bottom: 18px;
+}
+.pl-grid-inner:last-child { margin-bottom: 0; }
+/* Subtle section header when multiple playlists exist. Single-playlist
+   case never inserts these, so the picker stays one clean grid. */
+.pl-group-head {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--muted, #888);
+  padding: 4px 2px 8px;
+  margin-top: 4px;
+  border-top: 1px solid var(--border, rgba(0,0,0,.08));
+  padding-top: 14px;
+}
+.pl-grid-inner:first-of-type + .pl-group-head,
+.pl-group-head:first-child {
+  border-top: none;
+  margin-top: 0;
+  padding-top: 0;
+}
+.pl-tile {
+  background: var(--surface-2, rgba(0,0,0,.04));
+  border: 1px solid var(--border, rgba(0,0,0,.08));
+  color: var(--text, #111);
+  border-radius: 12px;
+  padding: 10px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  text-align: left;
+  font-family: inherit;
+  transition: transform .15s ease, border-color .15s ease, box-shadow .15s ease;
+  /* Virtualize off-screen tiles: the browser skips paint + decode for tiles
+     that aren't in (or near) the viewport, which is what kills scroll jank
+     when the picker has many tracks. The size hint matches a typical tile
+     so the scrollbar doesn't jump when content-visibility flips. */
+  content-visibility: auto;
+  contain-intrinsic-size: 220px 220px;
+}
+.pl-tile:hover {
+  transform: translateY(-2px);
+  border-color: var(--text, #111);
+  box-shadow: 0 8px 20px rgba(0,0,0,.18);
+}
+.pl-tile.is-active {
+  border-color: var(--accent, #5b8def);
+  box-shadow: 0 0 0 2px var(--accent, #5b8def);
+}
+.pl-tile-cover {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: var(--surface-3, rgba(0,0,0,.08));
+}
+.pl-tile-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  /* Don't promote each img to its own GPU layer — there can be dozens of
+     tiles and a layer per tile adds up. The hover lift sits on .pl-tile
+     instead. */
+}
+.pl-tile-cover-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+  color: var(--muted, #888);
+}
+.pl-tile-meta { padding: 0 2px; }
+.pl-tile-name {
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.pl-tile-count {
+  font-size: 11px;
+  color: var(--muted, #888);
+  margin-top: 3px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.pl-empty {
+  grid-column: 1 / -1;
+  text-align: center;
+  color: var(--muted, #888);
+  font-size: 14px;
+  padding: 40px 20px;
+}
+.pl-empty code {
+  background: var(--surface-2, rgba(0,0,0,.05));
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+/* ===== Upload music sub-modal =====
+   Sits over the picker. Same visual chrome as the picker so it feels
+   like part of the same flow. PC-only — the player FAB is hidden on
+   phone via the shell's @media rule, so this modal can never open there. */
+.pl-up-modal { z-index: 9600; }   /* over the picker */
+.pl-up-body {
+  padding: 18px 20px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.pl-up-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 12px;
+  color: var(--muted, #888);
+  font-weight: 700;
+}
+.pl-up-field > span:first-child {
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  font-size: 11px;
+}
+.pl-up-field input[type="file"],
+.pl-up-field input[type="text"],
+.pl-up-field select {
+  background: var(--surface-2, rgba(0,0,0,.04));
+  border: 1px solid var(--border, rgba(0,0,0,.12));
+  color: var(--text, #111);
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: inherit;
+  width: 100%;
+}
+.pl-up-field input[type="file"] { padding: 6px 8px; }
+.pl-up-hint {
+  font-size: 11px;
+  color: var(--muted, #888);
+  font-weight: 500;
+  margin-top: 2px;
+}
+.pl-up-error {
+  color: #ef5350;
+  font-size: 12.5px;
+  min-height: 16px;
+  font-weight: 600;
+}
+.pl-up-progress {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.pl-up-bar {
+  flex: 1;
+  height: 8px;
+  background: var(--surface-2, rgba(0,0,0,.08));
+  border-radius: 999px;
+  overflow: hidden;
+}
+.pl-up-bar > div {
+  height: 100%;
+  width: 0;
+  background: var(--accent, #5b8def);
+  border-radius: 999px;
+  transition: width .2s ease;
+}
+.pl-up-pct {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted, #888);
+  min-width: 44px;
+  text-align: right;
+}
+.pl-up-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.pl-up-cancel, .pl-up-save {
+  padding: 9px 16px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  border: 1px solid var(--border, rgba(0,0,0,.12));
+}
+.pl-up-cancel { background: var(--surface-2, rgba(0,0,0,.04)); color: var(--text, #111); }
+.pl-up-save   { background: var(--accent, #5b8def); color: var(--accent-text, #fff); border-color: var(--accent, #5b8def); }
+.pl-up-save:hover:not(:disabled) { filter: brightness(1.08); }
+.pl-up-save:disabled { opacity: .55; cursor: progress; }
+
+.pl-upload {
+  background: var(--accent, #5b8def);
+  color: var(--accent-text, #fff);
+  border: 1px solid var(--accent, #5b8def);
+  border-radius: 999px;
+  padding: 7px 13px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: filter .15s;
+}
+.pl-upload:hover { filter: brightness(1.08); }

@@ -1,0 +1,2718 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Library — MECEE-BL</title>
+
+<!-- Favicon (avoids /favicon.ico 404 on every load) -->
+<link rel="icon" type="image/x-icon" href="Assets/Favicon/favicon.ico" />
+<link rel="icon" type="image/png" sizes="32x32" href="Assets/Favicon/favicon-32x32.png" />
+<link rel="icon" type="image/png" sizes="16x16" href="Assets/Favicon/favicon-16x16.png" />
+<link rel="apple-touch-icon" sizes="180x180" href="Assets/Favicon/apple-touch-icon.png" />
+<link rel="manifest" href="Assets/Favicon/site.webmanifest" />
+
+<link rel="stylesheet" href="theme.css" />
+<link rel="stylesheet" href="player.css" />
+<link rel="stylesheet" href="cursor.css" />
+<link rel="stylesheet" href="contextmenu.css" />
+<script src="mecee_keys.js"></script>
+<script>
+  /* Apply the saved theme synchronously, BEFORE any styles paint. Other
+     pages do this in their own bottom-of-page <script>, but library was
+     missing it — meaning every fresh load defaulted to data-theme="dark"
+     (hardcoded in <html>) regardless of the user's choice. The storage
+     event in mecee_keys.js keeps theme in sync across iframes after that,
+     but the initial load needs this. */
+  (function () {
+    try {
+      var t = localStorage.getItem(window.MeceeKeys.THEME);
+      if (t) document.documentElement.setAttribute('data-theme', t);
+    } catch (_) { /* localStorage unavailable — ignore */ }
+  })();
+</script>
+<script defer src="cursor.js"></script>
+<script defer src="contextmenu.js"></script>
+<script defer src="sync.js"></script>
+<style>
+  :root {
+    --bg: #ffffff;
+    --surface: #f6f6f6;
+    --surface-2: #ececec;
+    --text: #111111;
+    --muted: #6b6b6b;
+    --border: #dcdcdc;
+    --accent: #111111;
+    --accent-text: #ffffff;
+  }
+  [data-theme="dark"] {
+    --bg: #0e0e0e;
+    --surface: #1a1a1a;
+    --surface-2: #232323;
+    --text: #f5f5f5;
+    --muted: #999;
+    --border: #2a2a2a;
+    --accent: #f5f5f5;
+    --accent-text: #0e0e0e;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; min-height: 100%; background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+  .container { max-width: 1200px; margin: 0 auto; padding: 24px; }
+
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding-bottom: 18px;
+    margin-bottom: 24px;
+    border-bottom: 1px solid var(--border);
+  }
+  .topbar h1 { margin: 0; font-size: 26px; letter-spacing: -0.5px; }
+  .topbar .nav { display: flex; gap: 8px; flex-wrap: wrap; }
+  .nav-btn {
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--border);
+    padding: 8px 14px;
+    border-radius: 999px;
+    font-size: 13px;
+    cursor: pointer;
+    text-decoration: none;
+  }
+  .nav-btn:hover { background: var(--surface-2); }
+
+  /* CABINET HOME — picker tiles */
+  .cabinet-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 22px;
+    padding: 12px 0 60px;
+  }
+  /* `display: grid` above beats the [hidden] attribute on specificity ties,
+     so the picker stayed visible after entering a cabinet. Force-hide. */
+  .cabinet-grid[hidden] { display: none; }
+  .cabinet-tile {
+    appearance: none;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px 22px 22px;
+    background: var(--surface);
+    color: var(--text);
+    cursor: pointer;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-height: 180px;
+    font-family: inherit;
+    position: relative;
+    overflow: hidden;
+    transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+  }
+  .cabinet-tile:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 30px rgba(0,0,0,.30);
+    border-color: var(--accent);
+  }
+  .cabinet-tile::before {
+    /* Subtle subject-tinted glow in the corner. */
+    content: "";
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 160px; height: 160px;
+    border-radius: 50%;
+    background: var(--cab-tint, transparent);
+    opacity: 0.18;
+    filter: blur(4px);
+    pointer-events: none;
+  }
+  .cab-tile-emoji { font-size: 44px; line-height: 1; margin-bottom: 8px; }
+  .cab-tile-name  { font-size: 20px; font-weight: 700; letter-spacing: -0.3px; }
+  .cab-tile-count { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 1.5px; margin-top: 6px; }
+
+  /* CABINET VIEW — toolbar above the bookshelf */
+  .cabinet-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 8px 0 18px;
+    flex-wrap: wrap;
+  }
+  .cab-back, .cab-add {
+    appearance: none;
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--border);
+    padding: 8px 14px;
+    border-radius: 999px;
+    font-size: 13px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .cab-back:hover, .cab-add:hover { background: var(--surface-2); }
+  .cab-add { background: var(--accent); color: var(--accent-text); border-color: var(--accent); font-weight: 600; }
+  .cab-add:hover { filter: brightness(1.1); }
+  .cab-name { margin: 0; font-size: 20px; flex: 1; letter-spacing: -0.3px; }
+
+  /* Books / Notes tabs — sit above the bookshelf, switch the filter. */
+  .lib-tabs {
+    display: flex;
+    gap: 6px;
+    margin: 0 0 14px;
+    padding: 4px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    width: max-content;
+  }
+  .lib-tab {
+    appearance: none;
+    background: transparent;
+    color: var(--muted);
+    border: none;
+    padding: 8px 18px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: background .15s, color .15s;
+  }
+  .lib-tab .count {
+    background: var(--surface-2);
+    color: var(--muted);
+    font-size: 11px;
+    padding: 1px 7px;
+    border-radius: 999px;
+    font-weight: 700;
+  }
+  .lib-tab:hover { color: var(--text); }
+  .lib-tab.is-active {
+    background: var(--accent);
+    color: var(--accent-text);
+  }
+  .lib-tab.is-active .count {
+    background: rgba(0, 0, 0, 0.2);
+    color: var(--accent-text);
+  }
+  [data-theme="dark"] .lib-tab.is-active .count {
+    background: rgba(255, 255, 255, 0.18);
+  }
+
+  /* BOOKSHELF */
+  .bookshelf {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 28px;
+    padding: 8px 0 60px;
+  }
+  .shelf-empty {
+    grid-column: 1 / -1;
+    text-align: center;
+    color: var(--muted);
+    font-size: 14px;
+    padding: 60px 20px;
+    border: 1px dashed var(--border);
+    border-radius: 12px;
+  }
+  .book-card {
+    cursor: pointer;
+    transition: transform .2s ease;
+  }
+  .book-card:hover { transform: translateY(-4px); }
+  .book-cover {
+    aspect-ratio: 3 / 4;
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 22px 18px;
+    text-align: center;
+    color: #fff;
+    box-shadow:
+      -2px 0 0 rgba(0,0,0,.18),
+      -4px 0 0 rgba(0,0,0,.10),
+      0 16px 32px rgba(0,0,0,.35);
+  }
+  .book-cover::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; bottom: 0;
+    width: 10px;
+    background: linear-gradient(90deg, rgba(0,0,0,.45), transparent);
+    pointer-events: none;
+  }
+  .book-cover::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      repeating-linear-gradient(135deg, rgba(255,255,255,.04) 0 2px, transparent 2px 6px),
+      radial-gradient(ellipse at 30% 20%, rgba(255,255,255,.18), transparent 60%);
+    pointer-events: none;
+  }
+  .bc-band {
+    position: absolute;
+    top: 0; left: 18px; right: 18px;
+    height: 4px;
+    background: rgba(255,255,255,.45);
+    border-radius: 0 0 4px 4px;
+  }
+  .bc-badge {
+    position: absolute;
+    top: 12px; right: 12px;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    background: rgba(0,0,0,.45);
+    border: 1px solid rgba(255,255,255,.25);
+    color: #fff;
+    padding: 3px 8px;
+    border-radius: 999px;
+    z-index: 2;
+  }
+
+  /* Image / gallery note cover — preview the actual image instead of the
+     generated book-spine look. Same dimensions as .book-cover so the shelf
+     grid stays uniform. */
+  .book-cover.book-cover-image {
+    padding: 0;
+    background: #1a1a1a;
+  }
+  .book-cover.book-cover-image::before,
+  .book-cover.book-cover-image::after { content: none; }
+  .book-cover-image .bc-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .bc-badge.bc-badge-overlay {
+    background: rgba(0,0,0,.65);
+  }
+  /* Position the card-level delete button at the top-right of the card */
+  .book-card { position: relative; }
+  .book-del {
+    position: absolute;
+    top: 6px; right: 6px;
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: rgba(20,20,20,.7);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,.25);
+    font-size: 14px;
+    line-height: 1;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity .15s ease, background .15s ease;
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .book-card:hover .book-del { opacity: 1; }
+  .book-del:hover { background: rgba(244,67,54,.85); }
+  .bm-field.bm-row { display: flex; gap: 10px; }
+  .bm-field select {
+    width: 100%;
+    background: #0e0e0e;
+    border: 1px solid #2c2c2c;
+    color: #f5f5f5;
+    padding: 9px 12px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-family: inherit;
+    box-sizing: border-box;
+  }
+  .bm-field input[type="file"] {
+    width: 100%;
+    background: #0e0e0e;
+    border: 1px solid #2c2c2c;
+    color: #f5f5f5;
+    padding: 9px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-family: inherit;
+    box-sizing: border-box;
+  }
+  .bc-title {
+    font-size: 18px;
+    font-weight: 800;
+    line-height: 1.2;
+    letter-spacing: -.3px;
+    text-shadow: 0 1px 6px rgba(0,0,0,.45);
+    position: relative;
+    z-index: 1;
+  }
+  .bc-class {
+    position: absolute;
+    bottom: 56px;
+    left: 18px; right: 18px;
+    font-size: 28px;
+    font-weight: 900;
+    letter-spacing: -.5px;
+    opacity: .9;
+    text-shadow: 0 1px 6px rgba(0,0,0,.45);
+  }
+  .bc-sub {
+    position: absolute;
+    bottom: 16px;
+    left: 18px; right: 18px;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    opacity: .75;
+  }
+  .book-title {
+    font-size: 14px;
+    font-weight: 600;
+    margin-top: 12px;
+    line-height: 1.3;
+  }
+  .book-meta {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 2px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  /* READER */
+  .reader {
+    position: fixed;
+    inset: 0;
+    background: #0a0a0a;
+    z-index: 100;
+    display: none;
+    flex-direction: column;
+  }
+  .reader.open { display: flex; }
+  /* While the reader is open, hide the underlying page scrollbar — otherwise
+     you see two scrollbars at the same time (the body's, and .pdf-viewport's). */
+  body.reader-open { overflow: hidden; }
+
+  .reader-header {
+    padding: 12px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #111;
+    border-bottom: 1px solid #222;
+    color: #fff;
+    flex-shrink: 0;
+  }
+  .reader-title { font-size: 15px; font-weight: 600; }
+  .close-btn {
+    background: rgba(255,255,255,.08);
+    border: 1px solid rgba(255,255,255,.15);
+    color: #fff;
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .close-btn:hover { background: rgba(255,255,255,.18); }
+
+  .reader-body {
+    flex: 1;
+    background: #1f1f1f;
+    min-height: 0;
+    position: relative;
+    overflow: hidden;
+  }
+  /* PDF.js viewport — scrollable container that holds the rendered page. */
+  .pdf-viewport {
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 24px 24px 80px;
+    box-sizing: border-box;
+    position: relative;
+  }
+  .pdf-loading {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    z-index: 4;
+  }
+  .pdf-loading[hidden] { display: none; }
+  .pdf-loading-spinner {
+    width: 40px; height: 40px;
+    border: 3px solid rgba(255,255,255,.15);
+    border-top-color: rgba(255,255,255,.75);
+    border-radius: 50%;
+    animation: pdfSpin .8s linear infinite;
+  }
+  @keyframes pdfSpin { to { transform: rotate(360deg); } }
+  .pdf-loading-text { color: rgba(255,255,255,.55); font-size: 13px; }
+  .pdf-error {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, .55);
+    backdrop-filter: blur(4px);
+    z-index: 5;
+  }
+  .pdf-error[hidden] { display: none; }
+  .pdf-error-card {
+    max-width: 460px;
+    background: var(--surface, #1a1a1a);
+    color: var(--text, #f5f5f5);
+    border: 1px solid var(--border, #2a2a2a);
+    border-radius: 14px;
+    padding: 24px 26px 20px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, .55);
+    font-family: 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif;
+  }
+  .pdf-error-card h3 { margin: 0 0 10px; font-size: 18px; letter-spacing: -.2px; }
+  .pdf-error-card p  { margin: 8px 0; line-height: 1.5; font-size: 14px; color: var(--muted, #aaa); }
+  .pdf-error-hint code {
+    background: var(--surface-2, #232323);
+    border: 1px solid var(--border, #2a2a2a);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 12px;
+    color: var(--text, #f5f5f5);
+  }
+  .pdf-error-card button {
+    margin-top: 12px;
+    background: var(--accent, #f5f5f5);
+    color: var(--accent-text, #111);
+    border: 0;
+    padding: 9px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .pdf-page {
+    position: relative;
+    background: #fff;
+    box-shadow: 0 6px 28px rgba(0,0,0,.55);
+    flex-shrink: 0;
+  }
+  .pdf-page canvas { display: block; }
+
+  /* Image / gallery note viewer — sits where .pdf-page would, swap with hidden. */
+  .img-page {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+  }
+  .img-page img {
+    display: block;
+    max-width: 100%;
+    max-height: calc(100vh - 120px);
+    object-fit: contain;
+    background: #fff;
+    box-shadow: 0 6px 28px rgba(0,0,0,.55);
+    user-select: none;
+    -webkit-user-drag: none;
+  }
+  /* PDF.js text layer — invisible but selectable text overlay sitting on the canvas. */
+  .pdf-text-layer {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    opacity: 0.999;          /* keep at 1 so selection rectangles compute correctly */
+    line-height: 1.0;
+    pointer-events: auto;
+  }
+  .pdf-text-layer > span,
+  .pdf-text-layer > br {
+    color: transparent;
+    position: absolute;
+    white-space: pre;
+    cursor: text;
+    transform-origin: 0% 0%;
+  }
+  .pdf-text-layer ::selection { background: rgba(255,213,79,.4); }
+  /* PDF.js appends an .endOfContent div used to extend selections past the
+     visible text on mousedrag. It MUST be positioned absolutely or it covers
+     the whole text layer and steals every click (which causes the
+     "selects everything from top" bug). */
+  .pdf-text-layer .endOfContent {
+    display: block;
+    position: absolute;
+    left: 0;
+    top: 100%;
+    right: 0;
+    bottom: 0;
+    z-index: -1;
+    cursor: default;
+    user-select: none;
+  }
+  .pdf-text-layer .endOfContent.active { top: 0; }
+  /* Highlight overlay — rectangles for saved highlights, sitting between canvas and text layer. */
+  .pdf-hl-layer {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+  .pdf-hl-layer .hl {
+    position: absolute;
+    background: rgba(255,235,59,.42);
+    border-radius: 2px;
+    pointer-events: auto;
+    cursor: pointer;
+  }
+  .pdf-hl-layer .hl:hover { filter: brightness(1.2); outline: 1px solid rgba(255,255,255,.7); }
+
+  /* Bottom control bar — fixed at the bottom of the reader. */
+  .pdf-bar {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    background: rgba(20,20,20,.85);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-top: 1px solid rgba(255,255,255,.08);
+    padding: 8px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    color: #f5f5f5;
+    font-size: 13px;
+    z-index: 5;
+  }
+  .pdf-bar button {
+    background: rgba(255,255,255,.08);
+    border: 1px solid rgba(255,255,255,.15);
+    color: #fff;
+    height: 32px;
+    min-width: 32px;
+    padding: 0 10px;
+    border-radius: 16px;
+    cursor: pointer;
+    font-size: 13px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+  }
+  .pdf-bar button:hover:not(:disabled) { background: rgba(255,255,255,.18); }
+  .pdf-bar button:disabled { opacity: .35; cursor: not-allowed; }
+  .pdf-bar input[type=number] {
+    width: 56px;
+    background: rgba(255,255,255,.08);
+    border: 1px solid rgba(255,255,255,.18);
+    color: #fff;
+    border-radius: 6px;
+    padding: 4px 6px;
+    font-size: 13px;
+    text-align: center;
+    -moz-appearance: textfield;
+  }
+  .pdf-bar input::-webkit-outer-spin-button,
+  .pdf-bar input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  .pdf-bar .sep { width: 1px; height: 18px; background: rgba(255,255,255,.15); margin: 0 4px; }
+  .pdf-bar .page-info { min-width: 110px; text-align: center; }
+
+  /* Floating highlight palette — appears next to a text selection. */
+  .hl-btn {
+    position: fixed;
+    z-index: 250;
+    background: #2a2a2a;
+    border: 1px solid rgba(255,255,255,.18);
+    padding: 6px 8px;
+    border-radius: 20px;
+    cursor: default;
+    box-shadow: 0 6px 16px rgba(0,0,0,.5);
+    display: none;
+  }
+  .hl-btn.open { display: inline-flex; align-items: center; gap: 6px; }
+  .hl-color {
+    display: inline-block;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid rgba(255,255,255,.25);
+    transition: transform .1s ease;
+  }
+  .hl-color:hover {
+    transform: scale(1.18);
+    border-color: #fff;
+  }
+  .hl-color.eraser {
+    background: transparent;
+    color: #fff;
+    font-size: 11px;
+    line-height: 18px;
+    text-align: center;
+    border-color: rgba(255,255,255,.45);
+    font-weight: 700;
+  }
+
+  /* Keep the music player visible on top of the reader (and inside fullscreen). */
+  .player-widget { z-index: 200 !important; }
+
+  /* In fullscreen, hide the reader header so the iframe fills the whole screen
+     — visually identical to Heyzine's own fullscreen mode, but our music player
+     widget stays visible (because the shell fullscreens its <html>, not us).
+     `.is-fullscreen` is toggled by JS based on either our own fullscreenchange
+     (standalone) or a postMessage from the shell. */
+  .is-fullscreen .reader-header { display: none; }
+
+  /* Syllabus side panel — shown when a book is open. */
+  .syl-toggle {
+    position: fixed;
+    top: 14px; left: 14px;
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    background: rgba(0,0,0,.55);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,.25);
+    font-size: 18px;
+    cursor: pointer;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 202;
+  }
+  .reader.open ~ .syl-toggle,
+  .reader.open .syl-toggle { display: flex; }
+  .syl-toggle:hover { background: rgba(0,0,0,.75); }
+
+  .syl-panel {
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    width: 340px;
+    max-width: 86vw;
+    background: #141414;
+    color: #f0f0f0;
+    border-right: 1px solid #2a2a2a;
+    transform: translateX(-100%);
+    transition: transform .25s ease;
+    z-index: 201;
+    overflow-y: auto;
+    padding: 64px 14px 24px;
+    font-size: 13px;
+  }
+  .syl-panel.open { transform: translateX(0); box-shadow: 8px 0 24px rgba(0,0,0,.5); }
+  .syl-panel h4 {
+    margin: 14px 0 6px;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: #bbb;
+  }
+  .syl-subj {
+    margin-bottom: 8px;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #1d1d1d;
+  }
+  .syl-subj-head {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 12px;
+    cursor: pointer;
+    font-weight: 700;
+    background: #222;
+  }
+  .syl-subj-head:hover { background: #2a2a2a; }
+  .syl-subj-head .emoji { font-size: 18px; }
+  .syl-subj-head .arrow { margin-left: auto; transition: transform .2s ease; font-size: 11px; opacity: .7; }
+  .syl-subj.open .syl-subj-head .arrow { transform: rotate(180deg); }
+  .syl-subj-body { display: none; padding: 6px 8px 10px; }
+  .syl-subj.open .syl-subj-body { display: block; }
+
+  .syl-unit { margin-top: 6px; }
+  .syl-unit-name {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: #888;
+    padding: 6px 4px 2px;
+  }
+  .syl-ch {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 4px 6px;
+    border-radius: 5px;
+    line-height: 1.35;
+  }
+  .syl-ch:hover { background: rgba(255,255,255,.05); }
+  .syl-ch .dot {
+    flex-shrink: 0;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    border: 1.5px solid #555;
+    margin-top: 2px;
+    position: relative;
+  }
+  .syl-ch.done .dot { background: #4caf50; border-color: #4caf50; }
+  .syl-ch.done .dot::after {
+    content: "✓"; position: absolute;
+    top: -2px; left: 2px;
+    font-size: 10px; font-weight: 800; color: #000;
+  }
+  .syl-ch.done .name { text-decoration: line-through; color: #888; }
+  .syl-ch .name { flex: 1; cursor: pointer; }
+  .syl-ch .name:hover { color: #fff; }
+  .syl-ch.has-bm .name { color: #ffd54f; }
+  .syl-ch-add {
+    flex-shrink: 0;
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: rgba(255,255,255,.05);
+    border: 1px dashed rgba(255,255,255,.2);
+    color: #aaa;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .syl-ch-add:hover { background: rgba(255,255,255,.12); color: #fff; border-style: solid; }
+
+  .syl-bms {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin: 4px 0 6px 24px;
+  }
+  .syl-bm {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(255,213,79,.13);
+    border: 1px solid rgba(255,213,79,.35);
+    color: #ffd54f;
+    padding: 2px 4px 2px 7px;
+    border-radius: 12px;
+    font-size: 11px;
+    cursor: pointer;
+    max-width: 100%;
+  }
+  .syl-bm:hover { background: rgba(255,213,79,.25); }
+  .syl-bm .bm-note {
+    color: #d6c89a;
+    font-style: italic;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 140px;
+  }
+  .syl-bm .bm-ts {
+    color: #aaa;
+    font-size: 9px;
+    opacity: .7;
+  }
+  .syl-bm-del {
+    margin-left: 2px;
+    padding: 0 4px;
+    border-radius: 50%;
+    opacity: .55;
+    cursor: pointer;
+    color: #fff;
+  }
+  .syl-bm-del:hover { opacity: 1; background: rgba(255,82,82,.3); color: #ff5252; }
+
+  /* Bookmark create/edit modal */
+  .bm-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.62);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 300;
+    animation: bmFade .12s ease-out;
+  }
+  .bm-backdrop.open { display: flex; }
+  @keyframes bmFade { from { opacity: 0; } to { opacity: 1; } }
+
+  .bm-modal {
+    background: #1a1a1a;
+    color: #f5f5f5;
+    border: 1px solid #333;
+    border-radius: 12px;
+    width: 380px;
+    max-width: calc(100vw - 32px);
+    box-shadow: 0 20px 60px rgba(0,0,0,.6);
+    padding: 22px;
+    animation: bmSlide .15s ease-out;
+  }
+  @keyframes bmSlide { from { transform: translateY(8px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  .bm-title {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .bm-subtitle {
+    font-size: 12px;
+    color: #999;
+    margin-bottom: 18px;
+    line-height: 1.4;
+  }
+  .bm-field { margin-bottom: 14px; }
+  .bm-hint {
+    margin-top: 6px;
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.4;
+  }
+  .bm-field label {
+    display: block;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: #aaa;
+    margin-bottom: 5px;
+  }
+  .bm-field input {
+    width: 100%;
+    background: #0e0e0e;
+    border: 1px solid #2c2c2c;
+    color: #f5f5f5;
+    padding: 9px 12px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-family: inherit;
+    box-sizing: border-box;
+  }
+  .bm-field input:focus {
+    outline: none;
+    border-color: #ffd54f;
+    box-shadow: 0 0 0 3px rgba(255,213,79,.18);
+  }
+  .bm-field input::-webkit-outer-spin-button,
+  .bm-field input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  .bm-error {
+    color: #ff6b6b;
+    font-size: 12px;
+    margin: -8px 0 12px;
+    min-height: 16px;
+  }
+  .upload-progress {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 12px;
+  }
+  .upload-progress[hidden] { display: none; }
+  .upload-bar-track {
+    flex: 1;
+    height: 6px;
+    background: #2a2a2a;
+    border-radius: 99px;
+    overflow: hidden;
+  }
+  .upload-bar-fill {
+    height: 100%;
+    width: 0%;
+    background: #ffd54f;
+    border-radius: 99px;
+    transition: width .12s ease;
+  }
+  .upload-pct {
+    font-size: 12px;
+    color: #888;
+    min-width: 34px;
+    text-align: right;
+  }
+  .bm-btns {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    margin-top: 4px;
+  }
+  .bm-btn {
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid transparent;
+    font-family: inherit;
+  }
+  .bm-btn.cancel {
+    background: transparent;
+    color: #ccc;
+    border-color: #333;
+  }
+  .bm-btn.cancel:hover { background: #222; color: #fff; }
+  .bm-btn.save {
+    background: #ffd54f;
+    color: #000;
+  }
+  .bm-btn.save:hover { background: #ffeb3b; }
+  .bm-btn.save:disabled { opacity: .4; cursor: not-allowed; background: #ffd54f; }
+
+  /* Floating exit button (only shown in fullscreen). */
+  .fs-exit {
+    position: fixed;
+    top: 14px; right: 14px;
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: rgba(0,0,0,.55);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,.25);
+    font-size: 16px;
+    cursor: pointer;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 201;
+  }
+  .is-fullscreen .fs-exit { display: flex; }
+  .fs-exit:hover { background: rgba(0,0,0,.75); }
+
+  @media (max-width: 720px) {
+    .container { padding: 16px; }
+    .bookshelf { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 18px; }
+    .topbar h1 { font-size: 22px; }
+  }
+
+  /* ===== Phone library UI (≤820px) =====
+     Goal: stacked topbar, tighter cabinet/bookshelf grid, larger tap
+     targets. The PDF reader itself is intentionally left dark-themed
+     since reading PDFs against a dark background is easier on the eyes
+     — only the cabinet/bookshelf chrome adapts to phone size. */
+  @media (max-width: 820px) {
+    .container { padding: 14px; }
+
+    /* Topbar: stack heading on its own row, nav pills wrap below. */
+    .topbar {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 10px;
+      padding-bottom: 14px;
+      margin-bottom: 18px;
+    }
+    .topbar h1 { font-size: 22px; }
+    .topbar .nav {
+      width: 100%;
+      flex-wrap: wrap;
+      row-gap: 8px;
+    }
+    .nav-btn {
+      padding: 9px 13px;
+      font-size: 13px;
+      white-space: nowrap;
+      line-height: 1;
+      min-height: 38px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* Cabinet tiles: 2 columns on phone, more compact. The desktop tile
+       is 180px tall with big emoji — on phone we shrink to fit two
+       per row without dwarfing the screen. */
+    .cabinet-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      padding: 6px 0 40px;
+    }
+    .cabinet-tile {
+      padding: 18px 14px 14px;
+      min-height: 130px;
+      border-radius: 14px;
+    }
+    .cabinet-tile:hover { transform: none; }   /* hover-lift sticks on tap */
+    .cab-tile-emoji { font-size: 32px; margin-bottom: 4px; }
+    .cab-tile-name  { font-size: 16px; }
+    .cab-tile-count { font-size: 10.5px; letter-spacing: 1px; }
+    .cabinet-tile::before {
+      width: 100px; height: 100px;
+      top: -28px; right: -28px;
+    }
+
+    /* Cabinet toolbar (back / add buttons + name when viewing a subject). */
+    .cabinet-toolbar { gap: 8px; margin: 4px 0 14px; }
+    .cab-back, .cab-add { padding: 8px 12px; font-size: 13px; min-height: 38px; }
+    .cab-name { font-size: 17px; flex-basis: 100%; order: -1; }
+
+    /* Bookshelf: 2 columns on phone — gives each book card enough width
+       so the title doesn't wrap into 3+ lines and get clipped by the
+       bottom of the viewport. 3 cols squeezes titles like "Biology —
+       Class 11" into "Biology —" + "Cl..." (cut). */
+    .bookshelf {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 18px;
+      padding: 4px 0 40px;
+    }
+    .book-card:hover { transform: none; }
+    .book-title {
+      font-size: 13.5px;
+      margin-top: 10px;
+      line-height: 1.35;
+      /* Allow up to 3 lines with ellipsis instead of arbitrary clipping. */
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      word-break: break-word;
+    }
+    .book-meta { font-size: 10px; letter-spacing: 0.8px; }
+
+    /* ===== PDF reader on phone =====
+       - Header: shrink padding, make title truncate cleanly so the close
+         button doesn't overlap the text.
+       - Bottom toolbar: bigger buttons (≥40px tap target), drop the
+         expensive backdrop-filter blur, push above iOS home indicator. */
+    .reader-header {
+      padding: 8px 12px;
+      gap: 8px;
+    }
+    .reader-title {
+      font-size: 14px;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      flex: 1;
+    }
+    .close-btn {
+      flex-shrink: 0;
+      width: 34px;
+      height: 34px;
+    }
+
+    .pdf-viewport {
+      padding: 12px 8px 88px;        /* clear room for the bigger bottom bar */
+      /* Enable native pinch-zoom on the PDF page itself. The user can
+         pinch to zoom in for closer reading; we still re-render at higher
+         resolution via setZoomMultiplier on pinch-end. */
+      touch-action: pinch-zoom pan-x pan-y;
+    }
+    .pdf-bar {
+      backdrop-filter: none;          /* blur is too costly on phone */
+      -webkit-backdrop-filter: none;
+      background: rgba(15,15,15,.96);
+      padding: 8px 8px calc(8px + env(safe-area-inset-bottom, 0px));
+      gap: 4px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .pdf-bar button {
+      height: 40px;
+      min-width: 40px;
+      padding: 0 12px;
+      font-size: 16px;
+      border-radius: 20px;
+    }
+    .pdf-bar input[type=number] { width: 48px; height: 32px; font-size: 14px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="topbar">
+    <h1 id="libHeader">📚 Library</h1>
+    <div class="nav">
+      <a href="tracker.html" class="nav-btn">← Tracker</a>
+      <a href="routine.html" class="nav-btn">📅 Routine</a>
+      <a href="flashcards.html" class="nav-btn">🧠 Flashcards</a>
+      <a href="chat.html" class="nav-btn">🤖 AI Tutor</a>
+    </div>
+  </div>
+
+  <!-- HOME VIEW: pick a cabinet -->
+  <div class="cabinet-grid" id="cabinetGrid"></div>
+
+  <!-- CABINET VIEW: shown after selecting a subject -->
+  <div class="cabinet-view" id="cabinetView" hidden>
+    <div class="cabinet-toolbar">
+      <button class="cab-back" id="cabBack" type="button">← All cabinets</button>
+      <h2 class="cab-name" id="cabName"></h2>
+      <button class="cab-add" id="cabAdd" type="button">+ Add Book</button>
+    </div>
+    <!-- Books / Notes filter. JS toggles .is-active and updates counts. -->
+    <div class="lib-tabs" id="libTabs" role="tablist">
+      <button class="lib-tab is-active" data-tab="book" type="button" role="tab" aria-selected="true">
+        📖 Books <span class="count" id="bookCount">0</span>
+      </button>
+      <button class="lib-tab" data-tab="note" type="button" role="tab" aria-selected="false">
+        📝 Notes <span class="count" id="noteCount">0</span>
+      </button>
+    </div>
+    <div class="bookshelf" id="bookshelf"></div>
+  </div>
+</div>
+
+<!-- ADD modal — used for both books and notes. Which one is being added is
+     driven by the active tab, not a dropdown. Books = single PDF. Notes =
+     single PDF *or* multiple images (which become one gallery note). -->
+<div class="bm-backdrop" id="addBackdrop">
+  <div class="bm-modal" role="dialog" aria-modal="true" aria-labelledby="addTitleEl">
+    <div class="bm-title" id="addTitleEl">📥 Add a Book</div>
+    <div class="bm-subtitle" id="addSubtitleEl">Saving into books/&lt;subject&gt;/</div>
+    <div class="bm-field">
+      <label for="addFile" id="addFileLabel">PDF file</label>
+      <input id="addFile" type="file" accept="application/pdf,.pdf" />
+      <div class="bm-hint" id="addFileHint" hidden>Pick a PDF, or hold ⌘/Ctrl to pick multiple images for a gallery note.</div>
+    </div>
+    <div class="bm-field">
+      <label for="addTitleInput">Title</label>
+      <input id="addTitleInput" type="text" maxlength="80" placeholder="e.g. Krebs Cycle Notes" autocomplete="off" />
+    </div>
+    <div class="bm-field">
+      <label for="addLabelInput">Subtitle (optional)</label>
+      <input id="addLabelInput" type="text" maxlength="60" placeholder="e.g. Class 12, Chapter 4" autocomplete="off" />
+    </div>
+    <div class="bm-error" id="addError"></div>
+    <div class="upload-progress" id="uploadProgress" hidden>
+      <div class="upload-bar-track">
+        <div class="upload-bar-fill" id="uploadBarFill"></div>
+      </div>
+      <span class="upload-pct" id="uploadPct">0%</span>
+    </div>
+    <div class="bm-btns">
+      <button class="bm-btn cancel" id="addCancelBtn" type="button">Cancel</button>
+      <button class="bm-btn save"   id="addSaveBtn"   type="button">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- READER -->
+<div class="reader" id="reader">
+  <div class="reader-header">
+    <div class="reader-title" id="readerTitle"></div>
+    <button class="close-btn" id="closeReader" title="Close (Esc)">✕</button>
+  </div>
+
+  <div class="reader-body">
+    <div class="pdf-viewport" id="pdfViewport">
+      <div class="pdf-page" id="pdfPage">
+        <canvas id="pdfCanvas"></canvas>
+        <div class="pdf-hl-layer" id="pdfHlLayer"></div>
+        <div class="pdf-text-layer" id="pdfTextLayer"></div>
+      </div>
+      <!-- Image / gallery note viewer — same viewport, swap with the canvas. -->
+      <div class="img-page" id="imgPage" hidden>
+        <img id="imgViewer" alt="" />
+      </div>
+      <div class="pdf-loading" id="pdfLoading" hidden>
+        <div class="pdf-loading-spinner"></div>
+        <div class="pdf-loading-text">Opening book…</div>
+      </div>
+      <div class="pdf-error" id="pdfError" hidden>
+        <div class="pdf-error-card">
+          <h3 id="pdfErrorTitle">Couldn't load this PDF</h3>
+          <p id="pdfErrorMsg"></p>
+          <p class="pdf-error-hint">If the URL starts with <code>file://</code>, run <code>Start-MECEE.bat</code> so the local server can serve PDFs.</p>
+          <button id="pdfErrorClose" type="button">Close</button>
+        </div>
+      </div>
+    </div>
+    <div class="pdf-bar">
+      <button id="pdfFirst" title="First page (Home)">⏮</button>
+      <button id="pdfPrev"  title="Previous (←)">◀</button>
+      <div class="page-info">
+        <input type="number" id="pdfPageInput" min="1" value="1" />
+        <span id="pdfPageTotal">/ —</span>
+      </div>
+      <button id="pdfNext"  title="Next (→)">▶</button>
+      <button id="pdfLast"  title="Last page (End)">⏭</button>
+      <div class="sep"></div>
+      <button id="pdfZoomOut" title="Zoom out">−</button>
+      <span   id="pdfZoom" style="min-width:42px;text-align:center">100%</span>
+      <button id="pdfZoomIn"  title="Zoom in">+</button>
+      <div class="sep"></div>
+      <button id="pdfFit"     title="Fit to window">⤢</button>
+    </div>
+  </div>
+  <div class="hl-btn" id="hlBtn" role="toolbar" aria-label="Highlight colors">
+    <span class="hl-color" data-color="#ffeb3b" style="background:#ffeb3b" title="Yellow"></span>
+    <span class="hl-color" data-color="#a5d6a7" style="background:#a5d6a7" title="Green"></span>
+    <span class="hl-color" data-color="#90caf9" style="background:#90caf9" title="Blue"></span>
+    <span class="hl-color" data-color="#f48fb1" style="background:#f48fb1" title="Pink"></span>
+    <span class="hl-color" data-color="#ffab91" style="background:#ffab91" title="Orange"></span>
+  </div>
+  <button class="syl-toggle" id="sylToggle" title="Syllabus chapters">📑</button>
+  <aside class="syl-panel" id="sylPanel" aria-label="Syllabus chapters"></aside>
+  <button class="fs-exit" id="fsExit" title="Exit (Esc)">✕</button>
+</div>
+
+<!-- Bookmark create/edit modal -->
+<div class="bm-backdrop" id="bmBackdrop">
+  <div class="bm-modal" role="dialog" aria-modal="true" aria-labelledby="bmTitle">
+    <div class="bm-title" id="bmTitle">🔖 Bookmark this page</div>
+    <div class="bm-subtitle" id="bmSubtitle"></div>
+    <div class="bm-field">
+      <label for="bmPage">Page number</label>
+      <input id="bmPage" type="number" min="1" inputmode="numeric" placeholder="e.g. 89" autocomplete="off" />
+    </div>
+    <div class="bm-field">
+      <label for="bmNote">Note (optional)</label>
+      <input id="bmNote" type="text" maxlength="120" placeholder="e.g. Krebs cycle diagram" autocomplete="off" />
+    </div>
+    <div class="bm-error" id="bmError"></div>
+    <div class="bm-btns">
+      <button class="bm-btn cancel" id="bmCancelBtn" type="button">Cancel</button>
+      <button class="bm-btn save"   id="bmSaveBtn"   type="button">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- SHARED MUSIC PLAYER -->
+<div class="player-widget" id="playerWidget" title="Study music player">
+  <div class="player-thumb" id="playerThumb"></div>
+  <div class="player-body">
+    <div class="player-info">
+      <div class="player-title" id="playerTitle">—</div>
+      <div class="player-sub" id="playerSub">Now playing</div>
+    </div>
+    <div class="player-controls">
+      <button class="player-btn" id="playerPrev" title="Previous">⏮</button>
+      <button class="player-btn play" id="playerPlay" title="Play / Pause">▶</button>
+      <button class="player-btn" id="playerNext" title="Next">⏭</button>
+      <input type="range" class="player-vol" id="playerVol" min="0" max="100" value="60" title="Volume" />
+    </div>
+  </div>
+  <div class="player-progress"><div class="player-progress-bar" id="playerProgress"></div></div>
+  <audio id="playerAudio" preload="none"></audio>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+  if (window.pdfjsLib) {
+    /* Wrap the CDN worker in a same-origin blob so the worker can fetch
+       local PDFs without cross-origin restrictions blocking the request. */
+    try {
+      const blob = new Blob(
+        [`importScripts('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js');`],
+        { type: 'text/javascript' }
+      );
+      pdfjsLib.GlobalWorkerOptions.workerSrc = URL.createObjectURL(blob);
+    } catch (_) {
+      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    }
+  }
+</script>
+<script src="books.js"></script>
+<script>
+/* PDF.js-backed library. BOOKS/LEGACY_FLIP_IDS/bookByFlipId live in books.js
+   so the flashcard generator can share them. */
+
+const bookshelfEl = document.getElementById('bookshelf');
+const cabinetGrid = document.getElementById('cabinetGrid');
+const cabinetView = document.getElementById('cabinetView');
+const cabBackBtn  = document.getElementById('cabBack');
+const cabAddBtn   = document.getElementById('cabAdd');
+const cabNameEl   = document.getElementById('cabName');
+const libHeader   = document.getElementById('libHeader');
+const libTabsEl   = document.getElementById('libTabs');
+const bookCountEl = document.getElementById('bookCount');
+const noteCountEl = document.getElementById('noteCount');
+const addBackdrop = document.getElementById('addBackdrop');
+const addFileIn   = document.getElementById('addFile');
+const addFileLbl  = document.getElementById('addFileLabel');
+const addFileHint = document.getElementById('addFileHint');
+const addTitleEl  = document.getElementById('addTitleEl');
+const addTitleIn  = document.getElementById('addTitleInput');
+const addLabelIn  = document.getElementById('addLabelInput');
+const addErrorEl  = document.getElementById('addError');
+const addSubtitle = document.getElementById('addSubtitleEl');
+const addCancelBt = document.getElementById('addCancelBtn');
+const addSaveBt   = document.getElementById('addSaveBtn');
+const upProgressEl  = document.getElementById('uploadProgress');
+const upBarFillEl   = document.getElementById('uploadBarFill');
+const upPctEl       = document.getElementById('uploadPct');
+const reader      = document.getElementById('reader');
+const readerTitle = document.getElementById('readerTitle');
+const closeBtn    = document.getElementById('closeReader');
+const fsExitBtn   = document.getElementById('fsExit');
+const sylToggle   = document.getElementById('sylToggle');
+const sylPanel    = document.getElementById('sylPanel');
+
+const pdfViewport = document.getElementById('pdfViewport');
+const pdfPageEl   = document.getElementById('pdfPage');
+const pdfCanvas   = document.getElementById('pdfCanvas');
+const imgPageEl   = document.getElementById('imgPage');
+const imgViewer   = document.getElementById('imgViewer');
+const pdfTextLyr  = document.getElementById('pdfTextLayer');
+const pdfHlLyr    = document.getElementById('pdfHlLayer');
+const pdfPageIn   = document.getElementById('pdfPageInput');
+const pdfPageTot  = document.getElementById('pdfPageTotal');
+const pdfPrevBtn  = document.getElementById('pdfPrev');
+const pdfNextBtn  = document.getElementById('pdfNext');
+const pdfFirstBtn = document.getElementById('pdfFirst');
+const pdfLastBtn  = document.getElementById('pdfLast');
+const pdfZoomIn   = document.getElementById('pdfZoomIn');
+const pdfZoomOut  = document.getElementById('pdfZoomOut');
+const pdfFitBtn   = document.getElementById('pdfFit');
+const pdfZoomLbl  = document.getElementById('pdfZoom');
+const hlBtn       = document.getElementById('hlBtn');
+
+/* ===== CABINETS =====
+   The library now has 4 subject "cabinets" (Biology, Physics, Chemistry, Math).
+   The home view shows tiles for each cabinet; clicking one swaps to a view
+   that lists only that subject's books and notes — plus a "+ Add PDF" button
+   that uploads via the launcher's /api/upload-pdf endpoint. */
+
+let currentSubject = null;   // null = home view, otherwise subject key
+let userBooks      = [];     // PDFs / notes added by the user (from /api/library)
+let activeTab      = 'book'; // 'book' (built-in BOOKS + user books) or 'note' (user notes only)
+
+function escapeHtml(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+function subjectInfo(key) {
+  return (typeof SUBJECTS !== 'undefined' && SUBJECTS[key]) || {
+    emoji: '📚', name: key || 'Books',
+    gradient: 'linear-gradient(160deg,#444,#111)'
+  };
+}
+
+function allBooksFor(subject) {
+  const built = BOOKS.filter(b => (b.subject || 'biology') === subject);
+  const user  = userBooks.filter(b => b.subject === subject);
+  return [...built, ...user];
+}
+
+/* Split a subject's items by tab. Books = built-in BOOKS + any user upload
+   without type:'note'. Notes = user uploads tagged type:'note'. */
+function itemsForTab(subject, tab) {
+  const all = allBooksFor(subject);
+  if (tab === 'note') return all.filter(b => b.type === 'note');
+  return all.filter(b => b.type !== 'note');
+}
+
+async function loadUserBooks() {
+  try {
+    const r = await fetch('/api/library', { cache: 'no-store' });
+    if (!r.ok) throw new Error('not ok');
+    const items = await r.json();
+    saveLibraryCache(items);   // keep the offline cache fresh
+    return items;
+  } catch (_) {
+    /* Launcher not running — serve from localStorage cache so user-added
+       books stay visible even without the server. */
+    return loadLibraryCache() || [];
+  }
+}
+
+function showHome() {
+  currentSubject = null;
+  cabinetView.hidden = true;
+  cabinetGrid.hidden = false;
+  cabinetGrid.style.display = '';
+  libHeader.textContent = '📚 Library';
+  renderCabinetGrid();
+}
+
+function showCabinet(subject) {
+  if (!subjectInfo(subject)) return;
+  currentSubject = subject;
+  cabinetGrid.hidden = true;
+  cabinetView.hidden = false;
+  const info = subjectInfo(subject);
+  libHeader.textContent = `📚 Library`;
+  cabNameEl.textContent = `${info.emoji} ${info.name}`;
+  /* Start on Books each time you enter a cabinet — most common case. */
+  activeTab = 'book';
+  syncTabUI();
+  renderShelf();
+}
+
+function setActiveTab(tab) {
+  if (tab !== 'book' && tab !== 'note') return;
+  activeTab = tab;
+  syncTabUI();
+  renderShelf();
+}
+
+function syncTabUI() {
+  /* Toggle pill state, update counts, and re-label the +Add button so it
+     matches whichever tab the user is on. */
+  libTabsEl.querySelectorAll('.lib-tab').forEach(btn => {
+    const on = btn.dataset.tab === activeTab;
+    btn.classList.toggle('is-active', on);
+    btn.setAttribute('aria-selected', on ? 'true' : 'false');
+  });
+  if (currentSubject) {
+    bookCountEl.textContent = itemsForTab(currentSubject, 'book').length;
+    noteCountEl.textContent = itemsForTab(currentSubject, 'note').length;
+  } else {
+    bookCountEl.textContent = '0';
+    noteCountEl.textContent = '0';
+  }
+  cabAddBtn.textContent = activeTab === 'note' ? '+ Add Note' : '+ Add Book';
+}
+
+function renderCabinetGrid() {
+  cabinetGrid.innerHTML = '';
+  Object.keys(SUBJECTS).forEach(key => {
+    const info  = SUBJECTS[key];
+    const count = allBooksFor(key).length;
+    const tile  = document.createElement('button');
+    tile.type = 'button';
+    tile.className = 'cabinet-tile';
+    tile.style.setProperty('--cab-tint', info.gradient);
+    tile.innerHTML = `
+      <div class="cab-tile-emoji">${info.emoji}</div>
+      <div class="cab-tile-name">${escapeHtml(info.name)}</div>
+      <div class="cab-tile-count">${count === 0 ? 'empty' : (count + ' item' + (count === 1 ? '' : 's'))}</div>
+    `;
+    tile.addEventListener('click', () => showCabinet(key));
+    cabinetGrid.appendChild(tile);
+  });
+}
+
+function renderShelf() {
+  /* Keep tab counts honest on every render — fires after upload, delete,
+     and sync. Cheap (just two filters + textContent assigns). */
+  syncTabUI();
+  bookshelfEl.innerHTML = '';
+  const list = itemsForTab(currentSubject, activeTab);
+  if (list.length === 0) {
+    const empty = document.createElement('div');
+    empty.className = 'shelf-empty';
+    empty.textContent = activeTab === 'note'
+      ? 'No notes in this cabinet yet. Click "+ Add Note" to upload a PDF or images.'
+      : 'No books in this cabinet yet. Click "+ Add Book" to upload a PDF.';
+    bookshelfEl.appendChild(empty);
+    return;
+  }
+  list.forEach(book => bookshelfEl.appendChild(makeBookCard(book)));
+}
+
+function makeBookCard(book) {
+  const card = document.createElement('div');
+  card.className = 'book-card';
+
+  const cover = document.createElement('div');
+  cover.className = 'book-cover';
+  const gradient = book.gradient || subjectInfo(book.subject).gradient;
+  const sub      = book.cls || book.subtitle || '';
+  const kind     = book.type === 'note' ? 'NOTE' : 'BOOK';
+
+  /* Image / gallery notes preview their first image as the cover so the
+     shelf doubles as a visual index. PDFs (books + PDF notes) keep the
+     generated gradient card. */
+  if (isImageItem(book)) {
+    const src = (book.files && book.files[0]) || book.file || '';
+    cover.classList.add('book-cover-image');
+    cover.style.background = '#1a1a1a';
+    cover.innerHTML = `
+      ${src ? `<img class="bc-image" src="${escapeHtml(src)}" alt="" loading="lazy" />` : ''}
+      <div class="bc-badge bc-badge-overlay">${kind}</div>
+    `;
+  } else {
+    cover.style.background = gradient;
+    cover.innerHTML = `
+      <div class="bc-band"></div>
+      <div class="bc-badge">${kind}</div>
+      <div class="bc-title">${escapeHtml(book.title)}</div>
+      <div class="bc-class">${escapeHtml(sub)}</div>
+      <div class="bc-sub">MECEE-BL</div>
+    `;
+  }
+
+  const title = document.createElement('div');
+  title.className = 'book-title';
+  title.textContent = sub ? `${book.title} — ${sub}` : book.title;
+
+  const meta = document.createElement('div');
+  meta.className = 'book-meta';
+  const count = (book.files && book.files.length) || book.pages || 0;
+  if (isImageItem(book)) {
+    meta.textContent = count > 1 ? `${count} images` : 'Image';
+  } else {
+    meta.textContent = book.pages ? `${book.pages} pages` : 'PDF';
+  }
+
+  card.append(cover, title, meta);
+  card.addEventListener('click', () => openBook(book));
+
+  /* User-added PDFs (have an addedAt timestamp from the server) get a delete
+     button on hover. Built-in BOOKS entries don't — they're bundled assets. */
+  if (book.addedAt) {
+    const del = document.createElement('button');
+    del.type = 'button';
+    del.className = 'book-del';
+    del.textContent = '×';
+    del.title = 'Remove this PDF';
+    del.addEventListener('click', e => { e.stopPropagation(); deleteUserBook(book); });
+    card.appendChild(del);
+  }
+  return card;
+}
+
+/* ===== Add modal (Book or Note, decided by active tab) ===== */
+function openAddModal() {
+  if (!currentSubject) return;
+  addErrorEl.textContent = '';
+  addFileIn.value = '';
+  addTitleIn.value = '';
+  addLabelIn.value = '';
+  addSaveBt.disabled = false;
+  resetUploadProgress();
+
+  /* Notes accept PDF *or* multiple images (which become one gallery note).
+     Books are PDF-only and single-file. The title/subtitle text and the file
+     input behaviour are reconfigured per tab. */
+  if (activeTab === 'note') {
+    addTitleEl.textContent = '📝 Add a Note';
+    addFileLbl.textContent = 'PDF or images';
+    addFileIn.setAttribute('accept', 'application/pdf,.pdf,image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp');
+    addFileIn.setAttribute('multiple', '');
+    addFileHint.hidden = false;
+  } else {
+    addTitleEl.textContent = '📥 Add a Book';
+    addFileLbl.textContent = 'PDF file';
+    addFileIn.setAttribute('accept', 'application/pdf,.pdf');
+    addFileIn.removeAttribute('multiple');
+    addFileHint.hidden = true;
+  }
+
+  const info = subjectInfo(currentSubject);
+  addSubtitle.textContent = `Saving into books/${currentSubject}/ — ${info.emoji} ${info.name}`;
+  addBackdrop.classList.add('open');
+  setTimeout(() => addFileIn.focus(), 30);
+}
+function closeAddModal() {
+  addBackdrop.classList.remove('open');
+  resetUploadProgress();
+  addErrorEl.textContent = '';
+}
+
+addCancelBt.addEventListener('click', closeAddModal);
+addBackdrop.addEventListener('click', e => { if (e.target === addBackdrop) closeAddModal(); });
+
+addFileIn.addEventListener('change', () => {
+  /* Auto-fill title from the (first) filename when empty. */
+  const f = addFileIn.files && addFileIn.files[0];
+  if (!addTitleIn.value && f) {
+    addTitleIn.value = f.name.replace(/\.(pdf|jpe?g|png|webp)$/i, '');
+  }
+});
+
+addSaveBt.addEventListener('click', () => uploadSelection());
+
+const IMG_RE = /\.(jpe?g|png|webp)$/i;
+const PDF_RE = /\.pdf$/i;
+const MAX_PDF_BYTES   = 250 * 1024 * 1024;   //  250 MB per PDF
+const MAX_IMG_BYTES   =  25 * 1024 * 1024;   //   25 MB per image
+const MAX_GALLERY_LEN =  40;                 // sanity cap so a Finder "Select All" doesn't upload thousands
+
+/* Single entry point — picks the right upload path based on what the user
+   selected and which tab is active. */
+async function uploadSelection() {
+  addErrorEl.textContent = '';
+  const files = Array.from(addFileIn.files || []);
+  const title = addTitleIn.value.trim();
+  const sub   = addLabelIn.value.trim();
+
+  if (!files.length) { addErrorEl.textContent = 'Please choose at least one file.'; return; }
+  if (!title)        { addErrorEl.textContent = 'Please enter a title.'; return; }
+
+  // Classify by extension. Books = single PDF only. Notes = single PDF OR ≥1 image.
+  const allPdf = files.every(f => PDF_RE.test(f.name) || f.type === 'application/pdf');
+  const allImg = files.every(f => IMG_RE.test(f.name) || (f.type || '').startsWith('image/'));
+
+  if (activeTab !== 'note' && (!allPdf || files.length !== 1)) {
+    addErrorEl.textContent = 'Books must be a single PDF file.'; return;
+  }
+  if (activeTab === 'note' && !allPdf && !allImg) {
+    addErrorEl.textContent = 'Notes must be either one PDF or one-or-more images (PDF + images mixed isn\'t supported).'; return;
+  }
+  if (activeTab === 'note' && allPdf && files.length !== 1) {
+    addErrorEl.textContent = 'For a PDF note, pick a single PDF file (no image-PDF mix).'; return;
+  }
+  if (allImg && files.length > MAX_GALLERY_LEN) {
+    addErrorEl.textContent = `Too many images (max ${MAX_GALLERY_LEN}).`; return;
+  }
+  for (const f of files) {
+    const limit = (PDF_RE.test(f.name) || f.type === 'application/pdf') ? MAX_PDF_BYTES : MAX_IMG_BYTES;
+    if (f.size > limit) {
+      addErrorEl.textContent = `"${f.name}" is too large (max ${Math.round(limit / 1024 / 1024)} MB).`;
+      return;
+    }
+  }
+
+  addSaveBt.disabled = true;
+
+  if (allImg) {
+    return uploadGalleryNote(files, title, sub);
+  }
+  // Single PDF — books, or single-PDF notes.
+  return uploadPdfNote(files[0], title, sub, activeTab === 'note' ? 'note' : 'book');
+}
+
+/* ===== Upload progress helpers ===== */
+function showUploadProgress(pct) {
+  upProgressEl.hidden = false;
+  const p = Math.round(Math.max(0, Math.min(100, pct)));
+  upBarFillEl.style.width = p + '%';
+  upPctEl.textContent = p + '%';
+}
+function resetUploadProgress() {
+  upProgressEl.hidden = true;
+  upBarFillEl.style.width = '0%';
+  upPctEl.textContent = '0%';
+}
+
+/* ===== localStorage cache for user-added books ===== */
+const LS_LIBRARY_KEY = MeceeKeys.USER_LIBRARY;
+function saveLibraryCache(items) {
+  try { localStorage.setItem(LS_LIBRARY_KEY, JSON.stringify(items)); } catch (_) {}
+}
+function loadLibraryCache() {
+  try {
+    const raw = localStorage.getItem(LS_LIBRARY_KEY);
+    if (raw) { const p = JSON.parse(raw); if (Array.isArray(p)) return p; }
+  } catch (_) {}
+  return null;
+}
+
+/* ===== XHR-based upload — gives real onprogress events that fetch() lacks ===== */
+function xhrUpload(url, body, contentType, onProgress) {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', url);
+    xhr.setRequestHeader('Content-Type', contentType);
+    xhr.upload.onprogress = e => {
+      if (e.lengthComputable) onProgress(e.loaded / e.total);
+    };
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        try { resolve(JSON.parse(xhr.responseText)); }
+        catch (_) { resolve({}); }
+      } else {
+        try { reject(new Error(JSON.parse(xhr.responseText).error || `HTTP ${xhr.status}`)); }
+        catch (_) { reject(new Error(`HTTP ${xhr.status}`)); }
+      }
+    };
+    xhr.onerror  = () => reject(new Error('Network error — is the launcher running?'));
+    xhr.onabort  = () => reject(new Error('Upload cancelled.'));
+    xhr.send(body);
+  });
+}
+
+async function uploadPdfNote(file, title, sub, kind) {
+  addErrorEl.textContent = '';
+  showUploadProgress(2);
+
+  /* Count pages client-side so the card shows "N pages" right away. */
+  let pages = 0;
+  addErrorEl.textContent = 'Reading PDF…';
+  try {
+    const buf = await file.arrayBuffer();
+    showUploadProgress(8);
+    const doc = await pdfjsLib.getDocument({ data: new Uint8Array(buf) }).promise;
+    pages = doc.numPages;
+    try { doc.destroy(); } catch (_) {}
+  } catch (_) { /* server still validates the %PDF header */ }
+
+  addErrorEl.textContent = 'Uploading…';
+  showUploadProgress(12);
+
+  const params = new URLSearchParams({
+    subject:  currentSubject,
+    title:    title,
+    subtitle: sub,
+    type:     kind,
+    pages:    String(pages),
+    filename: file.name,
+  });
+  try {
+    /* 12 → 98 % during the HTTP upload, then snap to 100. */
+    const item = await xhrUpload(
+      '/api/upload-pdf?' + params.toString(),
+      file, 'application/pdf',
+      frac => showUploadProgress(12 + frac * 86)
+    );
+    showUploadProgress(100);
+    addErrorEl.textContent = '';
+    userBooks.push(item);
+    saveLibraryCache(userBooks);
+    try { window.MeceeSync && MeceeSync.stamp('library', item.id, 'updated'); } catch (_) {}
+    setTimeout(() => { closeAddModal(); renderShelf(); }, 350);
+  } catch (e) {
+    resetUploadProgress();
+    addErrorEl.textContent = e.message || 'Upload failed. Is the launcher (Start-MECEE.bat) running?';
+    addSaveBt.disabled = false;
+  }
+}
+
+/* Multi-image note: upload each file to /api/upload-blob (returns the saved
+   path), then finalise as one library item via /api/create-note. Sequential
+   uploads keep things deterministic and the progress message accurate. */
+async function uploadGalleryNote(files, title, sub) {
+  const paths = [];
+  /* Each image gets an equal share of 0–90%. The final 10% is the create-note call. */
+  const perImg = 90 / files.length;
+  for (let i = 0; i < files.length; i++) {
+    const f = files[i];
+    const baseProgress = i * perImg;
+    addErrorEl.textContent = `Uploading image ${i + 1} / ${files.length}…`;
+    showUploadProgress(baseProgress);
+    const params = new URLSearchParams({ subject: currentSubject, filename: f.name });
+    try {
+      const r = await xhrUpload(
+        '/api/upload-blob?' + params.toString(),
+        f, f.type || 'application/octet-stream',
+        frac => showUploadProgress(baseProgress + frac * perImg)
+      );
+      paths.push(r.file);
+    } catch (e) {
+      resetUploadProgress();
+      addErrorEl.textContent = e.message || 'Upload failed mid-way. Is the launcher running?';
+      addSaveBt.disabled = false;
+      return;
+    }
+  }
+
+  addErrorEl.textContent = 'Saving note…';
+  showUploadProgress(95);
+  try {
+    const res = await fetch('/api/create-note', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        subject:  currentSubject,
+        title:    title,
+        subtitle: sub,
+        kind:     'gallery',
+        files:    paths,
+      }),
+    });
+    if (!res.ok) return uploadFail(res);
+    const item = await res.json();
+    showUploadProgress(100);
+    addErrorEl.textContent = '';
+    userBooks.push(item);
+    saveLibraryCache(userBooks);
+    try { window.MeceeSync && MeceeSync.stamp('library', item.id, 'updated'); } catch (_) {}
+    setTimeout(() => { closeAddModal(); renderShelf(); }, 350);
+  } catch (e) {
+    resetUploadProgress();
+    addErrorEl.textContent = 'Couldn\'t finalise the note. Try again.';
+    addSaveBt.disabled = false;
+  }
+}
+
+async function uploadFail(res) {
+  let msg = `Upload failed (HTTP ${res.status}).`;
+  try { const j = await res.json(); if (j && j.error) msg = j.error; } catch (_) {}
+  resetUploadProgress();
+  addErrorEl.textContent = msg;
+  addSaveBt.disabled = false;
+}
+
+async function deleteUserBook(book) {
+  if (!book.id) return;
+  if (!confirm(`Remove “${book.title}”?\nThis also deletes the PDF from books/${book.subject}/.`)) return;
+  try {
+    const r = await fetch('/api/delete-pdf?id=' + encodeURIComponent(book.id), { method: 'DELETE' });
+    if (!r.ok) { alert('Failed to delete.'); return; }
+    userBooks = userBooks.filter(b => b.id !== book.id);
+    saveLibraryCache(userBooks);
+    /* Tombstone for sync so the next R2 round-trip removes it everywhere. */
+    try { window.MeceeSync && MeceeSync.stamp('library', book.id, 'deleted'); } catch (_) {}
+    renderShelf();
+  } catch (_) {
+    alert('Delete failed. Is the launcher running?');
+  }
+}
+
+cabBackBtn.addEventListener('click', () => showHome());
+cabAddBtn.addEventListener('click', () => openAddModal());
+libTabsEl.addEventListener('click', e => {
+  const btn = e.target.closest('.lib-tab');
+  if (btn && btn.dataset.tab) setActiveTab(btn.dataset.tab);
+});
+
+/* Initial render — load user library, then show home. */
+async function bootCabinets() {
+  userBooks = await loadUserBooks();
+  showHome();
+}
+
+/* In-place refresh hook for sync.js. After a sync the launcher rewrites
+   user-library.json with the merged catalog, so refetch /api/library and
+   repaint the active view (cabinet grid or open shelf) plus the syllabus
+   panel that shows bookmark counts. */
+window.onMeceeSyncApplied = async function () {
+  userBooks = await loadUserBooks();
+  if (currentSubject) renderShelf();
+  else renderCabinetGrid();
+  renderSyllabusPanel();
+};
+
+/* This page usually runs inside the shell iframe (index.html), so the music
+   widget lives in the shell — outside our iframe. Fullscreening ourselves would
+   hide it. Instead we ask the shell to fullscreen its own <html>, and let it
+   ping us back the state so we can hide our header. Standalone fallback keeps
+   the old direct-fullscreen path. */
+const inShell = window.parent !== window;
+let shellFullscreen = false;
+
+/* Bumped before/after prompt()/confirm()/alert(), which cause Chrome to drop
+   fullscreen mid-flow. The fullscreenchange auto-close handlers check this so
+   they don't close the reader behind a modal dialog. */
+let modalDepth = 0;
+function withModal(fn) {
+  modalDepth++;
+  try { return fn(); }
+  finally {
+    /* keep the flag set briefly so any post-modal fullscreenchange events
+       (browser restoring fullscreen, etc.) don't race the close handler. */
+    setTimeout(() => { modalDepth = Math.max(0, modalDepth - 1); }, 500);
+  }
+}
+
+function requestFullscreen() {
+  if (inShell) {
+    window.parent.postMessage({ type: 'requestFullscreen' }, '*');
+  } else {
+    const el = document.documentElement;
+    const req = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
+    if (req && !document.fullscreenElement) req.call(el).catch(() => {});
+  }
+}
+
+function exitFullscreen() {
+  if (inShell) {
+    window.parent.postMessage({ type: 'exitFullscreen' }, '*');
+  } else if (document.fullscreenElement) {
+    (document.exitFullscreen || document.webkitExitFullscreen || document.msExitFullscreen).call(document);
+  }
+}
+
+function isFullscreen() {
+  return inShell ? shellFullscreen : !!document.fullscreenElement;
+}
+
+/* ===== PDF.js engine =====
+   pdfDoc      = the loaded document
+   pdfPageNum  = the currently rendered PDF page (1-based)
+   pdfScale    = current zoom factor (1.0 = "natural" PDF size)
+   fitScale    = the scale at which the page would fit the viewport — recomputed
+                 on resize. Setting pdfScale = fitScale = "fit to window" mode.
+   renderTask  = the in-flight PDF.js page render so we can cancel on rapid flips. */
+let currentBook = null;
+let pdfDoc      = null;
+let pdfPageNum  = 1;
+let pdfScale    = 1.0;
+let fitScale    = 1.0;
+let renderTask  = null;
+let renderToken = 0;          // monotonic counter — newest render wins
+let textLayerTask = null;
+
+function showPdfError(file, err) {
+  const box   = document.getElementById('pdfError');
+  const msg   = document.getElementById('pdfErrorMsg');
+  const close = document.getElementById('pdfErrorClose');
+  if (!box || !msg || !close) return;
+  const detail = err && err.message ? err.message : String(err || 'unknown error');
+  msg.textContent = `Couldn't load "${file}". ${detail}`;
+  box.hidden = false;
+  close.onclick = () => { box.hidden = true; closeReader(); };
+}
+
+/* Reader supports two modes:
+     'pdf'   → PDF.js renders into <canvas>; all the existing zoom/scroll/
+               highlight machinery applies.
+     'image' → image or multi-image gallery note. The same prev/next/jump
+               controls walk `imgFiles[]` and swap <img src> instead.
+   currentMode + currentBook drive everything else (handlers branch on it). */
+let currentMode = 'pdf';
+let imgFiles    = [];
+let imgIdx      = 0;
+
+function isImageItem(book) {
+  if (!book) return false;
+  if (book.kind === 'gallery' || book.kind === 'image') return true;
+  // Heuristic for ad-hoc items (or back-compat) — first file is an image extension.
+  const f = (book.files && book.files[0]) || book.file || '';
+  return /\.(jpe?g|png|webp|gif|bmp|avif)$/i.test(f);
+}
+
+async function openBook(book, startPage) {
+  document.getElementById('pdfError').hidden = true;
+  currentBook = book;
+  const _sub = book.cls || book.subtitle || '';
+  readerTitle.textContent = _sub ? `${book.title} — ${_sub}` : book.title;
+  reader.classList.add('open');
+  document.body.classList.add('reader-open');
+  requestFullscreen();
+
+  /* Tear down anything from a previous open — both modes. */
+  if (pdfDoc) { try { pdfDoc.destroy(); } catch (_) {} pdfDoc = null; }
+  pdfCanvas.width = pdfCanvas.height = 0;
+  pdfTextLyr.innerHTML = '';
+  pdfHlLyr.innerHTML   = '';
+  imgViewer.removeAttribute('src');
+
+  if (isImageItem(book)) {
+    currentMode = 'image';
+    imgFiles = (book.files && book.files.length)
+      ? book.files.slice()
+      : (book.file ? [book.file] : []);
+    pdfPageEl.hidden = true;
+    imgPageEl.hidden = false;
+    pdfPageTot.textContent = `/ ${imgFiles.length}`;
+    pdfPageIn.max = imgFiles.length;
+    imgIdx = Math.max(0, Math.min(imgFiles.length - 1, (parseInt(startPage, 10) || 1) - 1));
+    return renderImageAt(imgIdx);
+  }
+
+  // PDF flow (books + single-PDF notes).
+  currentMode = 'pdf';
+  pdfPageEl.hidden = false;
+  imgPageEl.hidden = true;
+  pdfPageNum = Math.max(1, parseInt(startPage, 10) || 1);
+
+  const pdfLoadingEl = document.getElementById('pdfLoading');
+  pdfLoadingEl.hidden = false;
+
+  try {
+    /* Fast path: let PDF.js load by URL. The server now supports HTTP Range
+       requests, so PDF.js fetches only the xref table + the streams it needs
+       for each page — a 17-page, 29 MB note opens in roughly the same time
+       as a small book because only a few hundred KB are transferred per page.
+       If URL loading fails for any reason (stale HTTP cache, worker issue,
+       etc.) we fall back to manually fetching every byte with cache bypass. */
+    try {
+      pdfDoc = await pdfjsLib.getDocument(book.file).promise;
+    } catch (_urlErr) {
+      /* Fallback: download all bytes ourselves, bypassing any corrupted cache
+         entry left by older app versions (they cached with immutable TTL). */
+      const resp = await fetch(book.file, { cache: 'no-store' });
+      if (!resp.ok) throw new Error(`Unexpected server response (${resp.status}) while retrieving PDF.`);
+      const buf = await resp.arrayBuffer();
+      pdfDoc = await pdfjsLib.getDocument({ data: new Uint8Array(buf) }).promise;
+    }
+  } catch (err) {
+    pdfLoadingEl.hidden = true;
+    showPdfError(book.file, err);
+    return;
+  }
+
+  pdfPageTot.textContent = `/ ${pdfDoc.numPages}`;
+  pdfPageIn.max          = pdfDoc.numPages;
+  if (pdfPageNum > pdfDoc.numPages) pdfPageNum = pdfDoc.numPages;
+
+  /* First render — start in fit-to-window mode. */
+  await computeFitScale();
+  pdfScale = fitScale;
+  pdfLoadingEl.hidden = true;
+  await renderPdfPage(pdfPageNum);
+}
+
+/* Swap to a specific image in the current gallery (or to the single image
+   for a one-file note). Updates the controls so prev/next/jump stay in sync. */
+function renderImageAt(idx) {
+  if (!imgFiles.length) return;
+  imgIdx = Math.max(0, Math.min(imgFiles.length - 1, idx));
+  imgViewer.src = imgFiles[imgIdx];
+  pdfPageIn.value = imgIdx + 1;
+  pdfPrevBtn.disabled  = imgIdx <= 0;
+  pdfFirstBtn.disabled = imgIdx <= 0;
+  pdfNextBtn.disabled  = imgIdx >= imgFiles.length - 1;
+  pdfLastBtn.disabled  = imgIdx >= imgFiles.length - 1;
+  pdfZoomLbl.textContent = '—';                   // zoom controls don't apply
+  pdfViewport.scrollTop  = 0;
+  pdfViewport.scrollLeft = 0;
+}
+
+async function computeFitScale() {
+  if (!pdfDoc) return;
+  const page = await pdfDoc.getPage(pdfPageNum);
+  const v1   = page.getViewport({ scale: 1 });
+  const w    = pdfViewport.clientWidth  - 48;   // account for padding
+  const h    = pdfViewport.clientHeight - 80;   // padding + bottom bar
+  fitScale   = Math.min(w / v1.width, h / v1.height);
+  if (fitScale < 0.2) fitScale = 0.2;
+}
+
+async function renderPdfPage(num) {
+  if (!pdfDoc) return;
+  pdfPageNum = Math.max(1, Math.min(pdfDoc.numPages, num));
+  const myToken = ++renderToken;
+
+  /* Cancel any in-flight render. */
+  if (renderTask) { try { renderTask.cancel(); } catch (_) {} renderTask = null; }
+  if (textLayerTask && textLayerTask.cancel) { try { textLayerTask.cancel(); } catch (_) {} textLayerTask = null; }
+
+  const page = await pdfDoc.getPage(pdfPageNum);
+  if (myToken !== renderToken) return;          // newer render started — bail
+
+  const viewport = page.getViewport({ scale: pdfScale });
+  /* HiDPI: draw the canvas at devicePixelRatio for sharpness, but lay it out at CSS pixels. */
+  const dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+  pdfCanvas.width  = Math.floor(viewport.width  * dpr);
+  pdfCanvas.height = Math.floor(viewport.height * dpr);
+  pdfCanvas.style.width  = viewport.width  + 'px';
+  pdfCanvas.style.height = viewport.height + 'px';
+  pdfPageEl.style.width  = viewport.width  + 'px';
+  pdfPageEl.style.height = viewport.height + 'px';
+
+  const ctx = pdfCanvas.getContext('2d');
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+  renderTask = page.render({ canvasContext: ctx, viewport });
+  try { await renderTask.promise; }
+  catch (e) { if (e && e.name !== 'RenderingCancelledException') throw e; return; }
+  if (myToken !== renderToken) return;
+
+  /* Text layer for selection. */
+  pdfTextLyr.innerHTML = '';
+  pdfTextLyr.style.width  = viewport.width  + 'px';
+  pdfTextLyr.style.height = viewport.height + 'px';
+  pdfTextLyr.style.setProperty('--scale-factor', pdfScale);
+  const textContent = await page.getTextContent();
+  if (myToken !== renderToken) return;
+  textLayerTask = pdfjsLib.renderTextLayer({
+    textContent,
+    container: pdfTextLyr,
+    viewport,
+    textDivs: []
+  });
+  if (textLayerTask && textLayerTask.promise) {
+    try { await textLayerTask.promise; } catch (_) {}
+  }
+
+  /* Highlight overlay. */
+  pdfHlLyr.style.width  = viewport.width  + 'px';
+  pdfHlLyr.style.height = viewport.height + 'px';
+  renderHighlightsForCurrentPage();
+
+  /* Warm the next page in the background so ⏭ feels instant. We don't await
+     this — pdf.js caches the page object internally, so the next renderPdfPage
+     call hits a warm cache. */
+  if (pdfPageNum < pdfDoc.numPages) {
+    const nextNum = pdfPageNum + 1;
+    pdfDoc.getPage(nextNum).then(p => {
+      if (myToken !== renderToken) return;
+      try { p.getTextContent(); } catch (_) {}
+    }).catch(() => {});
+  }
+
+  /* UI sync. */
+  pdfPageIn.value     = pdfPageNum;
+  pdfPrevBtn.disabled = pdfPageNum <= 1;
+  pdfFirstBtn.disabled = pdfPageNum <= 1;
+  pdfNextBtn.disabled = pdfPageNum >= pdfDoc.numPages;
+  pdfLastBtn.disabled = pdfPageNum >= pdfDoc.numPages;
+  pdfZoomLbl.textContent = Math.round(pdfScale / fitScale * 100) + '%';
+
+  pdfViewport.scrollTop  = 0;
+  pdfViewport.scrollLeft = 0;
+}
+
+function jumpToPage(page) {
+  if (!currentBook) return;
+  const v = parseInt(page, 10) || 1;
+  if (currentMode === 'image') renderImageAt(v - 1);
+  else                          renderPdfPage(v);
+}
+
+function closeReader() {
+  reader.classList.remove('open');
+  document.body.classList.remove('reader-open');
+  document.getElementById('pdfLoading').hidden = true;
+  if (pdfDoc) { try { pdfDoc.destroy(); } catch (_) {} pdfDoc = null; }
+  pdfCanvas.width = pdfCanvas.height = 0;
+  pdfTextLyr.innerHTML = '';
+  pdfHlLyr.innerHTML = '';
+  imgViewer.removeAttribute('src');
+  imgFiles = [];
+  currentBook = null;
+  sylPanel.classList.remove('open');
+  hideHlButton();
+  exitFullscreen();
+}
+
+/* ===== Navigation controls =====
+   prev/next/first/last/jumpToPage all branch on currentMode so a gallery
+   note walks imgFiles[] while a PDF walks pdfDoc pages. */
+pdfPrevBtn .addEventListener('click', () => {
+  if (currentMode === 'image') renderImageAt(imgIdx - 1);
+  else                          renderPdfPage(pdfPageNum - 1);
+});
+pdfNextBtn .addEventListener('click', () => {
+  if (currentMode === 'image') renderImageAt(imgIdx + 1);
+  else                          renderPdfPage(pdfPageNum + 1);
+});
+pdfFirstBtn.addEventListener('click', () => {
+  if (currentMode === 'image') renderImageAt(0);
+  else                          renderPdfPage(1);
+});
+pdfLastBtn .addEventListener('click', () => {
+  if (currentMode === 'image') renderImageAt(imgFiles.length - 1);
+  else if (pdfDoc)              renderPdfPage(pdfDoc.numPages);
+});
+pdfPageIn  .addEventListener('change', () => {
+  const v = parseInt(pdfPageIn.value, 10);
+  if (isNaN(v)) return;
+  if (currentMode === 'image') renderImageAt(v - 1);
+  else                          renderPdfPage(v);
+});
+
+/* Zoom controls — relative to fitScale so "100%" always means "fit". */
+function setZoomMultiplier(mult) {
+  if (!pdfDoc) return;
+  pdfScale = fitScale * Math.max(0.4, Math.min(5, mult));
+  renderPdfPage(pdfPageNum);
+}
+pdfZoomIn .addEventListener('click', () => setZoomMultiplier((pdfScale / fitScale) * 1.2));
+pdfZoomOut.addEventListener('click', () => setZoomMultiplier((pdfScale / fitScale) / 1.2));
+pdfFitBtn .addEventListener('click', async () => { await computeFitScale(); setZoomMultiplier(1); });
+
+/* Keyboard shortcuts. Branch on currentMode so arrows walk a gallery's
+   images instead of PDF pages when an image note is open. */
+document.addEventListener('keydown', e => {
+  if (!reader.classList.contains('open')) return;
+  if (document.activeElement === pdfPageIn) return;
+  const prev = () => currentMode === 'image' ? renderImageAt(imgIdx - 1) : renderPdfPage(pdfPageNum - 1);
+  const next = () => currentMode === 'image' ? renderImageAt(imgIdx + 1) : renderPdfPage(pdfPageNum + 1);
+  const first= () => currentMode === 'image' ? renderImageAt(0)          : renderPdfPage(1);
+  const last = () => currentMode === 'image' ? renderImageAt(imgFiles.length - 1)
+                                              : (pdfDoc && renderPdfPage(pdfDoc.numPages));
+  if (e.key === 'ArrowLeft'  || e.key === 'PageUp')   { prev();  e.preventDefault(); }
+  if (e.key === 'ArrowRight' || e.key === 'PageDown') { next();  e.preventDefault(); }
+  if (e.key === 'Home') { first(); e.preventDefault(); }
+  if (e.key === 'End')  { last();  e.preventDefault(); }
+});
+
+/* ===== Touch gestures (phone only) =====
+   - Horizontal one-finger swipe ≥ 60px → next/previous page.
+   - Two-finger pinch → zoom relative to fitScale.
+   We skip swipe-flip when the page is zoomed in (the user wants to pan,
+   not flip) and skip when the touch starts on a select/input. */
+let touchStartX = 0, touchStartY = 0;
+let pinchStartDist = 0, pinchStartMult = 1, pinching = false;
+
+function pinchDistance(t1, t2) {
+  const dx = t2.clientX - t1.clientX;
+  const dy = t2.clientY - t1.clientY;
+  return Math.sqrt(dx * dx + dy * dy);
+}
+
+pdfViewport.addEventListener('touchstart', e => {
+  if (!pdfDoc) return;
+  if (e.touches.length === 1) {
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+    pinching = false;
+  } else if (e.touches.length === 2) {
+    pinchStartDist = pinchDistance(e.touches[0], e.touches[1]);
+    pinchStartMult = pdfScale / fitScale;
+    pinching = true;
+  }
+}, { passive: true });
+
+pdfViewport.addEventListener('touchmove', e => {
+  /* Pinch zoom — preventDefault stops the browser from scrolling/zooming
+     the whole page underneath. We only update the visual scale on the
+     final pinch-end (re-rendering the canvas is too slow to do every
+     frame on phone), but track the live distance here so we can compute
+     the multiplier when the user lifts. */
+  if (pinching && e.touches.length === 2) {
+    e.preventDefault();
+  }
+}, { passive: false });
+
+pdfViewport.addEventListener('touchend', e => {
+  if (!pdfDoc) return;
+
+  /* Finish a pinch — only re-render if the user changed scale meaningfully. */
+  if (pinching && e.changedTouches.length === 1 && e.touches.length === 0) {
+    pinching = false;
+    return;
+  }
+
+  /* Single-finger swipe: detect direction + length. */
+  if (e.changedTouches.length === 1 && e.touches.length === 0 && !pinching) {
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    const dy = e.changedTouches[0].clientY - touchStartY;
+    /* Threshold + direction guard: horizontal swipe at least 60px and
+       mostly horizontal (|dx| > 1.5*|dy|). */
+    if (Math.abs(dx) >= 60 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+      /* Don't flip if the page is zoomed and overflows — that's a pan. */
+      const overflowsH = pdfPageEl.offsetWidth > pdfViewport.clientWidth - 12;
+      if (!overflowsH) {
+        if (currentMode === 'image') {
+          if (dx < 0) renderImageAt(imgIdx + 1);
+          else        renderImageAt(imgIdx - 1);
+        } else {
+          if (dx < 0) renderPdfPage(pdfPageNum + 1);
+          else        renderPdfPage(pdfPageNum - 1);
+        }
+      }
+    }
+  }
+}, { passive: true });
+
+/* Native pinch-zoom (gesturechange on iOS Safari) — apply the final scale
+   to PDF.js's canvas so the user gets a crisp render at the new zoom. */
+pdfViewport.addEventListener('gestureend', function (e) {
+  if (!pdfDoc || !e.scale) return;
+  const newMult = pinchStartMult * e.scale;
+  setZoomMultiplier(newMult);
+}, { passive: true });
+
+/* Scroll-to-flip + ctrl-scroll-zoom on the viewport. */
+let wheelDeb = 0;
+pdfViewport.addEventListener('wheel', e => {
+  if (currentMode === 'image') {
+    // Wheel-to-flip for galleries — no zoom math to do.
+    if (!imgFiles.length || imgFiles.length === 1) return;
+    const now = Date.now();
+    if (now - wheelDeb < 220) { e.preventDefault(); return; }
+    wheelDeb = now;
+    e.preventDefault();
+    if (e.deltaY > 0) renderImageAt(imgIdx + 1);
+    else              renderImageAt(imgIdx - 1);
+    return;
+  }
+  if (!pdfDoc) return;
+  if (e.ctrlKey || e.metaKey) {
+    e.preventDefault();
+    const factor = e.deltaY < 0 ? 1.1 : (1 / 1.1);
+    setZoomMultiplier((pdfScale / fitScale) * factor);
+    return;
+  }
+  /* Only flip when the page actually fits without scrolling — otherwise the user
+     is probably trying to scroll within a zoomed page. */
+  const overflowsV = pdfPageEl.offsetHeight > pdfViewport.clientHeight - 24;
+  const overflowsH = pdfPageEl.offsetWidth  > pdfViewport.clientWidth  - 24;
+  if (overflowsV || overflowsH) return;       // let the native scroll happen
+  const now = Date.now();
+  if (now - wheelDeb < 220) { e.preventDefault(); return; }
+  wheelDeb = now;
+  e.preventDefault();
+  if (e.deltaY > 0) renderPdfPage(pdfPageNum + 1);
+  else              renderPdfPage(pdfPageNum - 1);
+}, { passive: false });
+
+/* Re-fit when the window resizes (we recompute fitScale and re-render). */
+let resizeTimer = 0;
+window.addEventListener('resize', () => {
+  if (!pdfDoc) return;
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(async () => {
+    const oldMult = pdfScale / fitScale;
+    await computeFitScale();
+    pdfScale = fitScale * oldMult;
+    renderPdfPage(pdfPageNum);
+  }, 150);
+});
+
+closeBtn.addEventListener('click', closeReader);
+fsExitBtn.addEventListener('click', closeReader);
+document.addEventListener('keydown', e => {
+  if (reader.classList.contains('open') && e.key === 'Escape') closeReader();
+});
+
+/* Standalone path: react to our own fullscreenchange. */
+document.addEventListener('fullscreenchange', () => {
+  if (inShell) return;
+  document.documentElement.classList.toggle('is-fullscreen', !!document.fullscreenElement);
+  if (!document.fullscreenElement && reader.classList.contains('open') && modalDepth === 0) closeReader();
+});
+
+/* Shell path: the shell tells us when its fullscreen state changes. */
+window.addEventListener('message', e => {
+  if (!e.data || e.data.type !== 'fullscreenState') return;
+  shellFullscreen = !!e.data.inFullscreen;
+  document.documentElement.classList.toggle('is-fullscreen', shellFullscreen);
+  if (!shellFullscreen && reader.classList.contains('open') && modalDepth === 0) closeReader();
+});
+
+bootCabinets();
+
+/* ===== Highlights =====
+   Storage: localStorage `mecee_highlights_v1` = {
+     "<bookId>::<pdfPageNum>": [ { rects: [{x,y,w,h}], text, color, ts } ]
+   }
+   Rects are stored in *PDF coordinates* (scale=1) so they stay aligned through
+   zoom and window-resize re-renders. */
+const HIGHLIGHTS_KEY = MeceeKeys.HIGHLIGHTS;
+function readHighlights() { try { return JSON.parse(localStorage.getItem(HIGHLIGHTS_KEY) || '{}'); } catch (_) { return {}; } }
+function writeHighlights(h) { localStorage.setItem(HIGHLIGHTS_KEY, JSON.stringify(h)); }
+function hlKey(bookId, page) { return `${bookId}::${page}`; }
+
+function hexToRgba(hex, alpha) {
+  const m = /^#?([0-9a-f]{6})$/i.exec(hex || '');
+  if (!m) return `rgba(255,235,59,${alpha})`;
+  const v = parseInt(m[1], 16);
+  return `rgba(${(v>>16)&255},${(v>>8)&255},${v&255},${alpha})`;
+}
+
+function renderHighlightsForCurrentPage() {
+  pdfHlLyr.innerHTML = '';
+  if (!currentBook) return;
+  const all = readHighlights();
+  const list = all[hlKey(currentBook.id, pdfPageNum)] || [];
+  list.forEach((h, idx) => {
+    h.rects.forEach(r => {
+      const div = document.createElement('div');
+      div.className = 'hl';
+      div.style.left   = (r.x * pdfScale) + 'px';
+      div.style.top    = (r.y * pdfScale) + 'px';
+      div.style.width  = (r.w * pdfScale) + 'px';
+      div.style.height = (r.h * pdfScale) + 'px';
+      div.style.background = hexToRgba(h.color || '#ffeb3b', 0.42);
+      div.title = h.text || '';
+      div.dataset.hlIdx = idx;
+      div.addEventListener('click', e => {
+        e.stopPropagation();
+        if (confirm(`Remove highlight: "${(h.text || '').slice(0, 80)}"?`)) {
+          const cur = readHighlights();
+          const arr = cur[hlKey(currentBook.id, pdfPageNum)] || [];
+          arr.splice(idx, 1);
+          if (arr.length) cur[hlKey(currentBook.id, pdfPageNum)] = arr;
+          else delete cur[hlKey(currentBook.id, pdfPageNum)];
+          writeHighlights(cur);
+          renderHighlightsForCurrentPage();
+        }
+      });
+      pdfHlLyr.appendChild(div);
+    });
+  });
+}
+
+function hideHlButton() { hlBtn.classList.remove('open'); }
+
+/* PDF.js text layer creates an `.endOfContent` div used to extend selections
+   on mousedrag. The `.active` class must be toggled by us on mousedown/mouseup
+   (the basic renderTextLayer API doesn't wire it). Without this toggle, the
+   default endOfContent layout intercepts clicks and selection starts wherever
+   it happens to render — producing the "selects everything top-to-bottom" bug. */
+pdfTextLyr.addEventListener('mousedown', () => {
+  const eoc = pdfTextLyr.querySelector('.endOfContent');
+  if (eoc) eoc.classList.add('active');
+});
+document.addEventListener('mouseup', () => {
+  pdfTextLyr.querySelectorAll('.endOfContent').forEach(el => el.classList.remove('active'));
+});
+
+/* When the user selects text inside the text layer, show a floating "Highlight"
+   button positioned just above the selection. Clicking it saves the selection
+   as a highlight on the current page (in PDF coordinates). */
+document.addEventListener('selectionchange', () => {
+  const sel = window.getSelection();
+  if (!sel || sel.rangeCount === 0 || sel.isCollapsed) { hideHlButton(); return; }
+  const range = sel.getRangeAt(0);
+  /* Only if the selection is inside our text layer. */
+  if (!pdfTextLyr.contains(range.commonAncestorContainer) &&
+      !pdfTextLyr.contains(range.startContainer)) {
+    hideHlButton();
+    return;
+  }
+  const rect = range.getBoundingClientRect();
+  if (!rect || (rect.width === 0 && rect.height === 0)) { hideHlButton(); return; }
+  /* Center the palette above the selection (its width depends on # of colors). */
+  hlBtn.classList.add('open');
+  const w = hlBtn.offsetWidth || 180;
+  hlBtn.style.left = Math.max(8, Math.min(window.innerWidth - w - 8, rect.left + rect.width / 2 - w / 2)) + 'px';
+  hlBtn.style.top  = Math.max(8, rect.top - hlBtn.offsetHeight - 8) + 'px';
+});
+
+/* Save a highlight with the chosen color. Captures the selection's rectangles
+   in PDF coordinates (divide by current scale) so they stay aligned through
+   zoom + resize. */
+function saveHighlightWithColor(color) {
+  const sel = window.getSelection();
+  if (!sel || sel.rangeCount === 0 || sel.isCollapsed || !currentBook || !pdfDoc) return;
+  const range = sel.getRangeAt(0);
+  const pageRect = pdfPageEl.getBoundingClientRect();
+  const rects = Array.from(range.getClientRects())
+    .filter(r => r.width > 1 && r.height > 1)
+    .map(r => ({
+      x: (r.left - pageRect.left) / pdfScale,
+      y: (r.top  - pageRect.top)  / pdfScale,
+      w: r.width  / pdfScale,
+      h: r.height / pdfScale
+    }));
+  if (!rects.length) return;
+  const text = sel.toString();
+  const all = readHighlights();
+  const k = hlKey(currentBook.id, pdfPageNum);
+  if (!all[k]) all[k] = [];
+  all[k].push({ rects, text, color, ts: Date.now() });
+  writeHighlights(all);
+  sel.removeAllRanges();
+  hideHlButton();
+  renderHighlightsForCurrentPage();
+}
+
+hlBtn.querySelectorAll('.hl-color').forEach(swatch => {
+  /* mousedown (not click) so the selection isn't lost when the palette steals focus. */
+  swatch.addEventListener('mousedown', e => {
+    e.preventDefault();
+    saveHighlightWithColor(swatch.dataset.color);
+  });
+});
+
+/* ===== Syllabus panel + bookmarks =====
+   Bookmark format: { "Subject::Unit::idx": [ { flipId, page, note, ts }, ... ] }
+   (legacy single-object values are migrated on read.) */
+const PROGRESS_KEY  = MeceeKeys.PROGRESS;
+const BOOKMARKS_KEY = MeceeKeys.BOOKMARKS;
+
+function readProgress()  { try { return JSON.parse(localStorage.getItem(PROGRESS_KEY)  || '{}'); } catch (_) { return {}; } }
+/* Migration to PDF-page-based storage:
+   - Pre-PDF.js bookmarks stored `page` as the printed page in the book; we relied
+     on a per-book offset (6) when navigating to the Heyzine flipbook.
+   - PDF.js gives us the true PDF page directly. We store that. To migrate old
+     bookmarks we add the legacy offset of 6 once and stamp `v: 2`.
+   - We also map legacy Heyzine flipIds onto the new BOOK ids so existing data
+     keeps resolving. */
+const LEGACY_PAGE_OFFSET = 6;
+function readBookmarks() {
+  let raw;
+  try { raw = JSON.parse(localStorage.getItem(BOOKMARKS_KEY) || '{}'); }
+  catch (_) { return {}; }
+  let dirty = false;
+  const out = {};
+  function migrate(bm) {
+    if (bm && bm.v === 2) return bm;
+    dirty = true;
+    return {
+      flipId: LEGACY_FLIP_IDS[bm.flipId] || bm.flipId,
+      page:   (bm.page || 1) + LEGACY_PAGE_OFFSET,
+      note:   bm.note || '',
+      ts:     bm.ts || Date.now(),
+      v:      2
+    };
+  }
+  for (const [k, v] of Object.entries(raw)) {
+    if (Array.isArray(v)) out[k] = v.map(migrate);
+    else if (v && v.flipId && v.page) out[k] = [migrate(v)];
+  }
+  if (dirty) writeBookmarks(out);
+  return out;
+}
+function writeBookmarks(b) { localStorage.setItem(BOOKMARKS_KEY, JSON.stringify(b)); }
+function chName(ch) { return typeof ch === 'string' ? ch : ch.n; }
+function escAttr(s) { return String(s).replace(/"/g, '&quot;'); }
+function escHtml(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+/* Promise-based bookmark modal. Resolves with { page, note } on save, null on cancel. */
+const bmBackdrop = document.getElementById('bmBackdrop');
+const bmTitle    = document.getElementById('bmTitle');
+const bmSubtitle = document.getElementById('bmSubtitle');
+const bmPage     = document.getElementById('bmPage');
+const bmNote     = document.getElementById('bmNote');
+const bmError    = document.getElementById('bmError');
+const bmSaveBtn  = document.getElementById('bmSaveBtn');
+const bmCancelBtn= document.getElementById('bmCancelBtn');
+
+let bmResolve = null;
+function showBookmarkModal({ chapterName, bookLabel, initialPage = '', initialNote = '', titleText = '🔖 Bookmark this page' }) {
+  return new Promise(resolve => {
+    bmResolve = resolve;
+    bmTitle.textContent    = titleText;
+    bmSubtitle.innerHTML   = `<b>${escHtml(chapterName)}</b><br>in ${escHtml(bookLabel)}`;
+    bmPage.value           = initialPage;
+    bmNote.value           = initialNote;
+    bmError.textContent    = '';
+    bmBackdrop.classList.add('open');
+    /* focus after the dialog is visible */
+    setTimeout(() => { bmPage.focus(); bmPage.select(); }, 30);
+  });
+}
+function closeBookmarkModal(result) {
+  bmBackdrop.classList.remove('open');
+  const r = bmResolve;
+  bmResolve = null;
+  if (r) r(result);
+}
+function trySaveBookmarkModal() {
+  const p = parseInt(bmPage.value.trim(), 10);
+  if (isNaN(p) || p < 1) {
+    bmError.textContent = 'Enter a valid page number (1 or higher).';
+    bmPage.focus();
+    return;
+  }
+  closeBookmarkModal({ page: p, note: bmNote.value.trim() });
+}
+bmSaveBtn.addEventListener('click', trySaveBookmarkModal);
+bmCancelBtn.addEventListener('click', () => closeBookmarkModal(null));
+bmBackdrop.addEventListener('click', e => {
+  if (e.target === bmBackdrop) closeBookmarkModal(null);
+});
+[bmPage, bmNote].forEach(el => {
+  el.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); trySaveBookmarkModal(); }
+    else if (e.key === 'Escape') { e.preventDefault(); closeBookmarkModal(null); }
+  });
+});
+
+function relTime(ts) {
+  const sec = Math.floor((Date.now() - ts) / 1000);
+  if (sec < 60) return 'just now';
+  if (sec < 3600) return Math.floor(sec / 60) + 'm ago';
+  if (sec < 86400) return Math.floor(sec / 3600) + 'h ago';
+  if (sec < 86400 * 30) return Math.floor(sec / 86400) + 'd ago';
+  if (sec < 86400 * 365) return Math.floor(sec / 86400 / 30) + 'mo ago';
+  return Math.floor(sec / 86400 / 365) + 'y ago';
+}
+
+function renderSyllabusPanel() {
+  if (!window.SYLLABUS) {
+    sylPanel.innerHTML = '<div style="padding:20px;color:#888">Syllabus data not loaded.</div>';
+    return;
+  }
+  const progress  = readProgress();
+  const bookmarks = readBookmarks();
+  const subjects  = Object.entries(window.SYLLABUS);
+  let html = '<h4>Chapters</h4>';
+  subjects.forEach(([subjName, subj]) => {
+    const units = Object.entries(subj.units);
+    let unitsHtml = '';
+    units.forEach(([unitName, unit]) => {
+      let chapsHtml = '';
+      unit.chapters.forEach((ch, idx) => {
+        const key  = `${subjName}::${unitName}::${idx}`;
+        const done = !!progress[key];
+        const bms  = bookmarks[key] || [];
+        const hasBm = bms.length > 0;
+
+        let bmsHtml = '';
+        if (bms.length) {
+          bmsHtml = '<div class="syl-bms">' + bms.map((bm, bi) => {
+            const noteHtml = bm.note ? ` <span class="bm-note">"${escHtml(bm.note)}"</span>` : '';
+            const tsHtml   = bm.ts ? ` <span class="bm-ts">· ${relTime(bm.ts)}</span>` : '';
+            const tip = escAttr(`Page ${bm.page}${bm.note ? ' — ' + bm.note : ''}${bm.ts ? '\n(' + relTime(bm.ts) + ')' : ''}`);
+            return `<span class="syl-bm" data-key="${escAttr(key)}" data-bi="${bi}" title="${tip}">
+              <span>p.${bm.page}</span>${noteHtml}${tsHtml}
+              <span class="syl-bm-del" data-key="${escAttr(key)}" data-bi="${bi}" title="Delete bookmark">×</span>
+            </span>`;
+          }).join('') + '</div>';
+        }
+
+        chapsHtml += `<div class="syl-ch${done ? ' done' : ''}${hasBm ? ' has-bm' : ''}" data-key="${escAttr(key)}">
+          <div class="dot"></div>
+          <div class="name">${escHtml(chName(ch))}</div>
+          <div class="syl-ch-add" data-add-key="${escAttr(key)}" title="Add bookmark at current page">+ 🔖</div>
+        </div>${bmsHtml}`;
+      });
+      unitsHtml += `<div class="syl-unit"><div class="syl-unit-name">${escHtml(unitName)}</div>${chapsHtml}</div>`;
+    });
+    html += `<div class="syl-subj"><div class="syl-subj-head"><span class="emoji">${subj.emoji || '📘'}</span><span>${escHtml(subjName)}</span><span class="arrow">▼</span></div><div class="syl-subj-body">${unitsHtml}</div></div>`;
+  });
+  sylPanel.innerHTML = html;
+
+  /* expand/collapse per subject */
+  sylPanel.querySelectorAll('.syl-subj-head').forEach(head => {
+    head.addEventListener('click', () => head.parentElement.classList.toggle('open'));
+  });
+
+  /* click a bookmark chip → jump (or switch book + jump) */
+  sylPanel.querySelectorAll('.syl-bm').forEach(chip => {
+    chip.addEventListener('click', e => {
+      if (e.target.closest('.syl-bm-del')) return;   // delete handled separately
+      const key = chip.dataset.key;
+      const bi  = parseInt(chip.dataset.bi, 10);
+      const all = readBookmarks();
+      const bm  = (all[key] || [])[bi];
+      if (!bm) return;
+      const targetBook = bookByFlipId(bm.flipId);
+      if (!targetBook) { withModal(() => alert('Bookmarked book not in library')); return; }
+      if (currentBook && currentBook.flipId === bm.flipId) jumpToPage(bm.page);
+      else openBook(targetBook, bm.page);
+    });
+  });
+
+  /* delete a bookmark */
+  sylPanel.querySelectorAll('.syl-bm-del').forEach(x => {
+    x.addEventListener('click', e => {
+      e.stopPropagation();
+      const key = x.dataset.key;
+      const bi  = parseInt(x.dataset.bi, 10);
+      const all = readBookmarks();
+      const arr = all[key] || [];
+      const bm  = arr[bi];
+      if (!bm) return;
+      if (!withModal(() => confirm(`Delete bookmark on page ${bm.page}?`))) return;
+      arr.splice(bi, 1);
+      if (arr.length) all[key] = arr; else delete all[key];
+      writeBookmarks(all);
+      renderSyllabusPanel();
+    });
+  });
+
+  /* "+ 🔖" button on each chapter → add a new bookmark for current book */
+  sylPanel.querySelectorAll('.syl-ch-add').forEach(btn => {
+    btn.addEventListener('click', async e => {
+      e.stopPropagation();
+      if (!currentBook) { withModal(() => alert('Open a book first, then bookmark a chapter to its page.')); return; }
+      const key = btn.dataset.addKey;
+      const chRow = btn.closest('.syl-ch');
+      const chapterName = chRow.querySelector('.name').textContent;
+      const result = await showBookmarkModal({
+        chapterName,
+        bookLabel: `${currentBook.title} — ${currentBook.cls}`,
+        initialPage: pdfPageNum    // auto-detected — user can still change it
+      });
+      if (!result) return;   // cancelled
+      const all = readBookmarks();
+      const arr = all[key] || [];
+      arr.push({ flipId: currentBook.id, page: result.page, note: result.note, ts: Date.now(), v: 2 });
+      arr.sort((a, b) => a.page - b.page);
+      all[key] = arr;
+      writeBookmarks(all);
+      renderSyllabusPanel();
+    });
+  });
+}
+
+sylToggle.addEventListener('click', () => {
+  renderSyllabusPanel();       // re-render to pick up tracker progress + bookmark changes
+  sylPanel.classList.toggle('open');
+});
+
+/* Click outside panel closes it (the iframe interior won't fire here — that's the
+   cross-origin Heyzine doc — so iframe clicks safely don't close the panel). */
+document.addEventListener('click', e => {
+  if (!sylPanel.classList.contains('open')) return;
+  if (sylPanel.contains(e.target) || sylToggle.contains(e.target)) return;
+  sylPanel.classList.remove('open');
+});
+
+/* If we were navigated here with ?book=<flipId>&page=N, auto-open that book. */
+(function autoOpenFromQuery() {
+  const params = new URLSearchParams(location.search);
+  const flipId = params.get('book');
+  if (!flipId) return;
+  const book = bookByFlipId(flipId);
+  if (!book) return;
+  const page = parseInt(params.get('page') || '1', 10) || 1;
+  openBook(book, page);
+})();
+</script>
+<script src="syllabus.js"></script>
+<script src="Playlist/tracks.js"></script>
+<script src="player.js"></script>
+<script src="nav-shim.js"></script>
+</body>
+</html>

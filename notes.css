@@ -1,0 +1,204 @@
+/* ===== STICKY-NOTE LAUNCHER + WINDOW =====
+   Bottom-left of the shell. A single 📝 button toggles a draggable note
+   window with a paper-textured writing area. The writing cursor inside
+   the paper is the Writing.png from Assets/Mousedesign (top-left tip as
+   the hotspot, matching how a real pen point sits at the upper-left of
+   the writing nib). */
+
+/* Launcher — single round 📝 button in the bottom-left corner. */
+.notes-launcher {
+  position: fixed;
+  bottom: 22px;
+  left: 22px;
+  z-index: 9000;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: var(--surface, #1a1a1a);
+  border: 1px solid var(--border, rgba(255,255,255,0.10));
+  box-shadow: 0 10px 30px rgba(0,0,0,0.30), 0 2px 6px rgba(0,0,0,0.18);
+  box-sizing: border-box;
+  padding: 4px;
+
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  transition: box-shadow .2s ease;
+}
+.notes-launcher:hover {
+  box-shadow: 0 14px 36px rgba(0,0,0,0.36), 0 3px 8px rgba(0,0,0,0.22);
+}
+
+.notes-thumb {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: transparent;
+  border: 0;
+  color: var(--text, #f5f5f5);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: inherit;
+  padding: 0;
+  line-height: 1;
+  font-size: 22px;
+  transition: background .15s ease, transform .15s ease;
+}
+.notes-thumb:hover {
+  background: var(--surface-2, rgba(255,255,255,0.10));
+}
+.notes-thumb:active {
+  transform: scale(0.94);
+}
+
+/* ===== Note window — draggable + resizable ===== */
+.notes-window {
+  position: fixed;
+  z-index: 9100;
+  width: 360px;
+  height: 320px;
+  background: #1a1a1a;
+  color: #f5f5f5;
+  border: 1px solid #2a2a2a;
+  border-radius: 12px;
+  display: none;
+  flex-direction: column;
+  box-shadow: 0 28px 70px rgba(0,0,0,.60), 0 4px 12px rgba(0,0,0,.30);
+  overflow: hidden;
+  min-width: 240px;
+  min-height: 200px;
+  /* Native resize handle in the bottom-right corner */
+  resize: both;
+}
+.notes-window.open { display: flex; }
+
+.notes-header {
+  padding: 9px 12px;
+  background: #232323;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: grab;
+  user-select: none;
+  border-bottom: 1px solid #2a2a2a;
+  flex-shrink: 0;
+  font-size: 13px;
+  font-weight: 600;
+}
+.notes-header.dragging { cursor: grabbing; }
+.notes-header .title { flex: 1; }
+.notes-close {
+  background: transparent;
+  border: 1px solid #444;
+  color: #f5f5f5;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: inherit;
+  padding: 0;
+}
+.notes-close:hover { background: rgba(255,255,255,0.10); }
+
+/* The "paper" — wrapper that holds the keyboard textarea AND a drawing
+   canvas overlay. Click without dragging focuses the textarea so you can
+   type; click + drag draws strokes on the canvas with the Writing.png
+   cursor. Both layers persist independently to localStorage. */
+.notes-paper {
+  flex: 1;
+  position: relative;
+  background: #fafafa;
+  /* Horizontal ruling — matches line-height so text sits on the lines. */
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 24px,
+    rgba(0, 50, 120, 0.16) 24px,
+    rgba(0, 50, 120, 0.16) 25px
+  );
+  /* Left margin red line (notebook style). */
+  border-left: 22px solid #fafafa;
+  box-shadow: inset 26px 0 0 -22px rgba(220, 50, 50, 0.55);
+  overflow: hidden;
+  min-height: 0;
+  box-sizing: border-box;
+}
+
+.notes-text {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  outline: none;
+  resize: none;
+  padding: 14px 16px;
+  background: transparent;
+  color: #111;
+  font-family: 'Caveat', 'Patrick Hand', 'Bradley Hand', 'Comic Sans MS', cursive;
+  font-size: 19px;
+  line-height: 25px;
+  box-sizing: border-box;
+  z-index: 1;
+}
+.notes-text::placeholder { color: rgba(0,0,0,0.32); font-style: italic; }
+
+.notes-draw {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+  /* Transparent overlay so the textarea + ruling show through */
+  background: transparent;
+  /* Drawing-mode pen cursor — Writing.png with the top-left tip as hotspot.
+     Inline !important applied via JS in notes.js (beats the global cursor
+     override stylesheet rule). */
+}
+
+/* Header utility buttons (Clear, Undo, page prev/next) */
+.notes-clear {
+  background: transparent;
+  border: 1px solid #444;
+  color: #f5f5f5;
+  height: 24px;
+  padding: 0 10px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 11px;
+  font-family: inherit;
+  margin-right: 4px;
+}
+.notes-clear:hover:not(:disabled) { background: rgba(255,255,255,0.10); }
+.notes-clear:disabled { opacity: 0.35; cursor: default; }
+
+/* The compact ‹ › page-flip buttons */
+.notes-page-btn {
+  width: 24px;
+  padding: 0;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.notes-page-label {
+  font-size: 11px;
+  color: #ccc;
+  letter-spacing: .5px;
+  margin: 0 4px 0 0;
+  min-width: 36px;
+  text-align: center;
+  user-select: none;
+}

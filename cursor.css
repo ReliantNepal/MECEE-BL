@@ -1,0 +1,17 @@
+/* ===== CUSTOM CURSORS =====
+   Hand1 = default everywhere
+   Hand2 = while a mouse button is pressed
+   magnifier1 → magnifier2 = hover over any clickable (brief flash of 1, settles on 2)
+   book1 → book2 = hover over the Library link specifically
+
+   The actual cursor swap is driven by cursor.js, which sets an inline style on
+   <html> based on hover detection. That lets us beat per-element `cursor: help`,
+   `cursor: pointer`, etc. defined elsewhere in the page CSS.
+
+   We still ship a CSS fallback below so the default cursor shows even before
+   cursor.js has loaded.
+*/
+
+html, body {
+  cursor: url('Assets/Mousedesign/Hand1.png') 8 4, default;
+}
