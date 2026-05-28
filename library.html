@@ -1992,26 +1992,25 @@ async function openBook(book, startPage) {
   const pdfLoadingEl = document.getElementById('pdfLoading');
   pdfLoadingEl.hidden = false;
 
+  /* Append ?v=1 if the URL has no query string yet — this creates a new
+     cache key the browser has never seen, bypassing any corrupted immutable
+     HTTP-cached copy from an older service-worker version. Range requests
+     still work because the server strips the query string before serving. */
+  const pdfUrl = /\?/.test(book.file) ? book.file : book.file + '?v=1';
+
   try {
-    /* Fast path: let PDF.js load by URL. The server now supports HTTP Range
-       requests, so PDF.js fetches only the xref table + the streams it needs
-       for each page — a 17-page, 29 MB note opens in roughly the same time
-       as a small book because only a few hundred KB are transferred per page.
-       If URL loading fails for any reason (stale HTTP cache, worker issue,
-       etc.) we fall back to manually fetching every byte with cache bypass. */
     try {
-      pdfDoc = await pdfjsLib.getDocument(book.file).promise;
+      pdfDoc = await pdfjsLib.getDocument(pdfUrl).promise;
     } catch (_urlErr) {
-      /* Fallback: download all bytes ourselves, bypassing any corrupted cache
-         entry left by older app versions (they cached with immutable TTL). */
-      const resp = await fetch(book.file, { cache: 'no-store' });
+      /* Fallback: download all bytes, bypassing cache entirely. */
+      const resp = await fetch(pdfUrl, { cache: 'no-store' });
       if (!resp.ok) throw new Error(`Unexpected server response (${resp.status}) while retrieving PDF.`);
       const buf = await resp.arrayBuffer();
       pdfDoc = await pdfjsLib.getDocument({ data: new Uint8Array(buf) }).promise;
     }
   } catch (err) {
     pdfLoadingEl.hidden = true;
-    showPdfError(book.file, err);
+    showPdfError(pdfUrl, err);
     return;
   }
 
@@ -2077,18 +2076,49 @@ async function renderPdfPage(num) {
   const ctx = pdfCanvas.getContext('2d');
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
+  /* Kick off canvas render AND text-content fetch simultaneously — they both
+     need only the page object (already in hand) and are fully independent. */
   renderTask = page.render({ canvasContext: ctx, viewport });
+  const textContentPromise = page.getTextContent().catch(() => null);
+
   try { await renderTask.promise; }
   catch (e) { if (e && e.name !== 'RenderingCancelledException') throw e; return; }
   if (myToken !== renderToken) return;
 
-  /* Text layer for selection. */
+  /* Canvas is painted — update UI immediately so the user can flip pages
+     without waiting for the text / highlight layers. */
+  pdfPageIn.value      = pdfPageNum;
+  pdfPrevBtn.disabled  = pdfPageNum <= 1;
+  pdfFirstBtn.disabled = pdfPageNum <= 1;
+  pdfNextBtn.disabled  = pdfPageNum >= pdfDoc.numPages;
+  pdfLastBtn.disabled  = pdfPageNum >= pdfDoc.numPages;
+  pdfZoomLbl.textContent = Math.round(pdfScale / fitScale * 100) + '%';
+  pdfViewport.scrollTop  = 0;
+  pdfViewport.scrollLeft = 0;
+
+  /* Highlight overlay — independent of the text layer. */
+  pdfHlLyr.style.width  = viewport.width  + 'px';
+  pdfHlLyr.style.height = viewport.height + 'px';
+  renderHighlightsForCurrentPage();
+
+  /* Warm next page while the text layer is finishing. */
+  if (pdfPageNum < pdfDoc.numPages) {
+    const nextNum = pdfPageNum + 1;
+    pdfDoc.getPage(nextNum).then(p => {
+      if (myToken !== renderToken) return;
+      try { p.getTextContent(); } catch (_) {}
+    }).catch(() => {});
+  }
+
+  /* Text layer — by the time we reach here the fetch likely already finished
+     in parallel with the canvas render, so this await is usually instant. */
+  const textContent = await textContentPromise;
+  if (myToken !== renderToken || !textContent) return;
+
   pdfTextLyr.innerHTML = '';
   pdfTextLyr.style.width  = viewport.width  + 'px';
   pdfTextLyr.style.height = viewport.height + 'px';
   pdfTextLyr.style.setProperty('--scale-factor', pdfScale);
-  const textContent = await page.getTextContent();
-  if (myToken !== renderToken) return;
   textLayerTask = pdfjsLib.renderTextLayer({
     textContent,
     container: pdfTextLyr,
@@ -2098,33 +2128,6 @@ async function renderPdfPage(num) {
   if (textLayerTask && textLayerTask.promise) {
     try { await textLayerTask.promise; } catch (_) {}
   }
-
-  /* Highlight overlay. */
-  pdfHlLyr.style.width  = viewport.width  + 'px';
-  pdfHlLyr.style.height = viewport.height + 'px';
-  renderHighlightsForCurrentPage();
-
-  /* Warm the next page in the background so ⏭ feels instant. We don't await
-     this — pdf.js caches the page object internally, so the next renderPdfPage
-     call hits a warm cache. */
-  if (pdfPageNum < pdfDoc.numPages) {
-    const nextNum = pdfPageNum + 1;
-    pdfDoc.getPage(nextNum).then(p => {
-      if (myToken !== renderToken) return;
-      try { p.getTextContent(); } catch (_) {}
-    }).catch(() => {});
-  }
-
-  /* UI sync. */
-  pdfPageIn.value     = pdfPageNum;
-  pdfPrevBtn.disabled = pdfPageNum <= 1;
-  pdfFirstBtn.disabled = pdfPageNum <= 1;
-  pdfNextBtn.disabled = pdfPageNum >= pdfDoc.numPages;
-  pdfLastBtn.disabled = pdfPageNum >= pdfDoc.numPages;
-  pdfZoomLbl.textContent = Math.round(pdfScale / fitScale * 100) + '%';
-
-  pdfViewport.scrollTop  = 0;
-  pdfViewport.scrollLeft = 0;
 }
 
 function jumpToPage(page) {

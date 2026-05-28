@@ -10,7 +10,7 @@ const BOOKS = [
     cls:      "Class 11",
     subject:  "biology",
     type:     "book",
-    file:     "books/biology class 11.pdf",
+    file:     "books/biology class 11.pdf?v=1",
     pages:    504,
     gradient: "linear-gradient(160deg,#2e6b3a 0%,#1a4022 60%,#0f2914 100%)"
   },
@@ -21,7 +21,7 @@ const BOOKS = [
     cls:      "Class 12",
     subject:  "biology",
     type:     "book",
-    file:     "books/BIology classs 12.pdf",
+    file:     "books/BIology classs 12.pdf?v=1",
     pages:    586,
     gradient: "linear-gradient(160deg,#5d2a52 0%,#341330 60%,#1d0a1a 100%)"
   }

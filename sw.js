@@ -19,7 +19,7 @@
    To force every client to drop its cached copies, bump CACHE_VERSION below —
    the activate handler deletes any cache whose name doesn't match. */
 
-const CACHE_VERSION = 'mecee-v15'; // bumped: flush corrupted PDF cache entries
+const CACHE_VERSION = 'mecee-v16'; // bumped: PDFs now bypass SW entirely
 
 const SHELL = [
   '/',
@@ -92,12 +92,13 @@ self.addEventListener('fetch', event => {
   // Don't intercept the worker itself or its updates.
   if (url.pathname === '/sw.js') return;
 
-  // Large binaries (PDF, MP3) are excluded from the SW cache entirely.
-  // Their Cache-Control: immutable header makes the browser HTTP cache
-  // handle reuse. Bypassing SW caching avoids cloning a large
-  // ReadableStream body, which races stream readers and corrupts the
-  // response body returned to the caller.
-  const isBigBinary = /\.(pdf|mp3)$/i.test(url.pathname);
+  // Large binaries (PDF, MP3): bypass SW entirely — don't intercept.
+  // Intercepting and cloning a 10-30 MB ReadableStream while also writing
+  // it to the Cache API races the two readers and can corrupt the body,
+  // causing PDF.js to throw "Invalid PDF structure". Let the browser's
+  // own HTTP cache layer handle these (controlled by Cache-Control headers
+  // set by the server).
+  if (/\.(pdf|mp3)$/i.test(url.pathname)) return;
 
   event.respondWith(
     caches.open(CACHE_VERSION).then(cache =>
@@ -108,16 +109,13 @@ self.addEventListener('fetch', event => {
           // Only cache real successes. opaque (no-cors) responses have
           // status=0; basic = same-origin; we restrict to basic+200 to avoid
           // poisoning the cache with redirects or partial content.
-          // Skip large binaries — see note above.
-          if (!isBigBinary && resp && resp.status === 200 && resp.type === 'basic') {
+          if (resp && resp.status === 200 && resp.type === 'basic') {
             cache.put(req, resp.clone()).catch(() => {});
           }
           return resp;
         }).catch(() => cached);  // Offline? Fall back to whatever we had.
 
-        // For big binaries always go to network (or HTTP cache);
-        // for everything else return SW cache immediately if available.
-        return (!isBigBinary && cached) || networkFetch;
+        return cached || networkFetch;
       })
     )
   );

@@ -191,16 +191,17 @@ class QuietHandler(http.server.SimpleHTTPRequestHandler):
             # no-cache here removes any HTTP-layer cache confusion.
             self.send_header("Cache-Control", "no-cache")
         elif path.endswith(self._IMMUTABLE_EXT):
-            # User-uploaded PDFs live under books/<subject>/ (nested path).
-            # They can be deleted and re-uploaded, so "immutable" is wrong —
-            # a stale cached entry would survive well past the file's lifetime.
-            # Give them a short TTL so the browser re-checks within a day.
-            # Built-in PDFs (flat books/*.pdf) and audio/images are truly
-            # immutable (new files always get new names), so cache hard.
-            if path.endswith(".pdf") and path.count("/") >= 3:
-                # e.g. /books/biology/Notecopy1.pdf  → 3 slashes
-                self.send_header("Cache-Control", "public, max-age=86400")
+            if path.endswith(".pdf"):
+                # All PDFs use no-cache so the browser always revalidates with
+                # If-Modified-Since before serving from its HTTP cache. This
+                # means a corrupted cached copy is replaced on the very next
+                # request rather than surviving for days under an immutable TTL.
+                # The server returns 304 Not Modified when nothing changed, so
+                # repeat opens are still fast (no body re-download).
+                self.send_header("Cache-Control", "no-cache")
             else:
+                # Audio, images, fonts — new files always get new names, so
+                # hard-cache them for 30 days as immutable.
                 self.send_header("Cache-Control", "public, max-age=2592000, immutable")
             # Advertise range-request support so PDF.js can fetch pages on
             # demand instead of downloading the whole file up front.

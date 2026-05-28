@@ -2251,7 +2251,7 @@ const BOOKMARKS_KEY = MeceeKeys.BOOKMARKS;
    matters a lot for a biology/physics textbook. We render at ~900px on the
    long side — sharp enough for OCR + diagram comprehension, light enough to
    not blow out vision-token budgets. */
-const PAGE_RENDER_WIDTH = 900;
+const PAGE_RENDER_WIDTH = 768;
 
 function readDecks() {
   try {
@@ -2734,12 +2734,11 @@ function renderBookmarkList() {
 let pages = [];
 
 async function loadPdf(book) {
-  /* Fast path: URL loading with range requests (server now supports them). */
+  const pdfUrl = /\?/.test(book.file) ? book.file : book.file + '?v=1';
   try {
-    return await pdfjsLib.getDocument(book.file).promise;
+    return await pdfjsLib.getDocument(pdfUrl).promise;
   } catch (_) {
-    /* Fallback: fetch all bytes, bypassing stale HTTP cache entries. */
-    const resp = await fetch(book.file, { cache: 'no-store' });
+    const resp = await fetch(pdfUrl, { cache: 'no-store' });
     if (!resp.ok) throw new Error(`Unexpected server response (${resp.status}) while retrieving PDF.`);
     const buf = await resp.arrayBuffer();
     return await pdfjsLib.getDocument({ data: new Uint8Array(buf) }).promise;
@@ -2784,11 +2783,16 @@ document.getElementById('genPreviewBtn').addEventListener('click', async () => {
   }
   pages = [];
   try {
-    for (let p = from; p <= to; p++) {
-      setStatus('genStatus', `Rendering page ${p} of ${to}…`, 'busy');
-      const dataUrl = await renderPageImage(pdf, p);
-      pages.push({ page: p, dataUrl, include: true });
-      renderPagePreview();   // progressive — show tiles as they finish
+    for (let p = from; p <= to; p += 2) {
+      const end = Math.min(p + 1, to);
+      setStatus('genStatus', `Rendering page${end > p ? 's ' + p + '–' + end : ' ' + p} of ${to}…`, 'busy');
+      const batch = await Promise.all(
+        Array.from({ length: end - p + 1 }, (_, i) =>
+          renderPageImage(pdf, p + i).then(dataUrl => ({ page: p + i, dataUrl, include: true }))
+        )
+      );
+      batch.forEach(r => pages.push(r));
+      renderPagePreview();
     }
   } catch (e) {
     setStatus('genStatus', `Render error: ${e?.message || e}`, 'err');
@@ -3292,10 +3296,15 @@ async function addImgFiles(fileList) {
       try {
         const buf = await f.arrayBuffer();
         const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
-        for (let p = 1; p <= pdf.numPages; p++) {
-          setStatus('imgStatus', `Rendering ${f.name} — page ${p} / ${pdf.numPages}…`, 'busy');
-          const dataUrl = await renderPageImage(pdf, p);
-          imgFiles.push({ dataUrl, name: `${f.name} · p${p}` });
+        for (let p = 1; p <= pdf.numPages; p += 2) {
+          const end = Math.min(p + 1, pdf.numPages);
+          setStatus('imgStatus', `Rendering ${f.name} — page${end > p ? 's ' + p + '–' + end : ' ' + p} / ${pdf.numPages}…`, 'busy');
+          const batch = await Promise.all(
+            Array.from({ length: end - p + 1 }, (_, i) =>
+              renderPageImage(pdf, p + i).then(dataUrl => ({ dataUrl, name: `${f.name} · p${p + i}` }))
+            )
+          );
+          batch.forEach(r => imgFiles.push(r));
           renderImgThumbs();
         }
         setStatus('imgStatus', `✓ Loaded ${pdf.numPages} page(s) from ${f.name}.`, 'ok');
@@ -3501,17 +3510,23 @@ async function selectNote(note) {
          exists from an older app version. */
       setStatus('notesStatus', `Rendering "${note.title}"…`, 'busy');
       let pdf;
+      const noteUrl = /\?/.test(note.file) ? note.file : note.file + '?v=1';
       try {
-        pdf = await pdfjsLib.getDocument(note.file).promise;
+        pdf = await pdfjsLib.getDocument(noteUrl).promise;
       } catch (_) {
-        const resp = await fetch(note.file, { cache: 'no-store' });
+        const resp = await fetch(noteUrl, { cache: 'no-store' });
         if (!resp.ok) throw new Error(`Unexpected server response (${resp.status}).`);
         pdf = await pdfjsLib.getDocument({ data: new Uint8Array(await resp.arrayBuffer()) }).promise;
       }
-      for (let p = 1; p <= pdf.numPages; p++) {
-        setStatus('notesStatus', `Rendering page ${p} / ${pdf.numPages}…`, 'busy');
-        const dataUrl = await renderPageImage(pdf, p);
-        notesFiles.push({ dataUrl, name: `${note.title} · p${p}` });
+      for (let p = 1; p <= pdf.numPages; p += 2) {
+        const end = Math.min(p + 1, pdf.numPages);
+        setStatus('notesStatus', `Rendering page${end > p ? 's ' + p + '–' + end : ' ' + p} / ${pdf.numPages}…`, 'busy');
+        const batch = await Promise.all(
+          Array.from({ length: end - p + 1 }, (_, i) =>
+            renderPageImage(pdf, p + i).then(dataUrl => ({ dataUrl, name: `${note.title} · p${p + i}` }))
+          )
+        );
+        batch.forEach(r => notesFiles.push(r));
         renderNotesThumbs();
       }
       setStatus('notesStatus', `✓ Loaded ${pdf.numPages} page(s).`, 'ok');
