@@ -1,6 +1,9 @@
 .claude/
+.commandcode/
 __pycache__/
 *.pyc
 .DS_Store
+Thumbs.db
 Playlist/
 books/
+.mecee-secrets/
