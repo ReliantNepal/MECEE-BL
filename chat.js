@@ -690,7 +690,7 @@ function openSettings() {
   document.getElementById('systemPromptInput').value = localStorage.getItem(KEY_PROMPT) || DEFAULT_PROMPT;
   modal.classList.add('show');
 }
-document.getElementById('settingsBtn').addEventListener('click', openSettings);
+document.getElementById('aiSettingsBtn').addEventListener('click', openSettings);
 document.getElementById('cancelSettings').addEventListener('click', () => modal.classList.remove('show'));
 document.getElementById('saveSettings').addEventListener('click', () => {
   const k = document.getElementById('apiKeyInput').value.trim();

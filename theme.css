@@ -621,6 +621,20 @@ html, body { margin: 0; padding: 0; }
   /* background set inline via --wp-accent CSS variable on the tile */
   background: var(--wp-accent, transparent);
 }
+/* Emoji scatter shown on forest / coffee tiles */
+.wp-preview-emojis {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  font-size: 18px;
+  opacity: 0.55;
+  pointer-events: none;
+  letter-spacing: 1px;
+}
+
 /* floating "app window" card inside the preview */
 .wp-preview-card {
   position: absolute;
@@ -679,4 +693,32 @@ html, body { margin: 0; padding: 0; }
   .wp-grid { grid-template-columns: repeat(2, 1fr); }
   .wp-card { padding: 14px; border-radius: 16px; }
   .wp-preview { height: 68px; }
+}
+
+/* ============================================================
+   Emoji background layer (forest / coffee themes)
+   Injected by wallpaper.js as the first child of <body> so all
+   page content (painted later in tree order) sits on top of it.
+   ============================================================ */
+@keyframes mecee-emoji-float {
+  0%, 100% { transform: translateY(0px)   rotate(0deg);  }
+  30%       { transform: translateY(-14px) rotate(-4deg); }
+  65%       { transform: translateY(-26px) rotate(5deg);  }
+  80%       { transform: translateY(-10px) rotate(-2deg); }
+}
+
+#mecee-emoji-bg {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+#mecee-emoji-bg .em {
+  position: absolute;
+  animation: mecee-emoji-float ease-in-out infinite;
+  line-height: 1;
+  will-change: transform;
 }
