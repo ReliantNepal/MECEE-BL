@@ -2873,11 +2873,14 @@ document.getElementById('genPreviewBtn').addEventListener('click', async () => {
   }
   pages = [];
   try {
-    /* Render 4 pages in parallel — PDF.js worker handles raster decode off
-       the main thread, so most of these run truly concurrently. Stepping
-       up from 2 → 4 roughly halves wall-clock time for a 50-page range on
-       a multi-core machine, with no UI freeze because encoding is async. */
-    const BATCH = 4;
+    /* How many pages to render at once. PDF.js parses in a worker, but the
+       actual page.render() rasterization runs on the main thread — so on a
+       single-core host (e.g. running the browser on the VPS itself) firing 4
+       at once just floods that one core and freezes the tab ("unresponsive").
+       2 keeps a little worker/main overlap while yielding to the event loop
+       every couple of pages so the UI stays alive. Raise this to 4+ only on a
+       genuinely multi-core client. */
+    const BATCH = 2;
     for (let p = from; p <= to; p += BATCH) {
       const end = Math.min(p + BATCH - 1, to);
       setStatus('genStatus', `Rendering page${end > p ? 's ' + p + '–' + end : ' ' + p} of ${to}…`, 'busy');
@@ -3391,7 +3394,7 @@ async function addImgFiles(fileList) {
       try {
         const buf = await f.arrayBuffer();
         const pdf = await pdfjsLib.getDocument({ data: buf, ...PDFJS_OPTS }).promise;
-        const BATCH = 4;
+        const BATCH = 2;   // single-core friendly — see note in the books path
         for (let p = 1; p <= pdf.numPages; p += BATCH) {
           const end = Math.min(p + BATCH - 1, pdf.numPages);
           setStatus('imgStatus', `Rendering ${f.name} — page${end > p ? 's ' + p + '–' + end : ' ' + p} / ${pdf.numPages}…`, 'busy');
@@ -3615,7 +3618,7 @@ async function selectNote(note) {
         if (!resp.ok) throw new Error(`Unexpected server response (${resp.status}).`);
         pdf = await pdfjsLib.getDocument({ data: new Uint8Array(await resp.arrayBuffer()), ...PDFJS_OPTS }).promise;
       }
-      const BATCH = 4;
+      const BATCH = 2;   // single-core friendly — see note in the books path
       for (let p = 1; p <= pdf.numPages; p += BATCH) {
         const end = Math.min(p + BATCH - 1, pdf.numPages);
         setStatus('notesStatus', `Rendering page${end > p ? 's ' + p + '–' + end : ' ' + p} / ${pdf.numPages}…`, 'busy');
