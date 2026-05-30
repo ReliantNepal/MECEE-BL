@@ -471,6 +471,7 @@
 <link rel="stylesheet" href="cursor.css" />
 <link rel="stylesheet" href="contextmenu.css" />
 <script src="mecee_keys.js"></script>
+<script defer src="wallpaper.js"></script>
 <script defer src="cursor.js"></script>
 <script defer src="contextmenu.js"></script>
 </head>
@@ -487,7 +488,7 @@
         <a href="library.html" class="nav-btn">📚 Library</a>
         <a href="flashcards.html" class="nav-btn">🧠 Flashcards</a>
         <a href="chat.html" class="nav-btn">🤖 AI Tutor</a>
-        <button class="nav-btn" id="themeToggle">🌙 Dark</button>
+        <button class="nav-btn" id="wallpaperBtn" title="Wallpaper">⚙️</button>
       </div>
     </div>
 
@@ -600,17 +601,8 @@
 
 <script>
   const THEME_KEY = MeceeKeys.THEME;
-  const themeBtn = document.getElementById('themeToggle');
-  function applyTheme(t) {
-    document.documentElement.setAttribute('data-theme', t);
-    themeBtn.textContent = t === 'dark' ? '☀️ Light' : '🌙 Dark';
-    localStorage.setItem(THEME_KEY, t);
-  }
-  applyTheme(localStorage.getItem(THEME_KEY) || 'dark');
-  themeBtn.addEventListener('click', () => {
-    const cur = document.documentElement.getAttribute('data-theme');
-    applyTheme(cur === 'dark' ? 'light' : 'dark');
-  });
+  /* Theme handled by wallpaper.js */
+  (function () { var t = localStorage.getItem(THEME_KEY); if (t) document.documentElement.setAttribute('data-theme', t); })();
 
   /* ===== LIVE "NOW" HIGHLIGHT ===== */
   const DAY_NAMES = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];

@@ -17,6 +17,7 @@
 <link rel="stylesheet" href="cursor.css" />
 <link rel="stylesheet" href="contextmenu.css" />
 <script src="mecee_keys.js"></script>
+<script defer src="wallpaper.js"></script>
 <script defer src="cursor.js"></script>
 <script defer src="contextmenu.js"></script>
 <script defer src="sync.js"></script>
@@ -674,7 +675,7 @@
         <a href="flashcards.html" class="theme-toggle" style="text-decoration:none;">🧠 Flashcards</a>
         <a href="chat.html" class="theme-toggle" style="text-decoration:none;">🤖 AI Tutor</a>
         <a href="routine.html" class="theme-toggle" style="text-decoration:none;">📅 Routine</a>
-        <button class="theme-toggle" id="themeToggle">🌙 Dark</button>
+        <button class="theme-toggle" id="wallpaperBtn" title="Wallpaper">⚙️</button>
       </div>
     </div>
 
@@ -1134,18 +1135,11 @@ window.onMeceeSyncApplied = function () {
   refresh();
 };
 
-/* ---------- THEME TOGGLE ---------- */
-const themeBtn = document.getElementById('themeToggle');
-function applyTheme(t) {
-  document.documentElement.setAttribute('data-theme', t);
-  themeBtn.textContent = t === 'dark' ? '☀️ Light' : '🌙 Dark';
-  localStorage.setItem(THEME_KEY, t);
-}
-applyTheme(localStorage.getItem(THEME_KEY) || 'dark');
-themeBtn.addEventListener('click', () => {
-  const cur = document.documentElement.getAttribute('data-theme');
-  applyTheme(cur === 'dark' ? 'light' : 'dark');
-});
+/* ---------- THEME — handled by wallpaper.js ---------- */
+(function () {
+  var t = localStorage.getItem(THEME_KEY);
+  if (t) document.documentElement.setAttribute('data-theme', t);
+})();
 
 /* ---------- RESET ---------- */
 document.getElementById('resetBtn').addEventListener('click', () => {

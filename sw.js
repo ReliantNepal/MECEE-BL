@@ -19,7 +19,7 @@
    To force every client to drop its cached copies, bump CACHE_VERSION below —
    the activate handler deletes any cache whose name doesn't match. */
 
-const CACHE_VERSION = 'mecee-v20'; // bumped: library re-fetches from disk on cabinet open/close; fixed close→reopen showing previous book
+const CACHE_VERSION = 'mecee-v22'; // bumped: fix theme CSS specificity (:root[data-theme])
 
 const SHELL = [
   '/',
@@ -37,6 +37,7 @@ const SHELL = [
   '/notes.css',
   '/chat.css',
   '/mecee_keys.js',
+  '/wallpaper.js',
   '/cursor.js',
   '/contextmenu.js',
   '/queue.js',

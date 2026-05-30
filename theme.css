@@ -337,3 +337,346 @@ html, body { margin: 0; padding: 0; }
   .mecee-sync-card { width: calc(100vw - 24px); }
   .mecee-sync-launcher { bottom: 18px; left: 18px; }
 }
+
+/* ============================================================
+   Extra themes (midnight / forest / sunset / ocean / rose / coffee)
+   Each defines all CSS variables used across pages so every
+   page looks correct when these themes are selected.
+   ============================================================ */
+
+/* Using :root[data-theme="x"] (specificity 0,2,0) so these rules beat each
+   page's inline :root { } block (specificity 0,1,0) which would otherwise
+   always override the variables defined here. */
+
+:root[data-theme="midnight"] {
+  --bg: #070d1a;
+  --surface: #0f1929;
+  --surface-2: #162035;
+  --surface-3: #1e2d45;
+  --text: #dce8f5;
+  --muted: #7aa3c8;
+  --border: rgba(100,160,220,0.18);
+  --accent: #4d9de0;
+  --accent-text: #fff;
+  --done: #7dd3fc;
+  --good: #4ade80;
+  --bad: #f87171;
+  --biology: rgba(52,211,153,0.14);
+  --chemistry: rgba(96,165,250,0.18);
+  --physics: rgba(251,146,60,0.14);
+  --mat: rgba(192,132,252,0.16);
+  --revision: rgba(255,255,255,0.06);
+  --shadow-sm: 0 1px 3px rgba(0,0,0,.5);
+  --shadow-md: 0 4px 16px rgba(0,0,0,.55);
+  --shadow-lg: 0 22px 60px rgba(0,0,0,.7);
+  --user-bg: #4d9de0;
+  --user-text: #fff;
+  --ai-bg: #162035;
+}
+
+:root[data-theme="forest"] {
+  --bg: #060f08;
+  --surface: #0e1c11;
+  --surface-2: #152818;
+  --surface-3: #1e3521;
+  --text: #d4f0db;
+  --muted: #7abf8a;
+  --border: rgba(74,160,90,0.20);
+  --accent: #3db85c;
+  --accent-text: #fff;
+  --done: #86efac;
+  --good: #4ade80;
+  --bad: #f87171;
+  --biology: rgba(74,222,128,0.16);
+  --chemistry: rgba(96,165,250,0.14);
+  --physics: rgba(251,191,36,0.14);
+  --mat: rgba(192,132,252,0.14);
+  --revision: rgba(255,255,255,0.06);
+  --shadow-sm: 0 1px 3px rgba(0,0,0,.5);
+  --shadow-md: 0 4px 16px rgba(0,0,0,.55);
+  --shadow-lg: 0 22px 60px rgba(0,0,0,.7);
+  --user-bg: #3db85c;
+  --user-text: #fff;
+  --ai-bg: #152818;
+}
+
+:root[data-theme="sunset"] {
+  --bg: #150800;
+  --surface: #231200;
+  --surface-2: #321b00;
+  --surface-3: #422500;
+  --text: #fde8c8;
+  --muted: #c89060;
+  --border: rgba(200,130,60,0.22);
+  --accent: #f97316;
+  --accent-text: #fff;
+  --done: #fdba74;
+  --good: #4ade80;
+  --bad: #f87171;
+  --biology: rgba(52,211,153,0.14);
+  --chemistry: rgba(96,165,250,0.14);
+  --physics: rgba(251,146,60,0.22);
+  --mat: rgba(192,132,252,0.14);
+  --revision: rgba(255,255,255,0.06);
+  --shadow-sm: 0 1px 3px rgba(0,0,0,.5);
+  --shadow-md: 0 4px 16px rgba(0,0,0,.55);
+  --shadow-lg: 0 22px 60px rgba(0,0,0,.7);
+  --user-bg: #f97316;
+  --user-text: #fff;
+  --ai-bg: #321b00;
+}
+
+:root[data-theme="ocean"] {
+  --bg: #020c18;
+  --surface: #081829;
+  --surface-2: #0e233a;
+  --surface-3: #152f4c;
+  --text: #d4eeff;
+  --muted: #5fa8d3;
+  --border: rgba(30,150,200,0.20);
+  --accent: #06b6d4;
+  --accent-text: #fff;
+  --done: #67e8f9;
+  --good: #4ade80;
+  --bad: #f87171;
+  --biology: rgba(52,211,153,0.14);
+  --chemistry: rgba(96,165,250,0.20);
+  --physics: rgba(251,146,60,0.14);
+  --mat: rgba(192,132,252,0.14);
+  --revision: rgba(255,255,255,0.06);
+  --shadow-sm: 0 1px 3px rgba(0,0,0,.5);
+  --shadow-md: 0 4px 16px rgba(0,0,0,.55);
+  --shadow-lg: 0 22px 60px rgba(0,0,0,.7);
+  --user-bg: #06b6d4;
+  --user-text: #fff;
+  --ai-bg: #0e233a;
+}
+
+:root[data-theme="rose"] {
+  --bg: #0d0409;
+  --surface: #1c0c18;
+  --surface-2: #2a1225;
+  --surface-3: #3a1a33;
+  --text: #fce7f3;
+  --muted: #c47db5;
+  --border: rgba(200,80,160,0.20);
+  --accent: #ec4899;
+  --accent-text: #fff;
+  --done: #f9a8d4;
+  --good: #4ade80;
+  --bad: #f87171;
+  --biology: rgba(52,211,153,0.14);
+  --chemistry: rgba(96,165,250,0.14);
+  --physics: rgba(251,146,60,0.14);
+  --mat: rgba(192,132,252,0.20);
+  --revision: rgba(255,255,255,0.06);
+  --shadow-sm: 0 1px 3px rgba(0,0,0,.5);
+  --shadow-md: 0 4px 16px rgba(0,0,0,.55);
+  --shadow-lg: 0 22px 60px rgba(0,0,0,.7);
+  --user-bg: #ec4899;
+  --user-text: #fff;
+  --ai-bg: #2a1225;
+}
+
+:root[data-theme="coffee"] {
+  --bg: #0e0905;
+  --surface: #1e1308;
+  --surface-2: #2d1e0c;
+  --surface-3: #3d2a11;
+  --text: #f5e6cc;
+  --muted: #a88060;
+  --border: rgba(160,110,60,0.24);
+  --accent: #b45309;
+  --accent-text: #fff;
+  --done: #d4a574;
+  --good: #4ade80;
+  --bad: #f87171;
+  --biology: rgba(52,211,153,0.12);
+  --chemistry: rgba(96,165,250,0.12);
+  --physics: rgba(251,146,60,0.20);
+  --mat: rgba(192,132,252,0.12);
+  --revision: rgba(255,255,255,0.06);
+  --shadow-sm: 0 1px 3px rgba(0,0,0,.5);
+  --shadow-md: 0 4px 16px rgba(0,0,0,.55);
+  --shadow-lg: 0 22px 60px rgba(0,0,0,.7);
+  --user-bg: #b45309;
+  --user-text: #fff;
+  --ai-bg: #2d1e0c;
+}
+
+/* ============================================================
+   Wallpaper picker modal  (injected by wallpaper.js)
+   ============================================================ */
+.wp-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 10500;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+.wp-modal--open { display: flex; }
+.wp-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.60);
+  backdrop-filter: blur(5px);
+}
+.wp-card {
+  position: relative;
+  width: 480px;
+  max-width: calc(100vw - 28px);
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 22px;
+  box-shadow: 0 32px 80px rgba(0,0,0,.6);
+  font-family: inherit;
+  animation: wp-pop .17s ease-out;
+}
+@keyframes wp-pop {
+  from { transform: scale(.93) translateY(10px); opacity: 0; }
+  to   { transform: scale(1)   translateY(0);    opacity: 1; }
+}
+.wp-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+.wp-title {
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -.2px;
+}
+.wp-sub {
+  font-size: 11px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 1.3px;
+  margin-top: 3px;
+  font-weight: 600;
+}
+.wp-close {
+  background: transparent;
+  border: 0;
+  color: var(--muted);
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 2px 9px;
+  border-radius: 8px;
+  font-family: inherit;
+}
+.wp-close:hover { background: var(--surface-2); color: var(--text); }
+
+.wp-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 9px;
+}
+
+/* ── Individual tile ── */
+.wp-tile {
+  background: none;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  cursor: pointer;
+  padding: 0;
+  overflow: hidden;
+  font-family: inherit;
+  transition: transform .13s, box-shadow .13s, border-color .13s;
+  outline: none;
+  display: flex;
+  flex-direction: column;
+}
+.wp-tile:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0,0,0,.45);
+  border-color: rgba(255,255,255,.22);
+}
+.wp-tile--active {
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 1px var(--accent), 0 6px 20px rgba(0,0,0,.4);
+}
+
+/* ── Colour preview area ── */
+.wp-preview {
+  width: 100%;
+  height: 78px;
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
+  /* background set inline per-tile */
+}
+/* thin top-right corner accent stripe */
+.wp-preview::after {
+  content: '';
+  position: absolute;
+  top: 0; right: 0;
+  width: 28px; height: 4px;
+  border-radius: 0 0 0 4px;
+  /* background set inline via --wp-accent CSS variable on the tile */
+  background: var(--wp-accent, transparent);
+}
+/* floating "app window" card inside the preview */
+.wp-preview-card {
+  position: absolute;
+  bottom: 10px; left: 10px; right: 10px;
+  height: 42px;
+  border-radius: 7px;
+  padding: 7px 8px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  /* background set inline */
+}
+.wp-preview-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.wp-preview-bar {
+  height: 4px;
+  border-radius: 999px;
+  opacity: .7;
+  /* background + width set inline */
+}
+.wp-preview-btn {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-left: auto;
+  /* background set inline */
+}
+
+/* ── Label row ── */
+.wp-tile-label {
+  font-size: 11.5px;
+  font-weight: 500;
+  text-align: center;
+  padding: 6px 4px 7px;
+  letter-spacing: .1px;
+  background: var(--surface);
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  flex: 1;
+}
+.wp-tile--active .wp-tile-label {
+  font-weight: 700;
+}
+/* checkmark badge on active tile */
+.wp-tile--active .wp-tile-check { display: inline; }
+.wp-tile-check { display: none; font-style: normal; opacity: .8; }
+
+@media (max-width: 500px) {
+  .wp-grid { grid-template-columns: repeat(2, 1fr); }
+  .wp-card { padding: 14px; border-radius: 16px; }
+  .wp-preview { height: 68px; }
+}

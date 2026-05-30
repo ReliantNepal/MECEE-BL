@@ -50,18 +50,11 @@ function getEffectiveApiKey() {
   return FILE_OPENAI_KEY || localStorage.getItem(KEY_API);
 }
 
-/* ===== THEME ===== */
-const themeBtn = document.getElementById('themeToggle');
-function applyTheme(t) {
-  document.documentElement.setAttribute('data-theme', t);
-  themeBtn.textContent = t === 'dark' ? '☀️' : '🌙';
-  localStorage.setItem(THEME_KEY, t);
-}
-applyTheme(localStorage.getItem(THEME_KEY) || 'dark');
-themeBtn.addEventListener('click', () => {
-  const cur = document.documentElement.getAttribute('data-theme');
-  applyTheme(cur === 'dark' ? 'light' : 'dark');
-});
+/* ===== THEME — handled by wallpaper.js ===== */
+(function () {
+  var t = localStorage.getItem(THEME_KEY);
+  if (t) document.documentElement.setAttribute('data-theme', t);
+})();
 
 /* ===== FULL SYLLABUS TREE (Subject → Unit → Chapter → Micro) ===== */
 const SYLLABUS_TREE = {
