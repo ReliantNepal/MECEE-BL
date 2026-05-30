@@ -1294,20 +1294,13 @@
   <audio id="playerAudio" preload="none"></audio>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="Assets/pdfjs/pdf.min.js"></script>
 <script>
+  /* Same-origin local copy of pdf.js — no CDN round-trips, no 403s on
+     missing cmaps/fonts, works offline. The worker is also local so
+     `importScripts` resolves directly without a blob shim. */
   if (window.pdfjsLib) {
-    /* Wrap the CDN worker in a same-origin blob so the worker can fetch
-       local PDFs without cross-origin restrictions blocking the request. */
-    try {
-      const blob = new Blob(
-        [`importScripts('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js');`],
-        { type: 'text/javascript' }
-      );
-      pdfjsLib.GlobalWorkerOptions.workerSrc = URL.createObjectURL(blob);
-    } catch (_) {
-      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-    }
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'Assets/pdfjs/pdf.worker.min.js';
   }
 </script>
 <script src="books.js"></script>
@@ -1425,7 +1418,7 @@ function showHome() {
   renderCabinetGrid();
 }
 
-function showCabinet(subject) {
+async function showCabinet(subject) {
   if (!subjectInfo(subject)) return;
   currentSubject = subject;
   cabinetGrid.hidden = true;
@@ -1436,7 +1429,20 @@ function showCabinet(subject) {
   /* Start on Books each time you enter a cabinet — most common case. */
   activeTab = 'book';
   syncTabUI();
-  renderShelf();
+  /* Re-pull the catalog from disk (books/user-library.json) before painting
+     the shelf so any file added or removed since this page loaded shows up
+     without a hard refresh. The localStorage cache inside loadUserBooks() is
+     only the fallback when the launcher is unreachable. */
+  renderShelf();          // paint immediately from current memory (no flash)
+  try {
+    const fresh = await loadUserBooks();
+    /* Only repaint if the disk catalog actually differs — avoid the brief
+       flicker of re-rendering identical content. */
+    if (JSON.stringify(fresh) !== JSON.stringify(userBooks)) {
+      userBooks = fresh;
+      renderShelf();
+    }
+  } catch (_) { /* keep showing what we already have */ }
 }
 
 function setActiveTab(tab) {
@@ -1924,6 +1930,34 @@ let fitScale    = 1.0;
 let renderTask  = null;
 let renderToken = 0;          // monotonic counter — newest render wins
 let textLayerTask = null;
+/* LRU of recently rendered pages keyed by `${pageNum}@${scale.toFixed(3)}`.
+   Value = ImageBitmap of the canvas pixels. Hitting the cache lets a
+   back-flip paint instantly with no PDF.js work. Bounded to 6 entries
+   so memory stays modest even for big textbooks. */
+const pageBitmapCache = new Map();
+const PAGE_CACHE_MAX = 6;
+function cachePut(key, bmp) {
+  if (pageBitmapCache.has(key)) pageBitmapCache.delete(key);
+  pageBitmapCache.set(key, bmp);
+  while (pageBitmapCache.size > PAGE_CACHE_MAX) {
+    const oldKey = pageBitmapCache.keys().next().value;
+    const oldBmp = pageBitmapCache.get(oldKey);
+    pageBitmapCache.delete(oldKey);
+    try { oldBmp.close && oldBmp.close(); } catch (_) {}
+  }
+}
+function cacheGet(key) {
+  const bmp = pageBitmapCache.get(key);
+  if (bmp) {                  // refresh LRU position
+    pageBitmapCache.delete(key);
+    pageBitmapCache.set(key, bmp);
+  }
+  return bmp;
+}
+function cacheClear() {
+  for (const bmp of pageBitmapCache.values()) { try { bmp.close && bmp.close(); } catch (_) {} }
+  pageBitmapCache.clear();
+}
 
 function showPdfError(file, err) {
   const box   = document.getElementById('pdfError');
@@ -1963,11 +1997,24 @@ async function openBook(book, startPage) {
   document.body.classList.add('reader-open');
   requestFullscreen();
 
-  /* Tear down anything from a previous open — both modes. */
+  /* Tear down anything from a previous open — both modes.
+     Bumping renderToken invalidates any in-flight renderPdfPage() left
+     over from the previous book: when its awaited render or text-content
+     promise eventually resolves, it sees the newer token and bails
+     instead of painting the old book's content onto the new canvas
+     (this is what caused "open A, close, open B → shows A"). */
+  ++renderToken;
   if (pdfDoc) { try { pdfDoc.destroy(); } catch (_) {} pdfDoc = null; }
+  cacheClear();
   pdfCanvas.width = pdfCanvas.height = 0;
   pdfTextLyr.innerHTML = '';
   pdfHlLyr.innerHTML   = '';
+  /* Empty-string src then removeAttribute is the cross-browser reliable
+     way to drop the previously rendered bitmap immediately. Just calling
+     removeAttribute leaves the old image painted in some browsers until
+     the new src finishes loading, which is the visible "shows previous
+     note" bug for image notes. */
+  imgViewer.src = '';
   imgViewer.removeAttribute('src');
 
   if (isImageItem(book)) {
@@ -1998,15 +2045,24 @@ async function openBook(book, startPage) {
      still work because the server strips the query string before serving. */
   const pdfUrl = /\?/.test(book.file) ? book.file : book.file + '?v=1';
 
+  /* Loader options — `useSystemFonts: true` lets PDF.js substitute the
+     14 standard PostScript fonts (Helvetica, Times, …) with the OS fonts
+     instead of downloading the embedded subsets, saving a large per-open
+     cost on textbooks. We intentionally do NOT set cMapUrl /
+     standardFontDataUrl: pointing at a CDN that 403s (cdnjs doesn't
+     host those directories) makes PDF.js stall on retries. For latin
+     textbooks the substitution path is enough. */
+  const PDFJS_OPTS = { useSystemFonts: true };
+
   try {
     try {
-      pdfDoc = await pdfjsLib.getDocument(pdfUrl).promise;
+      pdfDoc = await pdfjsLib.getDocument({ url: pdfUrl, ...PDFJS_OPTS }).promise;
     } catch (_urlErr) {
       /* Fallback: download all bytes, bypassing cache entirely. */
       const resp = await fetch(pdfUrl, { cache: 'no-store' });
       if (!resp.ok) throw new Error(`Unexpected server response (${resp.status}) while retrieving PDF.`);
       const buf = await resp.arrayBuffer();
-      pdfDoc = await pdfjsLib.getDocument({ data: new Uint8Array(buf) }).promise;
+      pdfDoc = await pdfjsLib.getDocument({ data: new Uint8Array(buf), ...PDFJS_OPTS }).promise;
     }
   } catch (err) {
     pdfLoadingEl.hidden = true;
@@ -2060,12 +2116,32 @@ async function renderPdfPage(num) {
   if (renderTask) { try { renderTask.cancel(); } catch (_) {} renderTask = null; }
   if (textLayerTask && textLayerTask.cancel) { try { textLayerTask.cancel(); } catch (_) {} textLayerTask = null; }
 
+  /* HiDPI: draw the canvas at devicePixelRatio for sharpness, but lay it out at CSS pixels.
+     Cap at 1.5 (not the device's full DPR) — at 2x the canvas has 4× the pixel
+     count of CSS, which is the dominant cost in PDF.js rendering. 1.5 looks
+     visually indistinguishable from 2 on most screens but renders ~44% faster. */
+  const dpr = Math.max(1, Math.min(1.5, window.devicePixelRatio || 1));
+  /* Include the book's identity in the key so a stale bitmap from a
+     previously-open book can never satisfy a lookup for the current one,
+     even if the bookbump-and-clear teardown above gets racy. */
+  const bookKey = (currentBook && (currentBook.id || currentBook.file)) || '?';
+  const cacheKey = `${bookKey}|${pdfPageNum}@${pdfScale.toFixed(3)}x${dpr}`;
+
   const page = await pdfDoc.getPage(pdfPageNum);
   if (myToken !== renderToken) return;          // newer render started — bail
 
   const viewport = page.getViewport({ scale: pdfScale });
-  /* HiDPI: draw the canvas at devicePixelRatio for sharpness, but lay it out at CSS pixels. */
-  const dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+
+  /* Warm next page ASAP — kick off the getPage fetch in parallel with our
+     own render, not after. PDF.js's worker can decode the next page's xref
+     while the canvas paints, so the next flip is much closer to instant. */
+  if (pdfPageNum < pdfDoc.numPages) {
+    pdfDoc.getPage(pdfPageNum + 1).then(p => {
+      if (myToken !== renderToken) return;
+      try { p.getTextContent(); } catch (_) {}
+    }).catch(() => {});
+  }
+
   pdfCanvas.width  = Math.floor(viewport.width  * dpr);
   pdfCanvas.height = Math.floor(viewport.height * dpr);
   pdfCanvas.style.width  = viewport.width  + 'px';
@@ -2074,16 +2150,36 @@ async function renderPdfPage(num) {
   pdfPageEl.style.height = viewport.height + 'px';
 
   const ctx = pdfCanvas.getContext('2d');
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-  /* Kick off canvas render AND text-content fetch simultaneously — they both
-     need only the page object (already in hand) and are fully independent. */
-  renderTask = page.render({ canvasContext: ctx, viewport });
-  const textContentPromise = page.getTextContent().catch(() => null);
+  /* Cache hit — blit the previous bitmap and skip the expensive raster.
+     We still kick off the text layer below so selection works. */
+  const cachedBmp = cacheGet(cacheKey);
+  let textContentPromise;
+  if (cachedBmp) {
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.drawImage(cachedBmp, 0, 0, pdfCanvas.width, pdfCanvas.height);
+    textContentPromise = page.getTextContent().catch(() => null);
+  } else {
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-  try { await renderTask.promise; }
-  catch (e) { if (e && e.name !== 'RenderingCancelledException') throw e; return; }
-  if (myToken !== renderToken) return;
+    /* Kick off canvas render AND text-content fetch simultaneously — they both
+       need only the page object (already in hand) and are fully independent. */
+    renderTask = page.render({ canvasContext: ctx, viewport });
+    textContentPromise = page.getTextContent().catch(() => null);
+
+    try { await renderTask.promise; }
+    catch (e) { if (e && e.name !== 'RenderingCancelledException') throw e; return; }
+    if (myToken !== renderToken) return;
+
+    /* Snapshot the freshly painted canvas into an ImageBitmap so the next
+       visit to this (page, scale) is a no-render blit. createImageBitmap is
+       async + GPU-friendly; failing back to no-cache is fine. */
+    try {
+      const bmp = await createImageBitmap(pdfCanvas);
+      if (myToken === renderToken) cachePut(cacheKey, bmp);
+      else { try { bmp.close && bmp.close(); } catch (_) {} }
+    } catch (_) {}
+  }
 
   /* Canvas is painted — update UI immediately so the user can flip pages
      without waiting for the text / highlight layers. */
@@ -2100,15 +2196,6 @@ async function renderPdfPage(num) {
   pdfHlLyr.style.width  = viewport.width  + 'px';
   pdfHlLyr.style.height = viewport.height + 'px';
   renderHighlightsForCurrentPage();
-
-  /* Warm next page while the text layer is finishing. */
-  if (pdfPageNum < pdfDoc.numPages) {
-    const nextNum = pdfPageNum + 1;
-    pdfDoc.getPage(nextNum).then(p => {
-      if (myToken !== renderToken) return;
-      try { p.getTextContent(); } catch (_) {}
-    }).catch(() => {});
-  }
 
   /* Text layer — by the time we reach here the fetch likely already finished
      in parallel with the canvas render, so this await is usually instant. */
@@ -2141,16 +2228,39 @@ function closeReader() {
   reader.classList.remove('open');
   document.body.classList.remove('reader-open');
   document.getElementById('pdfLoading').hidden = true;
+  /* Invalidate any in-flight renders so a late page.render() resolve from
+     the just-closed book can't paint into the canvas that the NEXT open
+     is about to use. Without this the next openBook() sometimes shows the
+     previous book until the user flips a page. */
+  ++renderToken;
   if (pdfDoc) { try { pdfDoc.destroy(); } catch (_) {} pdfDoc = null; }
+  cacheClear();
   pdfCanvas.width = pdfCanvas.height = 0;
   pdfTextLyr.innerHTML = '';
   pdfHlLyr.innerHTML = '';
+  /* Same dual src-clear pattern as openBook — single removeAttribute leaves
+     the old image visible in some browsers. */
+  imgViewer.src = '';
   imgViewer.removeAttribute('src');
   imgFiles = [];
   currentBook = null;
   sylPanel.classList.remove('open');
   hideHlButton();
   exitFullscreen();
+  /* When the reader closes, quietly refresh the catalog from disk so the
+     shelf behind it reflects any add / delete / rename that happened while
+     the user was reading. Cheap: one fetch + a string diff, no flicker if
+     the catalog is unchanged. */
+  (async () => {
+    if (!currentSubject) return;
+    try {
+      const fresh = await loadUserBooks();
+      if (JSON.stringify(fresh) !== JSON.stringify(userBooks)) {
+        userBooks = fresh;
+        renderShelf();
+      }
+    } catch (_) {}
+  })();
 }
 
 /* ===== Navigation controls =====

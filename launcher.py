@@ -240,6 +240,8 @@ class QuietHandler(http.server.SimpleHTTPRequestHandler):
             return self._sync_status()
         if parsed.path == "/api/worker-config":
             return self._worker_config()
+        if parsed.path == "/api/openai-key":
+            return self._openai_key()
         if parsed.path.startswith("/api/sync/state/"):
             return self._sync_state_pull(parsed.path[len("/api/sync/state/"):])
         if parsed.path.startswith("/api/sync/pdf/"):
@@ -880,6 +882,33 @@ class QuietHandler(http.server.SimpleHTTPRequestHandler):
         if not token:
             return self._json(200, {"enabled": False, "reason": "token empty"})
         self._json(200, {"enabled": True, "url": url, "token": token})
+
+    def _openai_key(self) -> None:
+        """Return the OpenAI API key stored in .mecee-secrets/OPENAIAPI.txt.
+        This is the permanent source of truth — the browser fetches it on
+        every load so a hard refresh never loses the key, and the user only
+        edits the file to change it. Returns {enabled:false} when missing
+        so the frontend can fall back to whatever's in localStorage."""
+        key_path = os.path.join(SECRETS_DIR, "OPENAIAPI.txt")
+        if not os.path.isfile(key_path):
+            return self._json(200, {"enabled": False, "reason": "no OPENAIAPI.txt"})
+        try:
+            # utf-8-sig drops a BOM if Notepad/PowerShell wrote one. Strip the
+            # leading zero-width-BOM char too (PowerShell Set-Content -Encoding
+            # utf8 emits ﻿ which would otherwise ride into the Authorization
+            # header and fetch() would refuse it as non-ISO-8859-1.)
+            with open(key_path, "r", encoding="utf-8-sig") as f:
+                key = f.read().strip().lstrip("﻿")
+        except Exception as e:
+            return self._json(200, {"enabled": False, "reason": f"unreadable: {e}"})
+        if not key:
+            return self._json(200, {"enabled": False, "reason": "empty file"})
+        # Sanity: OpenAI keys all start with "sk-". Don't ship anything else;
+        # a typo'd path that points at the wrong file shouldn't leak its
+        # contents into the browser.
+        if not key.startswith("sk-"):
+            return self._json(200, {"enabled": False, "reason": "not an OpenAI key"})
+        self._json(200, {"enabled": True, "key": key})
 
     def _sync_state_pull(self, category: str) -> None:
         if not self._r2_or_503(): return

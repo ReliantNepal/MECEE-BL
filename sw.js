@@ -19,7 +19,7 @@
    To force every client to drop its cached copies, bump CACHE_VERSION below —
    the activate handler deletes any cache whose name doesn't match. */
 
-const CACHE_VERSION = 'mecee-v16'; // bumped: PDFs now bypass SW entirely
+const CACHE_VERSION = 'mecee-v20'; // bumped: library re-fetches from disk on cabinet open/close; fixed close→reopen showing previous book
 
 const SHELL = [
   '/',
@@ -48,6 +48,10 @@ const SHELL = [
   '/nav-shim.js',
   '/chat.js',
   '/Playlist/tracks.js',
+  /* Local pdf.js — same-origin so the worker can fetch local PDFs without
+     CORS, and so the library/flashcards pages don't wait on cdnjs. */
+  '/Assets/pdfjs/pdf.min.js',
+  '/Assets/pdfjs/pdf.worker.min.js',
 ];
 
 self.addEventListener('install', event => {

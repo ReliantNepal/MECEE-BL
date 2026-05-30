@@ -1992,6 +1992,17 @@
                 <option value="all" selected>Auto — cover everything</option>
               </select>
             </div>
+            <div style="width:180px">
+              <label>Model</label>
+              <select id="notesModel">
+                <option value="gpt-5.5" selected>gpt-5.5</option>
+                <option value="gpt-5.5-instant">gpt-5.5-instant</option>
+                <option value="gpt-5.4-mini">gpt-5.4-mini</option>
+                <option value="gpt-5.4-nano">gpt-5.4-nano</option>
+                <option value="gpt-4o">gpt-4o (legacy)</option>
+                <option value="gpt-4o-mini">gpt-4o-mini (legacy)</option>
+              </select>
+            </div>
             <div style="flex:1;min-width:160px">
               <label>Deck name</label>
               <input type="text" id="notesDeckName" placeholder="auto" />
@@ -2033,6 +2044,17 @@
             <option value="12">12 cards</option>
             <option value="20">20 cards</option>
             <option value="all" selected>Auto — cover everything</option>
+          </select>
+        </div>
+        <div style="width:180px">
+          <label>Model</label>
+          <select id="imgModel">
+            <option value="gpt-5.5" selected>gpt-5.5</option>
+            <option value="gpt-5.5-instant">gpt-5.5-instant</option>
+            <option value="gpt-5.4-mini">gpt-5.4-mini</option>
+            <option value="gpt-5.4-nano">gpt-5.4-nano</option>
+            <option value="gpt-4o">gpt-4o (legacy)</option>
+            <option value="gpt-4o-mini">gpt-4o-mini (legacy)</option>
           </select>
         </div>
         <div style="flex:1;min-width:160px">
@@ -2209,21 +2231,12 @@
   </button>
 </div>
 
-<!-- PDF.js for extracting text from bookmarked pages. -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<!-- PDF.js for extracting text from bookmarked pages. Same-origin local copy
+     — no CDN dependency, no 403s, works offline. -->
+<script src="Assets/pdfjs/pdf.min.js"></script>
 <script>
   if (window.pdfjsLib) {
-    /* Wrap the CDN worker in a same-origin blob so the worker can fetch
-       local PDFs without cross-origin restrictions blocking the request. */
-    try {
-      const blob = new Blob(
-        [`importScripts('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js');`],
-        { type: 'text/javascript' }
-      );
-      pdfjsLib.GlobalWorkerOptions.workerSrc = URL.createObjectURL(blob);
-    } catch (_) {
-      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-    }
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'Assets/pdfjs/pdf.worker.min.js';
   }
 </script>
 <script src="books.js"></script>
@@ -2523,10 +2536,39 @@ function navHome() {
 }
 window.addEventListener('hashchange', applyViewFromHash);
 
+/* ===== OpenAI API key — file-sourced =====
+   The permanent source of truth is .mecee-secrets/OPENAIAPI.txt, served
+   by the launcher at /api/openai-key. The browser fetches it once on page
+   load and caches it in FILE_OPENAI_KEY, so a hard refresh always re-reads
+   from disk and the user only needs to edit the file to rotate the key.
+   localStorage is only used as a fallback when the launcher isn't running
+   (e.g. file:// open) so the page still works offline. */
+let FILE_OPENAI_KEY = null;
+async function loadFileOpenAIKey() {
+  try {
+    const r = await fetch('/api/openai-key', { cache: 'no-store' });
+    if (!r.ok) return;
+    const j = await r.json();
+    if (j && j.enabled && j.key) {
+      FILE_OPENAI_KEY = j.key;
+      /* Mirror into localStorage so AI Tutor (which still reads from there
+         on its own load) picks up the same value without the user touching
+         the settings modal. */
+      try { localStorage.setItem(KEY_API, j.key); } catch (_) {}
+    }
+  } catch (_) { /* launcher not reachable — fall back to localStorage */ }
+}
+/* Fire as early as possible; the click handlers are all async and re-check
+   FILE_OPENAI_KEY each time, so any in-flight fetch will be done by then. */
+loadFileOpenAIKey();
+
 function getApiKey() {
-  const k = localStorage.getItem(KEY_API);
+  /* File wins over localStorage. If the file endpoint hasn't responded yet
+     for some reason, fall back to whatever's cached locally — same UX as
+     before for users running file:// or with the launcher down. */
+  const k = FILE_OPENAI_KEY || localStorage.getItem(KEY_API);
   if (!k) {
-    alert('No OpenAI API key found.\n\nOpen the AI Tutor page (🤖), click ⚙️, and paste your key — it will be reused here.');
+    alert('No OpenAI API key found.\n\nPut your key in .mecee-secrets/OPENAIAPI.txt (one line starting with sk-…) and refresh — the launcher serves it to the page automatically.\n\nFallback: open the AI Tutor page (🤖), click ⚙️, and paste it there.');
     return null;
   }
   return k;
@@ -2549,6 +2591,27 @@ document.querySelectorAll('#modeSeg .seg').forEach(t => {
     document.getElementById('panel-' + t.dataset.tab).classList.add('active');
   });
 });
+
+/* ===== Model picker — Books / Images / Notes stay in sync =====
+   All three tabs use the same OpenAI account, so picking a model is a
+   global preference, not a per-tab one. We persist to localStorage under
+   `mecee_flashcard_model` so the choice survives a refresh, and mirror
+   the selected value across genModel / imgModel / notesModel so the user
+   sees the same answer in whichever tab they open next. */
+const FC_MODEL_KEY = 'mecee_flashcard_model';
+(function wireModelPickers() {
+  const sels = ['genModel', 'imgModel', 'notesModel']
+    .map(id => document.getElementById(id))
+    .filter(Boolean);
+  if (!sels.length) return;
+  const saved = localStorage.getItem(FC_MODEL_KEY);
+  if (saved) sels.forEach(s => { if ([...s.options].some(o => o.value === saved)) s.value = saved; });
+  sels.forEach(s => s.addEventListener('change', () => {
+    const v = s.value;
+    try { localStorage.setItem(FC_MODEL_KEY, v); } catch (_) {}
+    sels.forEach(other => { if (other !== s) other.value = v; });
+  }));
+})();
 
 /* ===== Per-tab "Clear" buttons =====
    Each tab keeps its own pending selection (bookmark range, picked note,
@@ -2733,28 +2796,53 @@ function renderBookmarkList() {
    show in the preview grid and send to the vision model. */
 let pages = [];
 
+/* Shared loader options — `useSystemFonts: true` lets PDF.js substitute
+   the 14 standard PostScript fonts (Helvetica, Times, …) with OS fonts
+   instead of downloading the embedded subsets. We intentionally do NOT
+   set cMapUrl / standardFontDataUrl: pointing at a CDN that 403s makes
+   PDF.js stall on retries (cdnjs does not host pdfjs's cmaps/ or
+   standard_fonts/ directories). For latin textbooks substitution is
+   enough; for non-latin PDFs PDF.js gracefully falls back to .notdef. */
+const PDFJS_OPTS = { useSystemFonts: true };
+
 async function loadPdf(book) {
   const pdfUrl = /\?/.test(book.file) ? book.file : book.file + '?v=1';
   try {
-    return await pdfjsLib.getDocument(pdfUrl).promise;
+    return await pdfjsLib.getDocument({ url: pdfUrl, ...PDFJS_OPTS }).promise;
   } catch (_) {
     const resp = await fetch(pdfUrl, { cache: 'no-store' });
     if (!resp.ok) throw new Error(`Unexpected server response (${resp.status}) while retrieving PDF.`);
     const buf = await resp.arrayBuffer();
-    return await pdfjsLib.getDocument({ data: new Uint8Array(buf) }).promise;
+    return await pdfjsLib.getDocument({ data: new Uint8Array(buf), ...PDFJS_OPTS }).promise;
   }
 }
 
 async function renderPageImage(pdf, num, maxW = PAGE_RENDER_WIDTH) {
   const page = await pdf.getPage(num);
   const v1   = page.getViewport({ scale: 1 });
-  const scale = Math.min(2, maxW / v1.width);
+  /* Cap the canvas at maxW logical pixels (no DPR multiplier — these are
+     thumbnails + vision-model inputs, not crisp on-screen reads). The
+     vision model can't see more detail than this, and rendering smaller
+     is dramatically faster. */
+  const scale = Math.min(1.5, maxW / v1.width);
   const vp   = page.getViewport({ scale });
   const c    = document.createElement('canvas');
   c.width  = Math.floor(vp.width);
   c.height = Math.floor(vp.height);
   await page.render({ canvasContext: c.getContext('2d'), viewport: vp }).promise;
-  return c.toDataURL('image/jpeg', 0.82);
+  /* Encode off the main thread via toBlob → FileReader. toDataURL is
+     synchronous and stalls the UI for ~50-200 ms per page on a textbook
+     scan; toBlob runs on a worker thread inside the browser, so multiple
+     concurrent renders can encode in parallel without freezing scrolling. */
+  return new Promise((resolve, reject) => {
+    c.toBlob(blob => {
+      if (!blob) { reject(new Error('toBlob returned null')); return; }
+      const r = new FileReader();
+      r.onload  = () => resolve(r.result);
+      r.onerror = () => reject(r.error || new Error('FileReader failed'));
+      r.readAsDataURL(blob);
+    }, 'image/jpeg', 0.82);
+  });
 }
 
 document.getElementById('genPreviewBtn').addEventListener('click', async () => {
@@ -2783,8 +2871,13 @@ document.getElementById('genPreviewBtn').addEventListener('click', async () => {
   }
   pages = [];
   try {
-    for (let p = from; p <= to; p += 2) {
-      const end = Math.min(p + 1, to);
+    /* Render 4 pages in parallel — PDF.js worker handles raster decode off
+       the main thread, so most of these run truly concurrently. Stepping
+       up from 2 → 4 roughly halves wall-clock time for a 50-page range on
+       a multi-core machine, with no UI freeze because encoding is async. */
+    const BATCH = 4;
+    for (let p = from; p <= to; p += BATCH) {
+      const end = Math.min(p + BATCH - 1, to);
       setStatus('genStatus', `Rendering page${end > p ? 's ' + p + '–' + end : ' ' + p} of ${to}…`, 'busy');
       const batch = await Promise.all(
         Array.from({ length: end - p + 1 }, (_, i) =>
@@ -3295,9 +3388,10 @@ async function addImgFiles(fileList) {
       setStatus('imgStatus', `Rendering ${f.name}…`, 'busy');
       try {
         const buf = await f.arrayBuffer();
-        const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
-        for (let p = 1; p <= pdf.numPages; p += 2) {
-          const end = Math.min(p + 1, pdf.numPages);
+        const pdf = await pdfjsLib.getDocument({ data: buf, ...PDFJS_OPTS }).promise;
+        const BATCH = 4;
+        for (let p = 1; p <= pdf.numPages; p += BATCH) {
+          const end = Math.min(p + BATCH - 1, pdf.numPages);
           setStatus('imgStatus', `Rendering ${f.name} — page${end > p ? 's ' + p + '–' + end : ' ' + p} / ${pdf.numPages}…`, 'busy');
           const batch = await Promise.all(
             Array.from({ length: end - p + 1 }, (_, i) =>
@@ -3362,12 +3456,13 @@ document.getElementById('imgGoBtn').addEventListener('click', async () => {
       tag: pendingTag
     });
 
+    const imgModel = document.getElementById('imgModel').value;
     if (getAiMode() === 'cloud') {
       setStatus('imgStatus', `Uploading ${imgFiles.length} image${imgFiles.length === 1 ? '' : 's'} to the cloud worker…`, 'busy');
       const r = await generateDeckViaWorker({
         prompt:    promptText,
         dataUrls:  imgFiles.map(f => f.dataUrl),
-        model:     'gpt-4o',
+        model:     imgModel,
         deckName:  name,
         tag:       pendingTag,
         source:    `images:${imgFiles.length}`,
@@ -3379,7 +3474,7 @@ document.getElementById('imgGoBtn').addEventListener('click', async () => {
       imgFiles.forEach(f => userContent.push({ type: 'image_url', image_url: { url: f.dataUrl, detail: 'high' } }));
       const tokenBudget = count === 'all' ? Math.min(12000, 1500 + imgFiles.length * 1200) : 3000;
       const raw = await callOpenAI({
-        apiKey, model: 'gpt-5.5',
+        apiKey, model: imgModel,
         messages: [
           { role: 'system', content: 'You are a careful flashcard author. Always return valid JSON.' },
           { role: 'user',   content: userContent }
@@ -3512,14 +3607,15 @@ async function selectNote(note) {
       let pdf;
       const noteUrl = /\?/.test(note.file) ? note.file : note.file + '?v=1';
       try {
-        pdf = await pdfjsLib.getDocument(noteUrl).promise;
+        pdf = await pdfjsLib.getDocument({ url: noteUrl, ...PDFJS_OPTS }).promise;
       } catch (_) {
         const resp = await fetch(noteUrl, { cache: 'no-store' });
         if (!resp.ok) throw new Error(`Unexpected server response (${resp.status}).`);
-        pdf = await pdfjsLib.getDocument({ data: new Uint8Array(await resp.arrayBuffer()) }).promise;
+        pdf = await pdfjsLib.getDocument({ data: new Uint8Array(await resp.arrayBuffer()), ...PDFJS_OPTS }).promise;
       }
-      for (let p = 1; p <= pdf.numPages; p += 2) {
-        const end = Math.min(p + 1, pdf.numPages);
+      const BATCH = 4;
+      for (let p = 1; p <= pdf.numPages; p += BATCH) {
+        const end = Math.min(p + BATCH - 1, pdf.numPages);
         setStatus('notesStatus', `Rendering page${end > p ? 's ' + p + '–' + end : ' ' + p} / ${pdf.numPages}…`, 'busy');
         const batch = await Promise.all(
           Array.from({ length: end - p + 1 }, (_, i) =>
@@ -3593,12 +3689,13 @@ notesGoBtn.addEventListener('click', async () => {
       tag: pendingTag,
     });
 
+    const notesModel = document.getElementById('notesModel').value;
     if (getAiMode() === 'cloud') {
       setStatus('notesStatus', `Uploading ${notesFiles.length} page${notesFiles.length === 1 ? '' : 's'} to the cloud worker…`, 'busy');
       const r = await generateDeckViaWorker({
         prompt:    promptText,
         dataUrls:  notesFiles.map(f => f.dataUrl),
-        model:     'gpt-4o',
+        model:     notesModel,
         deckName:  name,
         tag:       pendingTag,
         source:    `notes:${selectedNote ? selectedNote.id : '?'}`,
@@ -3610,7 +3707,7 @@ notesGoBtn.addEventListener('click', async () => {
       notesFiles.forEach(f => userContent.push({ type: 'image_url', image_url: { url: f.dataUrl, detail: 'high' } }));
       const tokenBudget = count === 'all' ? Math.min(12000, 1500 + notesFiles.length * 1200) : 3000;
       const raw = await callOpenAI({
-        apiKey, model: 'gpt-5.5',
+        apiKey, model: notesModel,
         messages: [
           { role: 'system', content: 'You are a careful flashcard author. Always return valid JSON.' },
           { role: 'user',   content: userContent },

@@ -25,6 +25,31 @@ Be concise. Use bullet points. Prefer plain language over jargon. If the student
 let chats = JSON.parse(localStorage.getItem(KEY_CHATS) || "[]");
 let activeChatId = localStorage.getItem(KEY_ACTIVE);
 
+/* ===== File-sourced OpenAI key =====
+   The permanent source of truth is .mecee-secrets/OPENAIAPI.txt, served by
+   the launcher at /api/openai-key. We fetch it on every page load so a hard
+   refresh always re-reads from disk — the user only edits the file to rotate
+   the key. localStorage is a fallback for offline / no-launcher use. */
+let FILE_OPENAI_KEY = null;
+(async function loadFileOpenAIKey() {
+  try {
+    const r = await fetch('/api/openai-key', { cache: 'no-store' });
+    if (!r.ok) return;
+    const j = await r.json();
+    if (j && j.enabled && j.key) {
+      FILE_OPENAI_KEY = j.key;
+      try { localStorage.setItem(KEY_API, j.key); } catch (_) {}
+      /* If the settings modal is open, refresh the displayed value so the
+         user sees the file-loaded key instead of whatever was there before. */
+      const f = document.getElementById('apiKeyInput');
+      if (f && !f.value) f.value = j.key;
+    }
+  } catch (_) { /* launcher unreachable — fall back to localStorage */ }
+})();
+function getEffectiveApiKey() {
+  return FILE_OPENAI_KEY || localStorage.getItem(KEY_API);
+}
+
 /* ===== THEME ===== */
 const themeBtn = document.getElementById('themeToggle');
 function applyTheme(t) {
@@ -550,13 +575,13 @@ async function* streamChatCompletion({ apiKey, model, messages, temperature }) {
 async function sendMessage() {
   const inputEl = document.getElementById('input');
   const sendBtn = document.getElementById('sendBtn');
-  const apiKey = localStorage.getItem(KEY_API);
+  const apiKey = getEffectiveApiKey();
   const model = localStorage.getItem(KEY_MODEL) || 'gpt-4o-mini';
   const sysPrompt = localStorage.getItem(KEY_PROMPT) || DEFAULT_PROMPT;
 
   if (!apiKey) {
     openSettings();
-    alert("Add your OpenAI API key first (gear icon).");
+    alert("No OpenAI API key found.\n\nEither put your key in .mecee-secrets/OPENAIAPI.txt (one line, starts with sk-…) and refresh, or paste it here in the settings modal.");
     return;
   }
 
@@ -664,7 +689,10 @@ document.getElementById('newChatBtn').addEventListener('click', () => {
 /* ===== SETTINGS ===== */
 const modal = document.getElementById('settingsModal');
 function openSettings() {
-  document.getElementById('apiKeyInput').value = localStorage.getItem(KEY_API) || '';
+  /* Prefer the file-loaded key — what the user sees in the modal matches
+     what the request actually uses. They can still type a different value
+     to override for this browser only (saved to localStorage). */
+  document.getElementById('apiKeyInput').value = getEffectiveApiKey() || '';
   document.getElementById('modelSelect').value = localStorage.getItem(KEY_MODEL) || 'gpt-4o-mini';
   document.getElementById('systemPromptInput').value = localStorage.getItem(KEY_PROMPT) || DEFAULT_PROMPT;
   modal.classList.add('show');
