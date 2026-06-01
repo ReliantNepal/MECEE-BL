@@ -44,6 +44,10 @@
        so the shelf still populates even without the server. --- */
     USER_LIBRARY: 'mecee_user_library',
 
+    /* --- Custom thumbnails for library books/notes (data URLs keyed by
+       book id or file path). Stored locally only — not synced. --- */
+    THUMBNAILS: 'mecee_thumbnails_v1',
+
     /* --- Sync system internals. --- */
     SYNC_META_PREFIX: 'mecee_sync_meta_', // append <category>
     SYNC_STATUS:      'mecee_sync_last',

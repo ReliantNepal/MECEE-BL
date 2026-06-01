@@ -1578,6 +1578,7 @@ function renderShelf() {
 function makeBookCard(book) {
   const card = document.createElement('div');
   card.className = 'book-card';
+  card._meceeBook = book; // needed by the right-click thumbnail menu
 
   const cover = document.createElement('div');
   cover.className = 'book-cover';
@@ -1585,10 +1586,24 @@ function makeBookCard(book) {
   const sub      = book.cls || book.subtitle || '';
   const kind     = book.type === 'note' ? 'NOTE' : 'BOOK';
 
-  /* Image / gallery notes preview their first image as the cover so the
-     shelf doubles as a visual index. PDFs (books + PDF notes) keep the
-     generated gradient card. */
-  if (isImageItem(book)) {
+  const customThumb = readThumbnails()[thumbKey(book)];
+  if (customThumb) {
+    /* User-set custom thumbnail overrides everything. */
+    cover.classList.add('book-cover-image');
+    cover.style.background = '#1a1a1a';
+    const img = document.createElement('img');
+    img.className = 'bc-image';
+    img.alt = '';
+    img.loading = 'lazy';
+    img.src = customThumb;
+    const badge = document.createElement('div');
+    badge.className = 'bc-badge bc-badge-overlay';
+    badge.textContent = kind;
+    cover.append(img, badge);
+  } else if (isImageItem(book)) {
+    /* Image / gallery notes preview their first image as the cover so the
+       shelf doubles as a visual index. PDFs (books + PDF notes) keep the
+       generated gradient card. */
     const src = (book.files && book.files[0]) || book.file || '';
     cover.classList.add('book-cover-image');
     cover.style.background = '#1a1a1a';
@@ -1892,6 +1907,65 @@ function loadLibraryCache() {
   } catch (_) {}
   return null;
 }
+
+/* ===== Custom thumbnails ===== */
+function thumbKey(book) { return book.id || book.file || book.title || ''; }
+function readThumbnails() {
+  try { return JSON.parse(localStorage.getItem(MeceeKeys.THUMBNAILS) || '{}'); } catch (_) { return {}; }
+}
+function writeThumbnails(t) {
+  try { localStorage.setItem(MeceeKeys.THUMBNAILS, JSON.stringify(t)); } catch (_) {}
+}
+
+/* Hidden file input — reused for every "Change thumbnail" pick. */
+const _thumbInput = document.createElement('input');
+_thumbInput.type = 'file';
+_thumbInput.accept = 'image/*';
+_thumbInput.style.display = 'none';
+document.body.appendChild(_thumbInput);
+let _thumbPickBook = null;
+
+_thumbInput.addEventListener('change', () => {
+  const file = _thumbInput.files[0];
+  if (!file || !_thumbPickBook) { _thumbInput.value = ''; return; }
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const thumbs = readThumbnails();
+    thumbs[thumbKey(_thumbPickBook)] = ev.target.result;
+    writeThumbnails(thumbs);
+    renderShelf();
+  };
+  reader.readAsDataURL(file);
+  _thumbInput.value = '';
+  _thumbPickBook = null;
+});
+
+function pickThumbnail(book) {
+  _thumbPickBook = book;
+  _thumbInput.click();
+}
+function removeThumbnail(book) {
+  const thumbs = readThumbnails();
+  delete thumbs[thumbKey(book)];
+  writeThumbnails(thumbs);
+  renderShelf();
+}
+
+/* Context menu hook — fires when the user right-clicks a book card. */
+window.appCtxExtraItems = function (e) {
+  const card = e.target.closest('.book-card');
+  if (!card || !card._meceeBook) return [];
+  const book = card._meceeBook;
+  const hasThumb = !!readThumbnails()[thumbKey(book)];
+  const items = [
+    { section: 'Thumbnail' },
+    { icon: '🖼️', label: 'Change thumbnail', action: () => pickThumbnail(book) },
+  ];
+  if (hasThumb) {
+    items.push({ icon: '🗑️', label: 'Remove thumbnail', action: () => removeThumbnail(book) });
+  }
+  return items;
+};
 
 /* ===== XHR-based upload — gives real onprogress events that fetch() lacks ===== */
 function xhrUpload(url, body, contentType, onProgress) {

@@ -110,6 +110,12 @@
     var t = event.target;
     var sel  = (window.getSelection && window.getSelection().toString()) || '';
     var hasSel = !!sel;
+    /* Pages can inject context-specific items at the top by defining
+       window.appCtxExtraItems(event) → array of item objects. */
+    var extraItems = [];
+    if (typeof window.appCtxExtraItems === 'function') {
+      try { extraItems = window.appCtxExtraItems(event) || []; } catch (_) {}
+    }
     var editable = t && (
       (t.matches && t.matches('input, textarea')) ||
       (t.isContentEditable)
@@ -143,6 +149,9 @@
     list.push({ icon: '🌓', label: 'Toggle theme', action: toggleTheme });
     list.push({ icon: '🔄', label: 'Reload page',  sc: 'F5', action: function () { location.reload(); } });
 
+    if (extraItems.length) {
+      list = extraItems.concat(list.length ? [{ sep: true }] : []).concat(list);
+    }
     return list;
   }
 
