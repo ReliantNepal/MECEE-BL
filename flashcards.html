@@ -1852,6 +1852,129 @@
     .study .a { animation: none; }
     .study .pbar > div { transition: none; }
   }
+
+  /* ===== In-study Edit button — desktop (pointer:fine) only ===== */
+  .study .edit-current-btn { display: none; }
+  @media (pointer: fine) {
+    .study .edit-current-btn {
+      display: inline-flex;
+      position: absolute;
+      top: 14px;
+      right: 232px;
+      background: var(--surface-2);
+      color: var(--muted);
+      border: 1px solid var(--border);
+      height: 32px;
+      padding: 0 12px;
+      border-radius: 16px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      align-items: center;
+      gap: 6px;
+      font-family: inherit;
+      transition: color .15s, border-color .15s, background .15s;
+    }
+    .study .edit-current-btn:hover {
+      color: var(--accent);
+      border-color: var(--accent);
+      background: var(--surface-3);
+    }
+    .study .edit-current-btn:disabled {
+      opacity: .38;
+      cursor: not-allowed;
+    }
+  }
+
+  /* ===== Edit-card modal ===== */
+  .edit-card-back {
+    position: fixed;
+    inset: 0;
+    background: rgba(8,8,14,.88);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1100;
+    padding: 20px;
+  }
+  .edit-card-back.open { display: flex; animation: fadeIn .15s; }
+  .edit-card-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    width: 100%;
+    max-width: 560px;
+    padding: 24px;
+    color: var(--text);
+    box-shadow: var(--shadow-lg);
+    animation: studyIn .18s ease;
+  }
+  .edit-card-box h3 { margin: 0 0 18px; font-size: 17px; font-weight: 700; }
+  .edit-card-box textarea { min-height: 80px; resize: vertical; font-family: inherit; }
+  .edit-card-box .ec-mcq-row {
+    display: grid;
+    grid-template-columns: 22px 1fr;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 6px;
+  }
+  .edit-card-box .ec-mcq-row input[type="radio"] {
+    width: 16px; height: 16px; margin: 0; cursor: pointer; accent-color: var(--good);
+  }
+  .edit-card-box .ec-mcq-row input[type="text"] {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 7px 10px;
+    border-radius: 7px;
+    font-size: 13px;
+    font-family: inherit;
+    width: 100%;
+  }
+  .edit-card-box .ec-mcq-row.is-correct input[type="text"] {
+    border-color: var(--good);
+    background: rgba(102,187,106,.06);
+  }
+
+  /* ===== Double-confirm overlay (save edits) ===== */
+  .dbl-confirm-back {
+    position: fixed;
+    inset: 0;
+    background: rgba(8,8,14,.88);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1200;
+    padding: 20px;
+  }
+  .dbl-confirm-back.open { display: flex; animation: fadeIn .12s; }
+  .dbl-confirm-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    width: 100%;
+    max-width: 400px;
+    padding: 24px;
+    color: var(--text);
+    box-shadow: var(--shadow-lg);
+    animation: studyIn .15s ease;
+  }
+  .dbl-confirm-box .dc-icon {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--accent) 14%, transparent);
+    color: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    margin-bottom: 14px;
+  }
+  .dbl-confirm-box h3 { margin: 0 0 8px; font-size: 17px; font-weight: 700; }
+  .dbl-confirm-box p  { margin: 0 0 20px; color: var(--muted); font-size: 14px; line-height: 1.5; }
+  .dbl-confirm-box .dc-row { display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; }
 </style>
 </head>
 <body>
@@ -2227,6 +2350,7 @@
     <button class="close" id="studyClose" title="Close (Esc)">✕</button>
     <button class="del-current" id="studyDelete" title="Delete this card from the deck">🗑 Delete</button>
     <button class="del-current" id="studyUndo" style="right: 142px" title="Undo last rating (go back to previous card)" disabled>↶ Back</button>
+    <button class="edit-current-btn" id="studyEdit" title="Edit this card (desktop only)">✏️ Edit</button>
     <div class="mode-toggle" id="studyModeToggle" title="SRS schedules cards by recall difficulty · Cram reviews every card without affecting the schedule">
       <button data-mode="srs"  class="active">🧠 SRS</button>
       <button data-mode="cram">⚡ Cram</button>
@@ -2241,6 +2365,52 @@
     <div class="a" id="studyA"></div>
     <div class="actions" id="studyActions"></div>
     <div class="keyhint"><kbd>Space</kbd> reveal · <kbd>1</kbd>/<kbd>2</kbd>/<kbd>3</kbd>/<kbd>4</kbd> rate · <kbd>Z</kbd> back · <kbd>Esc</kbd> close</div>
+  </div>
+</div>
+
+<!-- EDIT CURRENT CARD MODAL (desktop / pointer:fine only) -->
+<div class="edit-card-back" id="editCardBack" role="dialog" aria-modal="true" aria-labelledby="editCardTitle">
+  <div class="edit-card-box">
+    <h3 id="editCardTitle">✏️ Edit card</h3>
+    <div class="field">
+      <label for="editCardQ">Question</label>
+      <textarea id="editCardQ"></textarea>
+    </div>
+    <div class="field" id="editCardAField">
+      <label for="editCardA">Answer / Explanation</label>
+      <textarea id="editCardA"></textarea>
+    </div>
+    <div id="editCardMcqArea"></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:18px;flex-wrap:wrap">
+      <button class="btn secondary" id="editCardCancel" type="button">Cancel</button>
+      <button class="btn" id="editCardSave" type="button">Save changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- SAVE CONFIRMATION 1 of 2 -->
+<div class="dbl-confirm-back" id="saveConfirm1Back" role="dialog" aria-modal="true">
+  <div class="dbl-confirm-box">
+    <div class="dc-icon">✏️</div>
+    <h3>Save changes?</h3>
+    <p>You're about to update this flashcard. Please review your edits — the original text will be replaced.</p>
+    <div class="dc-row">
+      <button class="btn secondary" id="saveConfirm1Cancel" type="button">Go back</button>
+      <button class="btn" id="saveConfirm1Ok" type="button">Yes, save</button>
+    </div>
+  </div>
+</div>
+
+<!-- SAVE CONFIRMATION 2 of 2 -->
+<div class="dbl-confirm-back" id="saveConfirm2Back" role="dialog" aria-modal="true">
+  <div class="dbl-confirm-box">
+    <div class="dc-icon">💾</div>
+    <h3>Confirm final save</h3>
+    <p>This will permanently overwrite the card in your deck. This action cannot be undone.</p>
+    <div class="dc-row">
+      <button class="btn secondary" id="saveConfirm2Cancel" type="button">Cancel</button>
+      <button class="btn" id="saveConfirm2Ok" type="button">Confirm &amp; save</button>
+    </div>
   </div>
 </div>
 
@@ -4871,6 +5041,7 @@ function refreshUndoBtn() {
   if (!btn) return;
   btn.disabled = studyUndoStack.length === 0;
   btn.style.display = studyMode === 'srs' ? '' : 'none';
+  refreshEditBtn();
 }
 function undoLastRating() {
   if (!studyUndoStack.length) return;
@@ -4996,6 +5167,12 @@ function saveStudySession() {
 }
 function closeStudy() {
   cancelAutoTimer();
+  /* Close any open edit/confirm modals before tearing down the session. */
+  ['saveConfirm2Back','saveConfirm1Back','editCardBack'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.remove('open');
+  });
+  _editCardPending = null;
   /* Persist where we left off so the next open resumes cleanly. */
   if (studyDeck && studyIdx < studyQueue.length) saveStudySession();
   studyBack.classList.remove('open');
@@ -5284,6 +5461,177 @@ function rateCurrentCard(rating) {
 }
 
 function nextCard() { cancelAutoTimer(); studyIdx++; showStudyCard(); }
+
+/* =========================================================================
+   IN-STUDY CARD EDITOR  (desktop / pointer:fine only)
+   ========================================================================= */
+
+let _editCardPending = null; // holds collected draft until both confirms pass
+
+/* Show or hide the Edit button based on whether a real card is on screen. */
+function refreshEditBtn() {
+  const btn = document.getElementById('studyEdit');
+  if (!btn) return;
+  const hasCard = studyDeck && studyIdx < studyQueue.length;
+  btn.disabled = !hasCard;
+}
+
+/* Open the edit modal pre-filled with the current card's data. */
+function openEditCurrentCard() {
+  if (!studyDeck || studyIdx >= studyQueue.length) return;
+  const card = studyDeck.cards[studyQueue[studyIdx]];
+  if (!card) return;
+
+  document.getElementById('editCardQ').value = card.q || '';
+  document.getElementById('editCardA').value = card.a || '';
+
+  const mcqArea = document.getElementById('editCardMcqArea');
+  mcqArea.innerHTML = '';
+
+  if (card.type === 'mcq' && Array.isArray(card.choices)) {
+    const lbl = document.createElement('label');
+    lbl.style.cssText = 'display:block;margin-bottom:8px';
+    lbl.innerHTML = 'Choices <span style="color:var(--muted);font-size:10px">(select the correct one)</span>';
+    mcqArea.appendChild(lbl);
+
+    card.choices.forEach((ch, i) => {
+      const row = document.createElement('div');
+      row.className = 'ec-mcq-row' + (i === card.correct ? ' is-correct' : '');
+
+      const radio = document.createElement('input');
+      radio.type = 'radio';
+      radio.name = 'editCardCorrect';
+      radio.value = String(i);
+      radio.checked = (i === card.correct);
+
+      const text = document.createElement('input');
+      text.type = 'text';
+      text.value = ch;
+      text.dataset.choiceIdx = String(i);
+
+      radio.addEventListener('change', () => {
+        mcqArea.querySelectorAll('.ec-mcq-row').forEach(r => r.classList.remove('is-correct'));
+        row.classList.add('is-correct');
+      });
+
+      row.appendChild(radio);
+      row.appendChild(text);
+      mcqArea.appendChild(row);
+    });
+  }
+
+  document.getElementById('editCardBack').classList.add('open');
+}
+
+function closeEditCurrentCard() {
+  document.getElementById('editCardBack').classList.remove('open');
+  _editCardPending = null;
+}
+
+/* Collect form values into a draft object; returns null on validation failure. */
+function collectEditDraft() {
+  if (!studyDeck || studyIdx >= studyQueue.length) return null;
+  const card = studyDeck.cards[studyQueue[studyIdx]];
+  if (!card) return null;
+
+  const q = document.getElementById('editCardQ').value.trim();
+  if (!q) { alert('Question cannot be empty.'); return null; }
+  const a = document.getElementById('editCardA').value.trim();
+
+  const draft = { cardId: card.id, type: card.type, q, a };
+
+  if (card.type === 'mcq') {
+    const mcqArea  = document.getElementById('editCardMcqArea');
+    const textInputs = mcqArea.querySelectorAll('input[type="text"]');
+    const choices  = Array.from(textInputs).map(inp => inp.value.trim());
+    if (choices.some(c => !c)) { alert('Choices cannot be empty.'); return null; }
+    const checked  = mcqArea.querySelector('input[type="radio"]:checked');
+    draft.choices  = choices;
+    draft.correct  = checked ? parseInt(checked.value, 10) : 0;
+  }
+  return draft;
+}
+
+/* Write the draft back into memory + localStorage, then refresh the card display. */
+function applyEditDraft(draft) {
+  if (!draft || !studyDeck) return;
+
+  const card = studyDeck.cards.find(c => c.id === draft.cardId);
+  if (!card) return;
+  card.q = draft.q;
+  card.a = draft.a;
+  if (draft.type === 'mcq') { card.choices = draft.choices; card.correct = draft.correct; }
+
+  const data = readDecks();
+  const deck = data.decks.find(d => d.id === studyDeck.id);
+  if (deck) {
+    const target = deck.cards.find(c => c.id === draft.cardId);
+    if (target) {
+      target.q = draft.q;
+      target.a = draft.a;
+      if (draft.type === 'mcq') { target.choices = draft.choices; target.correct = draft.correct; }
+      writeDecks(data);
+    }
+  }
+
+  /* Refresh the visible card without advancing the queue. */
+  document.getElementById('studyQ').textContent = card.q;
+  const aEl = document.getElementById('studyA');
+  if (aEl.classList.contains('open')) aEl.textContent = card.a || '(no answer)';
+}
+
+/* ---- Wire up: Edit button ---- */
+document.getElementById('studyEdit').addEventListener('click', openEditCurrentCard);
+
+/* ---- Wire up: Edit modal ---- */
+document.getElementById('editCardCancel').addEventListener('click', closeEditCurrentCard);
+document.getElementById('editCardBack').addEventListener('click', e => {
+  if (e.target.id === 'editCardBack') closeEditCurrentCard();
+});
+
+/* Save button → show first confirmation. */
+document.getElementById('editCardSave').addEventListener('click', () => {
+  const draft = collectEditDraft();
+  if (!draft) return;
+  _editCardPending = draft;
+  document.getElementById('saveConfirm1Back').classList.add('open');
+});
+
+/* ---- Wire up: Confirmation 1 of 2 ---- */
+document.getElementById('saveConfirm1Cancel').addEventListener('click', () => {
+  document.getElementById('saveConfirm1Back').classList.remove('open');
+  _editCardPending = null;
+});
+document.getElementById('saveConfirm1Ok').addEventListener('click', () => {
+  document.getElementById('saveConfirm1Back').classList.remove('open');
+  document.getElementById('saveConfirm2Back').classList.add('open');
+});
+
+/* ---- Wire up: Confirmation 2 of 2 ---- */
+document.getElementById('saveConfirm2Cancel').addEventListener('click', () => {
+  document.getElementById('saveConfirm2Back').classList.remove('open');
+  _editCardPending = null;
+});
+document.getElementById('saveConfirm2Ok').addEventListener('click', () => {
+  document.getElementById('saveConfirm2Back').classList.remove('open');
+  document.getElementById('editCardBack').classList.remove('open');
+  applyEditDraft(_editCardPending);
+  _editCardPending = null;
+});
+
+/* Esc closes the edit modal / confirmations in order (innermost first). */
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape') return;
+  if (document.getElementById('saveConfirm2Back').classList.contains('open')) {
+    document.getElementById('saveConfirm2Back').classList.remove('open');
+    _editCardPending = null;
+  } else if (document.getElementById('saveConfirm1Back').classList.contains('open')) {
+    document.getElementById('saveConfirm1Back').classList.remove('open');
+    _editCardPending = null;
+  } else if (document.getElementById('editCardBack').classList.contains('open')) {
+    closeEditCurrentCard();
+  }
+});
 
 /* ===== Theme sync ===== */
 const savedTheme = localStorage.getItem(MeceeKeys.THEME);
