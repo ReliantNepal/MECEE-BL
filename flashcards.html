@@ -3340,35 +3340,19 @@ async function callOpenAI({ apiKey, model, messages, max_tokens = 2000 }) {
     body.temperature = 0.4;
   }
 
-  /* Route through the server proxy (/api/openai) instead of calling OpenAI
-     directly from the browser. This eliminates CORS failures, "Failed to fetch"
-     errors from browser network restrictions, and keeps the API key server-side.
-     Falls back to a direct browser fetch if the proxy returns 404 (old server). */
+  /* Call OpenAI directly from the browser — bypasses the Cloudflare tunnel
+     (which has a 100s upstream timeout) so long vision requests don't get
+     a 524. OpenAI supports browser CORS, so this works without a proxy. */
   let res;
   try {
-    res = await fetch('/api/openai', {
+    res = await fetch('https://api.openai.com/v1/chat/completions', {
       method:  'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
       body:    JSON.stringify(body),
     });
-    /* If the proxy endpoint doesn't exist yet, fall through to direct fetch. */
-    if (res.status === 404) throw new Error('proxy_not_found');
-  } catch (proxyErr) {
-    if (proxyErr.message !== 'proxy_not_found') {
-      logError('callOpenAI proxy', proxyErr);
-      throw new Error(`Network error reaching local server: ${proxyErr.message}`);
-    }
-    /* Legacy fallback: direct browser→OpenAI fetch */
-    try {
-      res = await fetch('https://api.openai.com/v1/chat/completions', {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
-        body:    JSON.stringify(body),
-      });
-    } catch (directErr) {
-      logError('callOpenAI direct', directErr);
-      throw new Error(`Failed to reach OpenAI: ${directErr.message}. Check your internet connection.`);
-    }
+  } catch (directErr) {
+    logError('callOpenAI direct', directErr);
+    throw new Error(`Failed to reach OpenAI: ${directErr.message} — check internet connection.`);
   }
 
   if (!res.ok) {
