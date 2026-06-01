@@ -940,6 +940,23 @@
     min-width: 34px;
     text-align: right;
   }
+  .upload-speed {
+    font-size: 11px;
+    color: #888;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .upload-joke {
+    font-size: 12px;
+    color: #aaa;
+    line-height: 1.45;
+    margin: 0 0 10px;
+    min-height: 18px;
+    font-style: italic;
+    transition: opacity .35s ease;
+  }
+  .upload-joke[hidden] { display: none; }
+  .upload-joke.fading  { opacity: 0; }
   .bm-btns {
     display: flex;
     gap: 8px;
@@ -1183,11 +1200,13 @@
       <input id="addLabelInput" type="text" maxlength="60" placeholder="e.g. Class 12, Chapter 4" autocomplete="off" />
     </div>
     <div class="bm-error" id="addError"></div>
+    <div class="upload-joke" id="uploadJoke" hidden></div>
     <div class="upload-progress" id="uploadProgress" hidden>
       <div class="upload-bar-track">
         <div class="upload-bar-fill" id="uploadBarFill"></div>
       </div>
       <span class="upload-pct" id="uploadPct">0%</span>
+      <span class="upload-speed" id="uploadSpeed"></span>
     </div>
     <div class="bm-btns">
       <button class="bm-btn cancel" id="addCancelBtn" type="button">Cancel</button>
@@ -1334,6 +1353,8 @@ const addSaveBt   = document.getElementById('addSaveBtn');
 const upProgressEl  = document.getElementById('uploadProgress');
 const upBarFillEl   = document.getElementById('uploadBarFill');
 const upPctEl       = document.getElementById('uploadPct');
+const upSpeedEl     = document.getElementById('uploadSpeed');
+const upJokeEl      = document.getElementById('uploadJoke');
 const reader      = document.getElementById('reader');
 const readerTitle = document.getElementById('readerTitle');
 const closeBtn    = document.getElementById('closeReader');
@@ -1672,17 +1693,76 @@ async function uploadSelection() {
   return uploadPdfNote(files[0], title, sub, activeTab === 'note' ? 'note' : 'book');
 }
 
+/* ===== Upload joke rotator ===== */
+const UPLOAD_JOKES = [
+  "Why did the student eat his homework? The teacher said it was a piece of cake. 🍰",
+  "I told a chemistry joke. No reaction. 😐",
+  "A photon checks into a hotel. The bellhop asks about luggage. 'No thanks,' it says, 'I'm travelling light.' ✈️",
+  "Why don't scientists trust atoms? Because they make up everything! ⚛️",
+  "Why did the math book look so sad? It had too many problems. 📚",
+  "Biology exam question: describe the function of mitochondria. My answer: yes. 🧬",
+  "An electron walks into a bar. The bartender asks: 'Are you sure?' It says: 'I'm not positive.' ⚡",
+  "Why can't you trust the law of gravity? It always lets you down. 🌍",
+  "Schrödinger's upload: it both succeeded and failed until you check. 😺",
+  "I'd tell you a joke about an upload but it might take a while to land. 📡",
+  "Why did the biology student bring a ladder to class? Because the course was at a higher level. 🧪",
+  "Newton's lesser-known law: for every procrastination there is an equal and opposite panic. 📖",
+  "What did the ocean say to the beach? Nothing, it just waved. 🌊",
+  "Why is electricity so dangerous? It doesn't know how to conduct itself. ⚡",
+  "What do you call a fish without eyes? Fsh. 🐟",
+  "Two atoms walk out of a bar. One says 'I think I left an electron in there.' Other: 'Are you positive?' 🔬",
+  "Why did the cell phone go to school? To improve its cell-f esteem. 📱",
+  "Uploading faster than I studied for my last exam. Probably. ⏳",
+];
+let _jokeTimer  = null;
+let _jokeIndex  = Math.floor(Math.random() * UPLOAD_JOKES.length);
+
+function startJokes() {
+  if (!upJokeEl) return;
+  upJokeEl.hidden = false;
+  upJokeEl.classList.remove('fading');
+  upJokeEl.textContent = UPLOAD_JOKES[_jokeIndex];
+  _jokeTimer = setInterval(() => {
+    upJokeEl.classList.add('fading');
+    setTimeout(() => {
+      _jokeIndex = (_jokeIndex + 1) % UPLOAD_JOKES.length;
+      upJokeEl.textContent = UPLOAD_JOKES[_jokeIndex];
+      upJokeEl.classList.remove('fading');
+    }, 360);
+  }, 4000);
+}
+function stopJokes() {
+  clearInterval(_jokeTimer);
+  _jokeTimer = null;
+  if (upJokeEl) { upJokeEl.hidden = true; upJokeEl.textContent = ''; }
+}
+
 /* ===== Upload progress helpers ===== */
-function showUploadProgress(pct) {
+function fmtBytes(n) {
+  if (n >= 1048576) return (n / 1048576).toFixed(1) + ' MB';
+  return Math.round(n / 1024) + ' KB';
+}
+function showUploadProgress(pct, loaded, total, speed) {
   upProgressEl.hidden = false;
   const p = Math.round(Math.max(0, Math.min(100, pct)));
   upBarFillEl.style.width = p + '%';
   upPctEl.textContent = p + '%';
+  if (upSpeedEl && loaded != null && total != null && total > 0) {
+    let text = fmtBytes(loaded) + ' / ' + fmtBytes(total);
+    if (speed > 0) {
+      text += ' · ' + (speed >= 1048576
+        ? (speed / 1048576).toFixed(1) + ' MB/s'
+        : Math.round(speed / 1024) + ' KB/s');
+    }
+    upSpeedEl.textContent = text;
+  }
 }
 function resetUploadProgress() {
   upProgressEl.hidden = true;
   upBarFillEl.style.width = '0%';
   upPctEl.textContent = '0%';
+  if (upSpeedEl) upSpeedEl.textContent = '';
+  stopJokes();
 }
 
 /* ===== localStorage cache for user-added books ===== */
@@ -1704,8 +1784,20 @@ function xhrUpload(url, body, contentType, onProgress) {
     const xhr = new XMLHttpRequest();
     xhr.open('POST', url);
     xhr.setRequestHeader('Content-Type', contentType);
+    let lastTime   = Date.now();
+    let lastLoaded = 0;
+    let smoothSpeed = 0;  // EMA bytes/sec
     xhr.upload.onprogress = e => {
-      if (e.lengthComputable) onProgress(e.loaded / e.total);
+      if (!e.lengthComputable) return;
+      const now = Date.now();
+      const dt  = (now - lastTime) / 1000;
+      if (dt >= 0.1) {
+        const inst = (e.loaded - lastLoaded) / dt;
+        smoothSpeed = smoothSpeed ? (smoothSpeed * 0.6 + inst * 0.4) : inst;
+        lastLoaded = e.loaded;
+        lastTime   = now;
+      }
+      onProgress(e.loaded / e.total, e.loaded, e.total, smoothSpeed);
     };
     xhr.onload = () => {
       if (xhr.status >= 200 && xhr.status < 300) {
@@ -1724,11 +1816,11 @@ function xhrUpload(url, body, contentType, onProgress) {
 
 async function uploadPdfNote(file, title, sub, kind) {
   addErrorEl.textContent = '';
+  startJokes();
   showUploadProgress(2);
 
   /* Count pages client-side so the card shows "N pages" right away. */
   let pages = 0;
-  addErrorEl.textContent = 'Reading PDF…';
   try {
     const buf = await file.arrayBuffer();
     showUploadProgress(8);
@@ -1737,7 +1829,6 @@ async function uploadPdfNote(file, title, sub, kind) {
     try { doc.destroy(); } catch (_) {}
   } catch (_) { /* server still validates the %PDF header */ }
 
-  addErrorEl.textContent = 'Uploading…';
   showUploadProgress(12);
 
   const params = new URLSearchParams({
@@ -1753,7 +1844,7 @@ async function uploadPdfNote(file, title, sub, kind) {
     const item = await xhrUpload(
       '/api/upload-pdf?' + params.toString(),
       file, 'application/pdf',
-      frac => showUploadProgress(12 + frac * 86)
+      (frac, loaded, total, speed) => showUploadProgress(12 + frac * 86, loaded, total, speed)
     );
     showUploadProgress(100);
     addErrorEl.textContent = '';
@@ -1773,19 +1864,19 @@ async function uploadPdfNote(file, title, sub, kind) {
    uploads keep things deterministic and the progress message accurate. */
 async function uploadGalleryNote(files, title, sub) {
   const paths = [];
+  startJokes();
   /* Each image gets an equal share of 0–90%. The final 10% is the create-note call. */
   const perImg = 90 / files.length;
   for (let i = 0; i < files.length; i++) {
     const f = files[i];
     const baseProgress = i * perImg;
-    addErrorEl.textContent = `Uploading image ${i + 1} / ${files.length}…`;
     showUploadProgress(baseProgress);
     const params = new URLSearchParams({ subject: currentSubject, filename: f.name });
     try {
       const r = await xhrUpload(
         '/api/upload-blob?' + params.toString(),
         f, f.type || 'application/octet-stream',
-        frac => showUploadProgress(baseProgress + frac * perImg)
+        (frac, loaded, total, speed) => showUploadProgress(baseProgress + frac * perImg, loaded, total, speed)
       );
       paths.push(r.file);
     } catch (e) {
@@ -1796,7 +1887,6 @@ async function uploadGalleryNote(files, title, sub) {
     }
   }
 
-  addErrorEl.textContent = 'Saving note…';
   showUploadProgress(95);
   try {
     const res = await fetch('/api/create-note', {
