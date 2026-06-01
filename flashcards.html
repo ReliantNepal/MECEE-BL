@@ -595,6 +595,16 @@
   }
   .page-tile .pg-btn:hover { background: var(--surface-3); color: var(--text); }
   .page-tile .pg-btn.toggle.on { background: var(--accent); color: var(--accent-text); border-color: var(--accent); }
+  .pg-render-err {
+    width: 100%; aspect-ratio: 3/4;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    background: rgba(239,83,80,.08); border: 1px dashed rgba(239,83,80,.4);
+    border-radius: 6px; color: var(--bad, #ef5350); font-size: 11px;
+    text-align: center; padding: 8px; gap: 4px; cursor: default;
+    font-size: 28px;
+  }
+  .pg-render-err span { font-size: 12px; font-weight: 600; }
+  .pg-render-err small { font-size: 10px; opacity: .7; word-break: break-word; }
 
   /* Lightbox for full-size page preview */
   .lightbox {
@@ -2332,15 +2342,25 @@ async function probeRenderService() {
    relFile: URL path as served by the app, e.g. "books/biology/foo.pdf"
    Returns a data-URL jpeg string, same shape as renderPageImage(). */
 async function renderPageServer(relFile, pageNum, maxW = PAGE_RENDER_WIDTH) {
-  const file = relFile.replace(/^\//, '').split('?')[0]; // strip leading / and ?v=…
+  const file = relFile.replace(/^\//, '').split('?')[0];
   const url = `/api/render?file=${encodeURIComponent(file)}&page=${pageNum}&w=${maxW}&q=82`;
-  const resp = await fetch(url);
-  if (!resp.ok) throw new Error(`render service ${resp.status}`);
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 20000); // 20s hard timeout per page
+  let resp;
+  try {
+    resp = await fetch(url, { signal: ctrl.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+  if (!resp.ok) {
+    const body = await resp.text().catch(() => '');
+    throw new Error(`render service HTTP ${resp.status}${body ? ': ' + body.slice(0, 120) : ''}`);
+  }
   const blob = await resp.blob();
   return new Promise((resolve, reject) => {
     const r = new FileReader();
     r.onload  = () => resolve(r.result);
-    r.onerror = () => reject(r.error);
+    r.onerror = () => reject(new Error('FileReader failed reading render blob'));
     r.readAsDataURL(blob);
   });
 }
@@ -2962,9 +2982,14 @@ document.getElementById('genPreviewBtn').addEventListener('click', async () => {
         Array.from({ length: end - p + 1 }, (_, i) => {
           const pg = p + i;
           const render = useSvr
-            ? renderPageServer(relFile, pg).catch(() => renderPageImage(pdf, pg))
+            ? renderPageServer(relFile, pg).catch(svrErr => {
+                console.warn(`[render] server failed p${pg} (${svrErr?.message}), falling back to PDF.js`);
+                return renderPageImage(pdf, pg);
+              })
             : renderPageImage(pdf, pg);
-          return render.then(dataUrl => ({ page: pg, dataUrl, include: true }));
+          return render
+            .then(dataUrl => ({ page: pg, dataUrl, include: true, error: null }))
+            .catch(err => ({ page: pg, dataUrl: null, include: false, error: err?.message || String(err) }));
         })
       );
       batch.forEach(r => pages.push(r));
@@ -2975,8 +3000,17 @@ document.getElementById('genPreviewBtn').addEventListener('click', async () => {
     previewBtn.disabled = false;
     return;
   }
-  const cnt = pages.filter(p => p.include).length;
-  setStatus('genStatus', `✓ Rendered ${pages.length} page${pages.length === 1 ? '' : 's'}. ${cnt} selected — tap a tile to enlarge, toggle ✓/○ to include/exclude.`, 'ok');
+  const failed = pages.filter(p => p.error).length;
+  const cnt    = pages.filter(p => p.include).length;
+  if (pages.length === 0) {
+    setStatus('genStatus', 'No pages were rendered. Check the page range and try again.', 'err');
+  } else if (failed === pages.length) {
+    setStatus('genStatus', `All ${failed} pages failed to render — see tiles for details.`, 'err');
+  } else if (failed > 0) {
+    setStatus('genStatus', `Rendered ${pages.length - failed} page${pages.length - failed === 1 ? '' : 's'} (${failed} failed). ${cnt} selected.`, 'ok');
+  } else {
+    setStatus('genStatus', `✓ Rendered ${pages.length} page${pages.length === 1 ? '' : 's'}. ${cnt} selected — tap a tile to enlarge, toggle ✓/○ to include/exclude.`, 'ok');
+  }
   previewBtn.disabled = false;
 });
 
@@ -2986,8 +3020,11 @@ function renderPagePreview() {
   pages.forEach((p, i) => {
     const div = document.createElement('div');
     div.className = 'page-tile' + (p.include ? '' : ' off');
+    const imgOrError = p.error
+      ? `<div class="pg-render-err" title="${escapeHtml(p.error)}">⚠️<br><span>p.${p.page} failed</span><br><small>${escapeHtml(p.error.slice(0, 80))}</small></div>`
+      : `<img class="pg-img" src="${p.dataUrl}" alt="Page ${p.page}" loading="lazy" />`;
     div.innerHTML = `
-      <img class="pg-img" src="${p.dataUrl}" alt="Page ${p.page}" loading="lazy" />
+      ${imgOrError}
       <div class="pg-label">
         <span class="pg-num">p. ${p.page}</span>
         <span class="pg-actions">
@@ -3259,11 +3296,25 @@ async function callOpenAI({ apiKey, model, messages, max_tokens = 2000 }) {
     body: JSON.stringify(body)
   });
   if (!res.ok) {
-    const txt = await res.text().catch(() => '');
-    throw new Error(`OpenAI ${res.status}: ${txt.slice(0, 300)}`);
+    let detail = '';
+    try {
+      const j = await res.json();
+      detail = j?.error?.message || j?.error?.code || JSON.stringify(j).slice(0, 200);
+    } catch (_) {
+      detail = await res.text().catch(() => '');
+      detail = detail.slice(0, 200);
+    }
+    const hint =
+      res.status === 401 ? ' (invalid or expired API key)' :
+      res.status === 429 ? ' (rate-limited — wait a moment and retry)' :
+      res.status === 400 ? ' (bad request — model may not support JSON mode)' :
+      res.status === 404 ? ' (model not found — check the model name)' : '';
+    throw new Error(`OpenAI error ${res.status}${hint}: ${detail}`);
   }
   const j = await res.json();
-  return j.choices?.[0]?.message?.content || '';
+  const content = j.choices?.[0]?.message?.content || '';
+  if (!content) throw new Error('OpenAI returned an empty response — the model may have refused or hit a content filter.');
+  return content;
 }
 
 /* Build a syllabus-context block from a {subj, unit, chIdx} tag. Returns ""
@@ -3427,7 +3478,7 @@ document.getElementById('genGoBtn').addEventListener('click', async () => {
   /* In local mode we need the user's own API key. In cloud mode the Worker
      holds the key as a secret, so we skip the prompt entirely. */
   const apiKey = getAiMode() === 'cloud' ? null : getApiKey();
-  if (getAiMode() === 'local' && !apiKey) return;
+  if (getAiMode() === 'local' && !apiKey) { setStatus('genStatus', 'No API key — add it to .mecee-secrets/OPENAIAPI.txt and refresh.', 'err'); return; }
 
   const bookId = document.getElementById('genBook').value;
   const book = BOOKS.find(b => b.id === bookId);
@@ -3583,7 +3634,7 @@ document.getElementById('imgGoBtn').addEventListener('click', async () => {
   if (_flashcardGenerating) { setStatus('imgStatus', 'Generation already in progress — please wait.', 'err'); return; }
   if (!imgFiles.length) return;
   const apiKey = getAiMode() === 'cloud' ? null : getApiKey();
-  if (getAiMode() === 'local' && !apiKey) return;
+  if (getAiMode() === 'local' && !apiKey) { setStatus('imgStatus', 'No API key — add it to .mecee-secrets/OPENAIAPI.txt and refresh.', 'err'); return; }
   const mix      = document.getElementById('imgMix').value;
   const countSel = document.getElementById('imgCount').value;
   const count    = countSel === 'all' ? 'all' : Math.max(3, Math.min(30, parseInt(countSel, 10) || 10));
@@ -3824,7 +3875,7 @@ notesGoBtn.addEventListener('click', async () => {
   if (_flashcardGenerating) { setStatus('notesStatus', 'Generation already in progress — please wait.', 'err'); return; }
   if (!notesFiles.length) return;
   const apiKey = getAiMode() === 'cloud' ? null : getApiKey();
-  if (getAiMode() === 'local' && !apiKey) return;
+  if (getAiMode() === 'local' && !apiKey) { setStatus('notesStatus', 'No API key — add it to .mecee-secrets/OPENAIAPI.txt and refresh.', 'err'); return; }
   const mix      = document.getElementById('notesMix').value;
   const countSel = document.getElementById('notesCount').value;
   const count    = countSel === 'all' ? 'all' : Math.max(3, Math.min(30, parseInt(countSel, 10) || 10));
