@@ -3340,44 +3340,61 @@ async function callOpenAI({ apiKey, model, messages, max_tokens = 2000 }) {
     body.temperature = 0.4;
   }
 
-  /* Call OpenAI directly from the browser — bypasses the Cloudflare tunnel
-     (which has a 100s upstream timeout) so long vision requests don't get
-     a 524. OpenAI supports browser CORS, so this works without a proxy. */
-  let res;
+  /* Send to the VPS async endpoint — server calls OpenAI directly (no
+     Cloudflare 100s timeout) and we poll for the result. Falls back to a
+     direct browser→OpenAI fetch if the server endpoint isn't available. */
+  const bodyStr = JSON.stringify(body);
+
+  let content;
+  let usedServerPath = false;
   try {
-    res = await fetch('https://api.openai.com/v1/chat/completions', {
+    const submitRes = await fetch('/api/generate-flashcards', {
       method:  'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
-      body:    JSON.stringify(body),
+      headers: { 'Content-Type': 'application/json' },
+      body:    bodyStr,
     });
-  } catch (directErr) {
-    logError('callOpenAI direct', directErr);
-    throw new Error(`Failed to reach OpenAI: ${directErr.message} — check internet connection.`);
-  }
+    if (!submitRes.ok) throw new Error(`submit HTTP ${submitRes.status}`);
+    const { job_id } = await submitRes.json();
+    if (!job_id) throw new Error('no job_id returned');
+    usedServerPath = true;
 
-  if (!res.ok) {
-    let detail = '';
+    /* Poll until done or error — each GET returns in <1ms, so no timeout risk. */
+    content = await new Promise((resolve, reject) => {
+      const poll = async () => {
+        try {
+          const r   = await fetch(`/api/generate-flashcards/status?job_id=${job_id}`);
+          const job = await r.json();
+          if (job.status === 'done')  { resolve(job.result); return; }
+          if (job.status === 'error') { reject(new Error(job.error || 'generation failed on server')); return; }
+          setTimeout(poll, 2500);  // pending or running — check again in 2.5s
+        } catch (e) { reject(e); }
+      };
+      poll();
+    });
+  } catch (serverErr) {
+    if (usedServerPath) { logError('callOpenAI server', serverErr); throw serverErr; }
+    /* Server endpoint unavailable — fall back to direct browser fetch. */
+    let res;
     try {
-      const j = await res.json();
-      detail = j?.error?.message || j?.error?.code || JSON.stringify(j).slice(0, 300);
-    } catch (_) {
-      detail = await res.text().catch(() => '');
-      detail = detail.slice(0, 300);
+      res = await fetch('https://api.openai.com/v1/chat/completions', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+        body:    bodyStr,
+      });
+    } catch (directErr) {
+      logError('callOpenAI direct', directErr);
+      throw new Error(`Failed to reach OpenAI: ${directErr.message}`);
     }
-    const hint =
-      res.status === 401 ? ' (invalid or expired API key)' :
-      res.status === 429 ? ' (rate-limited — wait a moment and retry)' :
-      res.status === 400 ? ' (bad request — model may not support JSON mode or vision)' :
-      res.status === 404 ? ' (model not found — check the model name in the dropdown)' :
-      res.status === 502 ? ' (server could not reach OpenAI — check internet on the VPS)' :
-      res.status === 503 ? ' (OpenAI key not configured — add it to .mecee-secrets/OPENAIAPI.txt)' : '';
-    const err = new Error(`OpenAI error ${res.status}${hint}: ${detail}`);
-    logError('callOpenAI response', err);
-    throw err;
+    if (!res.ok) {
+      let detail = '';
+      try { const j = await res.json(); detail = j?.error?.message || JSON.stringify(j).slice(0, 200); }
+      catch (_) { detail = await res.text().catch(() => ''); }
+      throw new Error(`OpenAI error ${res.status}: ${detail}`);
+    }
+    const j = await res.json();
+    content = j.choices?.[0]?.message?.content || '';
   }
 
-  const j = await res.json();
-  const content = j.choices?.[0]?.message?.content || '';
   if (!content) {
     const err = new Error('OpenAI returned an empty response — model may have refused or hit a content filter.');
     logError('callOpenAI empty response', err);

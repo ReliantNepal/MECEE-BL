@@ -40,6 +40,11 @@ ROOT = os.path.dirname(os.path.abspath(__file__))
 PORT = 8000
 RENDER_PORT = 8001   # render_service.py — loopback-only MuPDF renderer
 
+# In-memory store for async flashcard generation jobs.
+# { job_id: {status: pending|running|done|error, result: str|None, error: str|None} }
+_fc_jobs: "dict[str, dict]" = {}
+_fc_jobs_lock = threading.Lock()
+
 # Where user-added PDFs (books/notes) get tracked. The PDFs themselves go into
 # books/<subject>/<filename>.pdf — this JSON only stores their metadata.
 METADATA_PATH = os.path.join(ROOT, "books", "user-library.json")
@@ -313,6 +318,8 @@ class QuietHandler(http.server.SimpleHTTPRequestHandler):
             return self._openai_key()
         if parsed.path == "/api/client-error":
             return self._api_client_error_get()
+        if parsed.path == "/api/generate-flashcards/status":
+            return self._api_fc_status(parsed)
         if parsed.path.startswith("/api/sync/state/"):
             return self._sync_state_pull(parsed.path[len("/api/sync/state/"):])
         if parsed.path.startswith("/api/sync/pdf/"):
@@ -568,6 +575,8 @@ class QuietHandler(http.server.SimpleHTTPRequestHandler):
             return self._api_cleanup_blobs()
         if parsed.path == "/api/openai":
             return self._api_openai_proxy()
+        if parsed.path == "/api/generate-flashcards":
+            return self._api_fc_generate()
         if parsed.path == "/api/set-openai-key":
             return self._api_set_openai_key()
         if parsed.path == "/api/client-error":
@@ -1131,6 +1140,85 @@ class QuietHandler(http.server.SimpleHTTPRequestHandler):
             self._json(200, list(reversed(entries)))
         except Exception as e:
             self._json(500, {"error": str(e)})
+
+    def _api_fc_generate(self) -> None:
+        """POST /api/generate-flashcards
+        Accepts the same JSON body callOpenAI would send to OpenAI directly,
+        starts the OpenAI call in a background thread, and returns a job_id
+        immediately — so the Cloudflare tunnel never times out waiting.
+        The browser polls /api/generate-flashcards/status?job_id=... for the result."""
+        try:
+            body_bytes = self._read_body()
+            payload    = json.loads(body_bytes.decode("utf-8"))
+        except Exception as e:
+            return self._json(400, {"error": f"bad request: {e}"})
+
+        key_path = os.path.join(SECRETS_DIR, "OPENAIAPI.txt")
+        try:
+            with open(key_path, "r", encoding="utf-8-sig") as f:
+                api_key = f.read().strip().lstrip("﻿")
+        except Exception:
+            return self._json(503, {"error": "OpenAI key not configured on server"})
+        if not api_key.startswith("sk-"):
+            return self._json(503, {"error": "OpenAI key on server looks invalid"})
+
+        job_id = uuid.uuid4().hex[:16]
+        with _fc_jobs_lock:
+            _fc_jobs[job_id] = {"status": "pending", "result": None, "error": None}
+
+        def _run():
+            with _fc_jobs_lock:
+                _fc_jobs[job_id]["status"] = "running"
+            model = payload.get("model", "gpt-4o")
+            print(f"[fc-generate] job={job_id} model={model} body={len(body_bytes)}B", flush=True)
+            try:
+                req = urllib.request.Request(
+                    "https://api.openai.com/v1/chat/completions",
+                    data=body_bytes,
+                    headers={"Content-Type": "application/json", "Authorization": f"Bearer {api_key}"},
+                    method="POST",
+                )
+                with urllib.request.urlopen(req, timeout=300) as r:
+                    resp    = json.loads(r.read())
+                content = (resp.get("choices") or [{}])[0].get("message", {}).get("content", "")
+                if not content:
+                    raise ValueError("OpenAI returned an empty response")
+                with _fc_jobs_lock:
+                    _fc_jobs[job_id] = {"status": "done", "result": content, "error": None}
+                print(f"[fc-generate] job={job_id} done ({len(content)} chars)", flush=True)
+            except urllib.error.HTTPError as e:
+                try:
+                    detail = json.loads(e.read()).get("error", {}).get("message", str(e))
+                except Exception:
+                    detail = str(e)
+                print(f"[fc-generate] job={job_id} OpenAI HTTP {e.code}: {detail}", flush=True)
+                with _fc_jobs_lock:
+                    _fc_jobs[job_id] = {"status": "error", "result": None,
+                                        "error": f"OpenAI error {e.code}: {detail}"}
+            except Exception as e:
+                print(f"[fc-generate] job={job_id} error: {e}", flush=True)
+                with _fc_jobs_lock:
+                    _fc_jobs[job_id] = {"status": "error", "result": None, "error": str(e)}
+
+        threading.Thread(target=_run, daemon=True).start()
+        self._json(200, {"job_id": job_id})
+
+    def _api_fc_status(self, parsed) -> None:
+        """GET /api/generate-flashcards/status?job_id=...
+        Returns {status, result, error} for a job started by _api_fc_generate."""
+        qs     = urllib.parse.parse_qs(parsed.query)
+        job_id = (qs.get("job_id", [""])[0] or "").strip()
+        if not job_id:
+            return self._json(400, {"error": "job_id required"})
+        with _fc_jobs_lock:
+            job = dict(_fc_jobs.get(job_id) or {})
+        if not job:
+            return self._json(404, {"error": "job not found (server may have restarted)"})
+        # Clean up completed/errored jobs after they've been fetched once as done/error
+        if job.get("status") in ("done", "error"):
+            with _fc_jobs_lock:
+                _fc_jobs.pop(job_id, None)
+        self._json(200, job)
 
     def _api_set_openai_key(self) -> None:
         """Save a new OpenAI API key to .mecee-secrets/OPENAIAPI.txt."""
