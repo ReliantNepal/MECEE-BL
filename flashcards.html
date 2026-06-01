@@ -1202,6 +1202,63 @@
     flex: 1;
     min-width: 200px;
   }
+  .edit-search-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+  .edit-search-wrap {
+    position: relative;
+    flex: 1;
+    min-width: 200px;
+    display: flex;
+    align-items: center;
+  }
+  .edit-search-icon {
+    position: absolute;
+    left: 11px;
+    font-size: 13px;
+    pointer-events: none;
+    opacity: .6;
+  }
+  .edit-search-input {
+    width: 100%;
+    padding: 9px 34px 9px 34px !important;
+    border-radius: 9px;
+    font-size: 13px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: inherit;
+    transition: border-color .15s, box-shadow .15s;
+  }
+  .edit-search-input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--surface-2);
+  }
+  .edit-search-clear {
+    position: absolute;
+    right: 8px;
+    background: transparent;
+    border: 0;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 12px;
+    padding: 4px;
+    border-radius: 4px;
+  }
+  .edit-search-clear:hover { color: var(--bad); }
+  .edit-search-count {
+    font-size: 11px;
+    color: var(--muted);
+    white-space: nowrap;
+    font-weight: 600;
+  }
+  .card-edit.search-match { border-color: var(--accent); }
+  .card-edit.search-dim { opacity: .35; }
   .edit-cards {
     display: grid;
     gap: 12px;
@@ -2339,6 +2396,14 @@
       <button class="btn secondary" id="editWallpaper" type="button">🎨 Wallpaper</button>
       <button class="btn secondary" id="editAddFlash" type="button">+ Flash card</button>
       <button class="btn secondary" id="editAddMcq" type="button">+ MCQ</button>
+    </div>
+    <div class="edit-search-bar">
+      <div class="edit-search-wrap">
+        <span class="edit-search-icon">🔍</span>
+        <input type="text" id="editSearchInput" class="edit-search-input" placeholder="Search cards by question, answer, or options…" autocomplete="off" />
+        <button class="edit-search-clear" id="editSearchClear" title="Clear search" style="display:none">✕</button>
+      </div>
+      <span id="editSearchCount" class="edit-search-count"></span>
     </div>
     <div class="edit-cards" id="editCards"></div>
   </div>
@@ -4655,6 +4720,10 @@ function openDeckEditor(id) {
   if (!deck) return;
   editingDeckId = id;
   document.getElementById('editDeckName').value = deck.name;
+  const searchEl = document.getElementById('editSearchInput');
+  if (searchEl) { searchEl.value = ''; }
+  const clearBtn = document.getElementById('editSearchClear');
+  if (clearBtn) clearBtn.style.display = 'none';
   renderEditCards();
   document.getElementById('editBack').classList.add('open');
   document.body.style.overflow = 'hidden';
@@ -4680,6 +4749,25 @@ function getEditingDeck() {
 
 function persistEditingDeck(data) { writeDecks(data); }
 
+function scoreCardMatch(card, query) {
+  if (!query) return 0;
+  const q = query.toLowerCase();
+  const terms = q.split(/\s+/).filter(Boolean);
+  let score = 0;
+  const fields = [card.q || '', card.a || ''];
+  if (card.type === 'mcq' && Array.isArray(card.choices)) {
+    card.choices.forEach(ch => fields.push(ch || ''));
+  }
+  const haystack = fields.map(f => f.toLowerCase());
+  terms.forEach(term => {
+    haystack.forEach(f => {
+      if (f.includes(term)) score += 2;
+      if (f.startsWith(term)) score += 1;
+    });
+  });
+  return score;
+}
+
 function renderEditCards() {
   const { deck } = getEditingDeck();
   const wrap = document.getElementById('editCards');
@@ -4688,12 +4776,30 @@ function renderEditCards() {
     `${deck.cards.length} card${deck.cards.length === 1 ? '' : 's'} · auto-saved as you type`;
   if (deck.cards.length === 0) {
     wrap.innerHTML = `<div class="empty"><div class="icon">📝</div>No cards yet — add one with the + Flash or + MCQ buttons above.</div>`;
+    updateEditSearchCount(0, 0, '');
     return;
   }
-  wrap.innerHTML = deck.cards.map((c, i) => cardEditRowHtml(c, i)).join('');
 
-  /* Wire field inputs — every textarea/input updates the in-memory card
-     and writes back to localStorage. */
+  const query = (document.getElementById('editSearchInput') || {}).value || '';
+  const trimmed = query.trim();
+
+  let ordered;
+  if (!trimmed) {
+    ordered = deck.cards.map((c, i) => ({ c, i, score: 0 }));
+  } else {
+    ordered = deck.cards.map((c, i) => ({ c, i, score: scoreCardMatch(c, trimmed) }));
+    ordered.sort((a, b) => b.score - a.score);
+  }
+
+  const matchCount = trimmed ? ordered.filter(x => x.score > 0).length : deck.cards.length;
+  updateEditSearchCount(matchCount, deck.cards.length, trimmed);
+
+  wrap.innerHTML = ordered.map(({ c, i, score }) => {
+    const cls = trimmed ? (score > 0 ? ' search-match' : ' search-dim') : '';
+    return cardEditRowHtml(c, i, cls);
+  }).join('');
+
+  /* Wire field inputs */
   wrap.querySelectorAll('[data-cid]').forEach(row => {
     const cid = row.dataset.cid;
     row.querySelectorAll('textarea[data-field], input[type="text"][data-choice], input[type="radio"][data-correct]').forEach(el => {
@@ -4705,7 +4811,15 @@ function renderEditCards() {
   });
 }
 
-function cardEditRowHtml(c, i) {
+function updateEditSearchCount(matches, total, query) {
+  const el = document.getElementById('editSearchCount');
+  if (!el) return;
+  if (!query) { el.textContent = ''; return; }
+  el.textContent = matches === 0 ? 'No matches' : `${matches} of ${total} matched`;
+}
+
+function cardEditRowHtml(c, i, extraCls) {
+  const cls = extraCls || '';
   if (c.type === 'mcq') {
     /* Pad to at least 4 choices for editing convenience. */
     const choices = c.choices.slice();
@@ -4717,7 +4831,7 @@ function cardEditRowHtml(c, i) {
         <input type="text" data-choice="${ci}" value="${escapeHtml(ch)}" placeholder="Choice ${ci + 1}${ci === 0 ? ' (correct by convention if not set)' : ''}" />
       </div>`).join('');
     return `
-      <div class="card-edit" data-cid="${c.id}">
+      <div class="card-edit${cls}" data-cid="${c.id}">
         <div class="card-head">
           <span class="card-type-pill">MCQ</span>
           <span class="card-idx">#${i + 1}</span>
@@ -4739,7 +4853,7 @@ function cardEditRowHtml(c, i) {
   }
   /* flash */
   return `
-    <div class="card-edit" data-cid="${c.id}">
+    <div class="card-edit${cls}" data-cid="${c.id}">
       <div class="card-head">
         <span class="card-type-pill">Flash</span>
         <span class="card-idx">#${i + 1}</span>
@@ -4821,6 +4935,20 @@ document.getElementById('editDeckName').addEventListener('input', e => {
   if (!deck) return;
   deck.name = e.target.value;
   persistEditingDeck(data);
+});
+
+/* Card search in edit modal. */
+document.getElementById('editSearchInput').addEventListener('input', e => {
+  const clearBtn = document.getElementById('editSearchClear');
+  if (clearBtn) clearBtn.style.display = e.target.value ? 'block' : 'none';
+  renderEditCards();
+});
+document.getElementById('editSearchClear').addEventListener('click', () => {
+  const inp = document.getElementById('editSearchInput');
+  inp.value = '';
+  document.getElementById('editSearchClear').style.display = 'none';
+  inp.focus();
+  renderEditCards();
 });
 
 document.getElementById('editAddFlash').addEventListener('click', () => addCard('flash'));
