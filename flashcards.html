@@ -3240,10 +3240,18 @@ async function generateDeckViaWorker({ prompt, dataUrls, model, deckName, tag, s
     const blob = dataUrlToBlob(dataUrls[i]);
     const form = new FormData();
     form.append('image', blob, `page-${i + 1}.png`);
-    const ur = await fetch(cfg.url.replace(/\/$/, '') + '/upload', { method: 'POST', headers, body: form });
+    let ur;
+    try {
+      ur = await fetch(cfg.url.replace(/\/$/, '') + '/upload', { method: 'POST', headers, body: form });
+    } catch (netErr) {
+      logError('worker upload (network)', netErr);
+      throw new Error(`Worker unreachable: ${netErr.message} — check internet or switch to Local mode.`);
+    }
     if (!ur.ok) {
       const txt = await ur.text().catch(() => '');
-      throw new Error(`upload ${i + 1}/${dataUrls.length} failed: ${ur.status} ${txt.slice(0, 200)}`);
+      const e = new Error(`worker upload ${i + 1}/${dataUrls.length} failed: HTTP ${ur.status} ${txt.slice(0, 200)}`);
+      logError('worker upload', e);
+      throw e;
     }
     const j = await ur.json();
     urls.push(j.url);
@@ -3545,8 +3553,7 @@ document.getElementById('genGoBtn').addEventListener('click', async () => {
   if (pages.length === 0) { setStatus('genStatus', 'Click "Preview" first.', 'err'); return; }
   const included = pages.filter(p => p.include);
   if (!included.length) { setStatus('genStatus', 'No pages selected.', 'err'); return; }
-  /* In local mode we need the user's own API key. In cloud mode the Worker
-     holds the key as a secret, so we skip the prompt entirely. */
+  await loadFileOpenAIKey(); // always use the latest key (e.g. just updated via ⚙️ settings)
   const apiKey = getAiMode() === 'cloud' ? null : getApiKey();
   if (getAiMode() === 'local' && !apiKey) { setStatus('genStatus', 'No API key — add it to .mecee-secrets/OPENAIAPI.txt and refresh.', 'err'); return; }
 
@@ -3704,6 +3711,7 @@ function renderImgThumbs() {
 document.getElementById('imgGoBtn').addEventListener('click', async () => {
   if (_flashcardGenerating) { setStatus('imgStatus', 'Generation already in progress — please wait.', 'err'); return; }
   if (!imgFiles.length) return;
+  await loadFileOpenAIKey();
   const apiKey = getAiMode() === 'cloud' ? null : getApiKey();
   if (getAiMode() === 'local' && !apiKey) { setStatus('imgStatus', 'No API key — add it to .mecee-secrets/OPENAIAPI.txt and refresh.', 'err'); return; }
   const mix      = document.getElementById('imgMix').value;
@@ -3946,6 +3954,7 @@ async function fileUrlToDataUrl(path) {
 notesGoBtn.addEventListener('click', async () => {
   if (_flashcardGenerating) { setStatus('notesStatus', 'Generation already in progress — please wait.', 'err'); return; }
   if (!notesFiles.length) return;
+  await loadFileOpenAIKey();
   const apiKey = getAiMode() === 'cloud' ? null : getApiKey();
   if (getAiMode() === 'local' && !apiKey) { setStatus('notesStatus', 'No API key — add it to .mecee-secrets/OPENAIAPI.txt and refresh.', 'err'); return; }
   const mix      = document.getElementById('notesMix').value;

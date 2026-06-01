@@ -1011,10 +1011,9 @@ class QuietHandler(http.server.SimpleHTTPRequestHandler):
         length = int(self.headers.get("Content-Length", "0") or "0")
         if length <= 0:
             return b""
-        # 50 MB cap for snapshot payloads — well above realistic flashcard JSON,
-        # but stops accidental gigantic uploads from chewing memory.
-        if length > 50 * 1024 * 1024:
-            raise ValueError("snapshot too large (>50 MB)")
+        # 100 MB cap — vision requests with many full-page images can be large.
+        if length > 100 * 1024 * 1024:
+            raise ValueError("request body too large (>100 MB)")
         return self.rfile.read(length)
 
     def _r2_or_503(self) -> bool:
@@ -1125,6 +1124,15 @@ class QuietHandler(http.server.SimpleHTTPRequestHandler):
             return self._json(503, {"error": "OpenAI key on server looks invalid"})
 
         body = self._read_body()
+        # Log model + body size so errors are debuggable without printing the full payload.
+        try:
+            _meta = json.loads(body)
+            _model = _meta.get("model", "?")
+            _msgs  = len(_meta.get("messages", []))
+            print(f"[openai-proxy] model={_model} messages={_msgs} body={len(body)}B", flush=True)
+        except Exception:
+            pass
+
         request = _req.Request(
             "https://api.openai.com/v1/chat/completions",
             data=body,
@@ -1143,6 +1151,12 @@ class QuietHandler(http.server.SimpleHTTPRequestHandler):
             resp_body  = e.read() or b"{}"
             resp_code  = e.code
             resp_ctype = e.headers.get("Content-Type", "application/json")
+            # Log failures so they appear in the launcher log
+            try:
+                err_detail = json.loads(resp_body).get("error", {})
+                print(f"[openai-proxy] HTTP {resp_code} — {err_detail.get('message','?')} (code={err_detail.get('code','?')})", flush=True)
+            except Exception:
+                print(f"[openai-proxy] HTTP {resp_code} — {resp_body[:200]}", flush=True)
         except Exception as e:
             return self._json(502, {"error": f"OpenAI unreachable: {e}"})
 
