@@ -957,6 +957,51 @@
   }
   .upload-joke[hidden] { display: none; }
   .upload-joke.fading  { opacity: 0; }
+
+  /* Floating upload-in-progress button — bottom-left, above the sync FAB */
+  .upload-fab-btn {
+    position: fixed;
+    bottom: 74px;
+    left: 14px;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    z-index: 500;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    background: conic-gradient(#ffd54f 0% 0%, #2a2a2a 0% 100%);
+    box-shadow: 0 4px 14px rgba(0,0,0,.5);
+    transition: box-shadow .2s ease;
+    padding: 0;
+  }
+  .upload-fab-btn.visible { display: flex; }
+  .upload-fab-btn:hover { box-shadow: 0 6px 20px rgba(255,213,79,.45), 0 0 0 5px rgba(255,213,79,.15); }
+
+  .upload-fab-tooltip {
+    position: fixed;
+    bottom: 126px;
+    left: 14px;
+    background: #1e1e1e;
+    border: 1px solid #333;
+    border-radius: 10px;
+    padding: 10px 14px;
+    min-width: 200px;
+    max-width: 270px;
+    box-shadow: 0 8px 24px rgba(0,0,0,.5);
+    font-size: 12px;
+    color: #ccc;
+    z-index: 501;
+    display: none;
+  }
+  .upload-fab-tooltip.visible { display: block; }
+  .uft-title { font-weight: 700; color: #f0f0f0; margin-bottom: 6px; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .uft-bar-track { height: 4px; background: #333; border-radius: 99px; overflow: hidden; margin: 6px 0 4px; }
+  .uft-bar-fill  { height: 100%; background: #ffd54f; border-radius: 99px; transition: width .15s ease; }
+  .uft-stats { display: flex; justify-content: space-between; color: #888; font-size: 11px; }
   .bm-btns {
     display: flex;
     gap: 8px;
@@ -1742,20 +1787,24 @@ function fmtBytes(n) {
   if (n >= 1048576) return (n / 1048576).toFixed(1) + ' MB';
   return Math.round(n / 1024) + ' KB';
 }
+let _activeUploadName = '';
+
 function showUploadProgress(pct, loaded, total, speed) {
   upProgressEl.hidden = false;
   const p = Math.round(Math.max(0, Math.min(100, pct)));
   upBarFillEl.style.width = p + '%';
   upPctEl.textContent = p + '%';
-  if (upSpeedEl && loaded != null && total != null && total > 0) {
-    let text = fmtBytes(loaded) + ' / ' + fmtBytes(total);
+  let statsText = '';
+  if (loaded != null && total != null && total > 0) {
+    statsText = fmtBytes(loaded) + ' / ' + fmtBytes(total);
     if (speed > 0) {
-      text += ' · ' + (speed >= 1048576
+      statsText += ' · ' + (speed >= 1048576
         ? (speed / 1048576).toFixed(1) + ' MB/s'
         : Math.round(speed / 1024) + ' KB/s');
     }
-    upSpeedEl.textContent = text;
+    if (upSpeedEl) upSpeedEl.textContent = statsText;
   }
+  showUploadFab(_activeUploadName, p, statsText);
 }
 function resetUploadProgress() {
   upProgressEl.hidden = true;
@@ -1763,6 +1812,66 @@ function resetUploadProgress() {
   upPctEl.textContent = '0%';
   if (upSpeedEl) upSpeedEl.textContent = '';
   stopJokes();
+  hideUploadFab();
+}
+
+/* ===== Floating upload FAB ===== */
+let _fabBtn = null, _fabTooltip = null, _fabTooltipVisible = false;
+let _fabCurrentName = '', _fabCurrentPct = 0, _fabCurrentStats = '';
+
+function ensureUploadFab() {
+  if (_fabBtn) return;
+  _fabBtn = document.createElement('button');
+  _fabBtn.type = 'button';
+  _fabBtn.className = 'upload-fab-btn';
+  _fabBtn.title = 'Upload in progress';
+  _fabBtn.innerHTML = '⬆';
+  document.body.appendChild(_fabBtn);
+
+  _fabTooltip = document.createElement('div');
+  _fabTooltip.className = 'upload-fab-tooltip';
+  _fabTooltip.innerHTML =
+    '<div class="uft-title" id="_uftTitle">Uploading…</div>' +
+    '<div class="uft-bar-track"><div class="uft-bar-fill" id="_uftFill" style="width:0%"></div></div>' +
+    '<div class="uft-stats"><span id="_uftPct">0%</span><span id="_uftSpeed"></span></div>';
+  document.body.appendChild(_fabTooltip);
+
+  _fabBtn.addEventListener('click', () => {
+    _fabTooltipVisible = !_fabTooltipVisible;
+    _fabTooltip.classList.toggle('visible', _fabTooltipVisible);
+  });
+  document.addEventListener('click', e => {
+    if (_fabTooltipVisible && !_fabBtn.contains(e.target) && !_fabTooltip.contains(e.target)) {
+      _fabTooltipVisible = false;
+      _fabTooltip.classList.remove('visible');
+    }
+  });
+}
+
+function showUploadFab(name, pct, statsText) {
+  ensureUploadFab();
+  _fabCurrentName = name;
+  _fabCurrentPct  = pct;
+  _fabCurrentStats = statsText;
+  _fabBtn.classList.add('visible');
+  /* Conic-gradient ring that fills clockwise with the upload percentage. */
+  _fabBtn.style.background =
+    `conic-gradient(#ffd54f 0% ${pct}%, #2a2a2a ${pct}% 100%)`;
+  if (_fabTooltipVisible) _refreshFabTooltip();
+}
+function _refreshFabTooltip() {
+  const t = document.getElementById('_uftTitle');
+  const f = document.getElementById('_uftFill');
+  const p = document.getElementById('_uftPct');
+  const s = document.getElementById('_uftSpeed');
+  if (t) t.textContent = _fabCurrentName || 'Uploading…';
+  if (f) f.style.width = _fabCurrentPct + '%';
+  if (p) p.textContent = _fabCurrentPct + '%';
+  if (s) s.textContent = _fabCurrentStats;
+}
+function hideUploadFab() {
+  if (_fabBtn) _fabBtn.classList.remove('visible');
+  if (_fabTooltip) { _fabTooltip.classList.remove('visible'); _fabTooltipVisible = false; }
 }
 
 /* ===== localStorage cache for user-added books ===== */
@@ -1787,8 +1896,10 @@ function xhrUpload(url, body, contentType, onProgress) {
     let lastTime   = Date.now();
     let lastLoaded = 0;
     let smoothSpeed = 0;  // EMA bytes/sec
+    let totalBytes = 0;
     xhr.upload.onprogress = e => {
       if (!e.lengthComputable) return;
+      totalBytes = e.total;
       const now = Date.now();
       const dt  = (now - lastTime) / 1000;
       if (dt >= 0.1) {
@@ -1798,6 +1909,11 @@ function xhrUpload(url, body, contentType, onProgress) {
         lastTime   = now;
       }
       onProgress(e.loaded / e.total, e.loaded, e.total, smoothSpeed);
+    };
+    /* All bytes sent — server is now writing to disk. Bump to 98% so the
+       bar doesn't appear stuck while the server processes the upload. */
+    xhr.upload.onloadend = () => {
+      onProgress(1, totalBytes, totalBytes, smoothSpeed);
     };
     xhr.onload = () => {
       if (xhr.status >= 200 && xhr.status < 300) {
@@ -1816,6 +1932,7 @@ function xhrUpload(url, body, contentType, onProgress) {
 
 async function uploadPdfNote(file, title, sub, kind) {
   addErrorEl.textContent = '';
+  _activeUploadName = title || file.name;
   startJokes();
   showUploadProgress(2);
 
@@ -1864,6 +1981,7 @@ async function uploadPdfNote(file, title, sub, kind) {
    uploads keep things deterministic and the progress message accurate. */
 async function uploadGalleryNote(files, title, sub) {
   const paths = [];
+  _activeUploadName = title || files[0].name;
   startJokes();
   /* Each image gets an equal share of 0–90%. The final 10% is the create-note call. */
   const perImg = 90 / files.length;

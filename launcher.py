@@ -23,10 +23,12 @@ import os
 import re
 import socket
 import socketserver
+import subprocess
 import sys
 import threading
 import time
 import urllib.parse
+import urllib.request
 import uuid
 import webbrowser
 
@@ -36,6 +38,7 @@ ROOT = os.path.dirname(os.path.abspath(__file__))
 # Fixed port so localStorage (bookmarks, highlights, progress) stays on a single
 # origin across launches — different ports = different origins = different data.
 PORT = 8000
+RENDER_PORT = 8001   # render_service.py — loopback-only MuPDF renderer
 
 # Where user-added PDFs (books/notes) get tracked. The PDFs themselves go into
 # books/<subject>/<filename>.pdf — this JSON only stores their metadata.
@@ -86,10 +89,10 @@ def sanitize_music_filename(name):
 
 
 def ensure_port_free(p: int) -> None:
-    # Bind-check on 0.0.0.0 because that's what the real server will bind to —
-    # checking 127.0.0.1 alone misses the case where the port is taken on
-    # another interface but free on loopback.
+    # Mirror the server's SO_REUSEADDR so FIN-WAIT sockets don't produce a
+    # false positive — the real server will bind fine in that state too.
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         try:
             s.bind(("0.0.0.0", p))
         except OSError as e:
@@ -123,6 +126,68 @@ def lan_ips() -> list[str]:
     except OSError:
         pass
     return sorted(ips)
+
+
+_render_proc: "subprocess.Popen | None" = None
+
+def start_render_service() -> bool:
+    """Start render_service.py in the background and wait up to 3 s for it to be ready.
+    Returns True if the service is healthy (whether we started it or it was already up)."""
+    global _render_proc
+    health_url = f"http://127.0.0.1:{RENDER_PORT}/healthz"
+
+    # Already running?
+    try:
+        with urllib.request.urlopen(health_url, timeout=1) as r:
+            if r.status == 200:
+                print(f"[launcher] render service already on port {RENDER_PORT}")
+                return True
+    except Exception:
+        pass
+
+    svc = os.path.join(ROOT, "render_service.py")
+    if not os.path.isfile(svc):
+        print("[launcher] render_service.py not found — server-side render disabled")
+        return False
+
+    try:
+        _render_proc = subprocess.Popen(
+            [sys.executable, svc],
+            stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+            cwd=ROOT,
+        )
+    except Exception as e:
+        print(f"[launcher] could not start render service: {e}")
+        return False
+
+    # Drain subprocess stdout on a daemon thread so the pipe never blocks.
+    def _drain():
+        for line in _render_proc.stdout:
+            sys.stdout.buffer.write(line)
+            sys.stdout.buffer.flush()
+    threading.Thread(target=_drain, daemon=True).start()
+
+    deadline = time.monotonic() + 5.0
+    while time.monotonic() < deadline:
+        try:
+            with urllib.request.urlopen(health_url, timeout=0.5) as r:
+                if r.status == 200:
+                    print(f"[launcher] render service ready on port {RENDER_PORT} (MuPDF)")
+                    return True
+        except Exception:
+            time.sleep(0.1)
+
+    print("[launcher] render service did not start in time — server-side render disabled")
+    return False
+
+
+def stop_render_service() -> None:
+    if _render_proc and _render_proc.poll() is None:
+        _render_proc.terminate()
+        try:
+            _render_proc.wait(timeout=3)
+        except subprocess.TimeoutExpired:
+            _render_proc.kill()
 
 
 def refresh_playlist() -> None:
@@ -236,6 +301,10 @@ class QuietHandler(http.server.SimpleHTTPRequestHandler):
         parsed = urllib.parse.urlparse(self.path)
         if parsed.path == "/api/library":
             return self._api_list()
+        if parsed.path == "/api/render":
+            return self._api_render(parsed)
+        if parsed.path == "/api/render-status":
+            return self._api_render_status()
         if parsed.path == "/api/sync/status":
             return self._sync_status()
         if parsed.path == "/api/worker-config":
@@ -596,13 +665,58 @@ class QuietHandler(http.server.SimpleHTTPRequestHandler):
         self.send_header("Content-Type", "application/json; charset=utf-8")
         self.send_header("Content-Length", str(len(body)))
         self.end_headers()
-        self.wfile.write(body)
+        try:
+            self.wfile.write(body)
+        except (BrokenPipeError, ConnectionResetError):
+            pass  # client disconnected — file already saved, response just lost
 
     def _api_list(self):
         try:
             self._json(200, load_user_library())
         except Exception as e:
             self._json(500, {"error": str(e)})
+
+    def _api_render_status(self) -> None:
+        """Return whether the MuPDF render service is alive."""
+        try:
+            with urllib.request.urlopen(
+                f"http://127.0.0.1:{RENDER_PORT}/healthz", timeout=0.5
+            ) as r:
+                available = r.status == 200
+        except Exception:
+            available = False
+        self._json(200, {"available": available})
+
+    def _api_render(self, parsed) -> None:
+        """Proxy /api/render?... → http://127.0.0.1:RENDER_PORT/render?...
+        The render service binds loopback-only; this proxy is the only public
+        path to it, and only PDFs under books/ are served (enforced by the
+        service itself)."""
+        upstream = f"http://127.0.0.1:{RENDER_PORT}/render?{parsed.query}"
+        try:
+            with urllib.request.urlopen(upstream, timeout=30) as r:
+                data = r.read()
+                ctype = r.headers.get("Content-Type", "image/jpeg")
+                self.send_response(r.status)
+                self.send_header("Content-Type", ctype)
+                self.send_header("Content-Length", str(len(data)))
+                self.send_header("Cache-Control", "public, max-age=300")
+                self.end_headers()
+                self.wfile.write(data)
+        except urllib.error.HTTPError as e:
+            body = e.read() or b"render error"
+            self.send_response(e.code)
+            self.send_header("Content-Type", "text/plain; charset=utf-8")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+        except Exception as e:
+            body = str(e).encode()
+            self.send_response(503)
+            self.send_header("Content-Type", "text/plain; charset=utf-8")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
 
     def _api_upload(self, parsed):
         try:
@@ -630,10 +744,6 @@ class QuietHandler(http.server.SimpleHTTPRequestHandler):
             if length > 250 * 1024 * 1024:
                 return self._json(413, {"error": "PDF too large (>250 MB)"})
 
-            data = self.rfile.read(length)
-            if data[:4] != b"%PDF":
-                return self._json(400, {"error": "not a PDF (missing %PDF header)"})
-
             subdir = os.path.join(ROOT, "books", subject)
             os.makedirs(subdir, exist_ok=True)
 
@@ -649,8 +759,30 @@ class QuietHandler(http.server.SimpleHTTPRequestHandler):
                 i += 1
 
             full = os.path.join(subdir, final)
-            with open(full, "wb") as f:
-                f.write(data)
+            # Stream body to disk in 64 KB chunks — keeps the TCP receive
+            # window open so the browser's upload.onprogress never stalls.
+            full_tmp = full + ".upload"
+            header_buf = b""
+            try:
+                with open(full_tmp, "wb") as fout:
+                    remaining = length
+                    while remaining > 0:
+                        chunk = self.rfile.read(min(65536, remaining))
+                        if not chunk:
+                            break
+                        if not header_buf:
+                            header_buf = chunk[:4]
+                        fout.write(chunk)
+                        remaining -= len(chunk)
+                if header_buf[:4] != b"%PDF":
+                    try: os.remove(full_tmp)
+                    except OSError: pass
+                    return self._json(400, {"error": "not a PDF (missing %PDF header)"})
+                os.replace(full_tmp, full)
+            except Exception:
+                try: os.remove(full_tmp)
+                except OSError: pass
+                raise
 
             item = {
                 "id":       uuid.uuid4().hex[:12],
@@ -705,17 +837,6 @@ class QuietHandler(http.server.SimpleHTTPRequestHandler):
             if ext not in self.NOTE_BLOB_EXTS:
                 return self._json(400, {"error": f"unsupported file type: {ext or '(none)'}"})
 
-            data = self.rfile.read(length)
-            # Light magic-byte sanity check so a renamed .png isn't actually a script.
-            if ext == ".pdf"  and not data.startswith(b"%PDF"):
-                return self._json(400, {"error": "not a PDF (missing %PDF header)"})
-            if ext == ".png"  and not data.startswith(b"\x89PNG\r\n\x1a\n"):
-                return self._json(400, {"error": "not a PNG image"})
-            if ext in (".jpg", ".jpeg") and not data.startswith(b"\xff\xd8\xff"):
-                return self._json(400, {"error": "not a JPEG image"})
-            if ext == ".webp" and not (data[:4] == b"RIFF" and data[8:12] == b"WEBP"):
-                return self._json(400, {"error": "not a WEBP image"})
-
             subdir = os.path.join(ROOT, "books", subject)
             os.makedirs(subdir, exist_ok=True)
 
@@ -727,14 +848,50 @@ class QuietHandler(http.server.SimpleHTTPRequestHandler):
                 i += 1
 
             full = os.path.join(subdir, final)
-            with open(full, "wb") as f:
-                f.write(data)
+            # Stream to disk in chunks so the TCP receive window stays open.
+            full_tmp = full + ".upload"
+            header_buf = b""
+            bytes_written = 0
+            try:
+                with open(full_tmp, "wb") as fout:
+                    remaining = length
+                    while remaining > 0:
+                        chunk = self.rfile.read(min(65536, remaining))
+                        if not chunk:
+                            break
+                        if not header_buf:
+                            header_buf = chunk[:12]
+                        fout.write(chunk)
+                        bytes_written += len(chunk)
+                        remaining -= len(chunk)
+                # Magic-byte validation after streaming.
+                if ext == ".pdf"  and header_buf[:4] != b"%PDF":
+                    try: os.remove(full_tmp)
+                    except OSError: pass
+                    return self._json(400, {"error": "not a PDF (missing %PDF header)"})
+                if ext == ".png"  and header_buf[:8] != b"\x89PNG\r\n\x1a\n":
+                    try: os.remove(full_tmp)
+                    except OSError: pass
+                    return self._json(400, {"error": "not a PNG image"})
+                if ext in (".jpg", ".jpeg") and header_buf[:3] != b"\xff\xd8\xff":
+                    try: os.remove(full_tmp)
+                    except OSError: pass
+                    return self._json(400, {"error": "not a JPEG image"})
+                if ext == ".webp" and not (header_buf[:4] == b"RIFF" and header_buf[8:12] == b"WEBP"):
+                    try: os.remove(full_tmp)
+                    except OSError: pass
+                    return self._json(400, {"error": "not a WEBP image"})
+                os.replace(full_tmp, full)
+            except Exception:
+                try: os.remove(full_tmp)
+                except OSError: pass
+                raise
 
             rel = f"books/{subject}/{final}"
             self._json(200, {
                 "file": rel,
                 "mime": self.NOTE_BLOB_MIMES.get(ext, "application/octet-stream"),
-                "size": len(data),
+                "size": bytes_written,
             })
         except Exception as e:
             self._json(500, {"error": str(e)})
@@ -1205,6 +1362,8 @@ def main() -> int:
 
     url = f"http://localhost:{PORT}/index.html" + (f"#{page}" if page else "")
 
+    start_render_service()
+
     # Bind 0.0.0.0 so phones / other devices on the same Wi-Fi can reach the
     # app at http://<pc-lan-ip>:8000. ThreadingTCPServer also lets the browser
     # load multiple resources concurrently.
@@ -1237,6 +1396,7 @@ def main() -> int:
     finally:
         httpd.shutdown()
         httpd.server_close()
+        stop_render_service()
     return 0
 
 
