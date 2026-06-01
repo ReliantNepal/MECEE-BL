@@ -1122,7 +1122,7 @@ class QuietHandler(http.server.SimpleHTTPRequestHandler):
             print(f"[client-error] [{entry['time']}] {entry['page']} › {entry['ctx']}: {entry['msg'][:200]}", flush=True)
             with open(self._ERROR_LOG_PATH, "a", encoding="utf-8") as f:
                 f.write(json.dumps(entry) + "\n")
-            self._json(200, {"ok": True})
+            self._json(200, {"ok": True, "log_path": self._ERROR_LOG_PATH})
         except Exception as e:
             self._json(500, {"error": str(e)})
 

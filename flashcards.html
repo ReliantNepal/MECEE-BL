@@ -3287,9 +3287,11 @@ function isReasoningModel(m) {
 }
 
 /* ===== Error logger =====
-   Writes timestamped entries to localStorage so errors survive page reloads
-   and show up in the on-page log panel. */
+   Writes timestamped entries to localStorage, ships to the server log,
+   and shows a centered popup so the user always sees what went wrong. */
 const ERR_LOG_KEY = 'mecee_fc_errors';
+let _errLogPath = null;  // server-side log path fetched once on first error
+
 function logError(context, err) {
   const entry = {
     ts:    Date.now(),
@@ -3304,12 +3306,26 @@ function logError(context, err) {
     localStorage.setItem(ERR_LOG_KEY, JSON.stringify(prev.slice(0, 50)));
   } catch (_) {}
   console.error(`[FC error] ${context}:`, err);
-  /* Also ship to the server so it can be read from the terminal. */
+
+  /* Ship to server and get the log file path, then show the popup. */
   fetch('/api/client-error', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(entry),
-  }).catch(() => {});
+  })
+    .then(r => r.ok ? r.json() : {})
+    .then(j => {
+      if (j.log_path) _errLogPath = j.log_path;
+      if (typeof window.__showFcErrorPopup === 'function') {
+        window.__showFcErrorPopup(context, entry.msg, _errLogPath);
+      }
+    })
+    .catch(() => {
+      if (typeof window.__showFcErrorPopup === 'function') {
+        window.__showFcErrorPopup(context, entry.msg, _errLogPath);
+      }
+    });
+
   renderErrorLog();
 }
 function renderErrorLog() {
@@ -5312,7 +5328,42 @@ window.onMeceeSyncApplied = function () {
 <script src="player.js"></script>
 <script src="nav-shim.js"></script>
 
-<!-- Error log panel — hidden until there are errors -->
+<!-- Centered error popup -->
+<div id="fcErrPopup" style="
+  display:none; position:fixed; inset:0; z-index:10000;
+  align-items:center; justify-content:center;
+  background:rgba(0,0,0,.55); backdrop-filter:blur(4px);">
+  <div style="
+    background:#1c1c1c; border:1px solid #ef5350; border-radius:14px;
+    padding:24px 26px 20px; max-width:460px; width:calc(100vw - 40px);
+    box-shadow:0 24px 60px rgba(0,0,0,.7); animation:fcErrPop .18s ease-out;
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+      <span style="font-size:22px">⚠️</span>
+      <span style="font-weight:700;font-size:16px;color:#ef5350" id="fcPopupTitle">Something went wrong</span>
+      <button id="fcPopupClose" style="margin-left:auto;background:none;border:none;color:#888;cursor:pointer;font-size:20px;line-height:1;padding:0 4px">×</button>
+    </div>
+    <div id="fcPopupCtx"  style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#ffd54f;margin-bottom:6px"></div>
+    <div id="fcPopupMsg"  style="font-size:13px;color:#f0f0f0;line-height:1.5;word-break:break-word;margin-bottom:16px"></div>
+    <div style="background:#111;border:1px solid #2a2a2a;border-radius:8px;padding:10px 12px;">
+      <div style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#666;margin-bottom:4px">Full log saved to</div>
+      <code id="fcPopupPath" style="font-size:11px;color:#aaa;word-break:break-all"></code>
+    </div>
+    <button id="fcPopupOk" style="
+      margin-top:16px;width:100%;padding:10px;border-radius:8px;border:none;
+      background:#ef5350;color:#fff;font-size:14px;font-weight:700;cursor:pointer;
+      font-family:inherit;">Dismiss</button>
+  </div>
+</div>
+<style>
+  @keyframes fcErrPop { from{transform:scale(.9) translateY(10px);opacity:0} to{transform:scale(1) translateY(0);opacity:1} }
+  .fc-err-row { display:flex; flex-direction:column; gap:2px; padding:5px 0; border-top:1px solid #2a2a2a; }
+  .fc-err-time { color:#666; font-size:10px; }
+  .fc-err-ctx  { color:#ffd54f; font-size:10px; font-weight:600; }
+  .fc-err-msg  { color:#ef5350; word-break:break-word; font-size:11px; }
+</style>
+
+<!-- Bottom-right error log panel (history) -->
 <div id="fcErrPanel" hidden style="
   position:fixed; bottom:14px; right:14px; z-index:9999;
   background:#1a1a1a; border:1px solid #ef5350; border-radius:10px;
@@ -5325,13 +5376,27 @@ window.onMeceeSyncApplied = function () {
   </div>
   <div class="fc-err-list"></div>
 </div>
-<style>
-  .fc-err-row { display:flex; flex-direction:column; gap:2px; padding:5px 0; border-top:1px solid #2a2a2a; }
-  .fc-err-time { color:#666; font-size:10px; }
-  .fc-err-ctx  { color:#ffd54f; font-size:10px; font-weight:600; }
-  .fc-err-msg  { color:#ef5350; word-break:break-word; font-size:11px; }
-</style>
+
 <script>
+  /* Wire up the centered error popup. */
+  (function () {
+    const popup    = document.getElementById('fcErrPopup');
+    const closeBtn = document.getElementById('fcPopupClose');
+    const okBtn    = document.getElementById('fcPopupOk');
+    function hidePopup() { popup.style.display = 'none'; }
+    closeBtn.addEventListener('click', hidePopup);
+    okBtn.addEventListener('click',    hidePopup);
+    popup.addEventListener('click', e => { if (e.target === popup) hidePopup(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') hidePopup(); });
+
+    window.__showFcErrorPopup = function (ctx, msg, logPath) {
+      document.getElementById('fcPopupCtx').textContent  = ctx  || '';
+      document.getElementById('fcPopupMsg').textContent  = msg  || 'An unknown error occurred.';
+      document.getElementById('fcPopupPath').textContent = logPath || 'client-errors.jsonl (on the VPS)';
+      popup.style.display = 'flex';
+    };
+  })();
+
   /* Render any saved errors from previous sessions on page load. */
   if (typeof renderErrorLog === 'function') renderErrorLog();
 </script>
