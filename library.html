@@ -2222,6 +2222,18 @@ async function openBook(book, startPage) {
   const myOpen = ++openToken;
   ++renderToken;
 
+  /* Reset ALL stale UI from the previous book SYNCHRONOUSLY — before any
+     await — so the bottom bar never shows the previous book's page count,
+     zoom, or nav state while the new one is loading. */
+  pdfPageTot.textContent   = '/ —';
+  pdfPageIn.value          = '1';
+  pdfPageIn.max            = 9999;
+  pdfZoomLbl.textContent   = '—';
+  pdfPrevBtn.disabled      = true;
+  pdfFirstBtn.disabled     = true;
+  pdfNextBtn.disabled      = true;
+  pdfLastBtn.disabled      = true;
+
   if (pdfDoc) { try { pdfDoc.destroy(); } catch (_) {} pdfDoc = null; }
   cacheClear();
   pdfCanvas.width = pdfCanvas.height = 0;
@@ -2449,12 +2461,20 @@ function closeReader() {
   pdfCanvas.width = pdfCanvas.height = 0;
   pdfTextLyr.innerHTML = '';
   pdfHlLyr.innerHTML = '';
-  /* Same dual src-clear pattern as openBook — single removeAttribute leaves
-     the old image visible in some browsers. */
   imgViewer.src = '';
   imgViewer.removeAttribute('src');
   imgFiles = [];
   currentBook = null;
+  /* Clear stale page-count / zoom UI so reopening another book never shows
+     the previous book's values even for a split second. */
+  pdfPageTot.textContent  = '/ —';
+  pdfPageIn.value         = '1';
+  pdfZoomLbl.textContent  = '—';
+  pdfPrevBtn.disabled     = true;
+  pdfFirstBtn.disabled    = true;
+  pdfNextBtn.disabled     = true;
+  pdfLastBtn.disabled     = true;
+  readerTitle.textContent = '';
   sylPanel.classList.remove('open');
   hideHlButton();
   exitFullscreen();
