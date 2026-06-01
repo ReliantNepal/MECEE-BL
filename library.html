@@ -1186,6 +1186,47 @@
     }
     .pdf-bar input[type=number] { width: 48px; height: 32px; font-size: 14px; }
   }
+
+  /* ===== Thumbnail picker modal ===== */
+  .thumb-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin: 16px 0;
+  }
+  .thumb-option {
+    border-radius: 6px;
+    overflow: hidden;
+    cursor: pointer;
+    border: 2px solid transparent;
+    aspect-ratio: 3/4;
+    transition: border-color .15s, transform .15s;
+    background: #111;
+  }
+  .thumb-option:hover { border-color: var(--accent, #4f8ef7); transform: scale(1.05); }
+  .thumb-option canvas { width: 100%; height: 100%; display: block; }
+  .thumb-picker-row {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    padding-top: 4px;
+  }
+  .thumb-picker-btn {
+    background: transparent;
+    border: 1px solid var(--border, #333);
+    color: var(--text, #f5f5f5);
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font: inherit;
+    font-size: 13px;
+    transition: background .15s;
+  }
+  .thumb-picker-btn:hover { background: var(--surface-2, rgba(255,255,255,.08)); }
+  @media (max-width: 520px) {
+    .thumb-grid { grid-template-columns: repeat(3, 1fr); }
+  }
 </style>
 </head>
 <body>
@@ -1940,16 +1981,200 @@ _thumbInput.addEventListener('change', () => {
   _thumbPickBook = null;
 });
 
-function pickThumbnail(book) {
-  _thumbPickBook = book;
-  _thumbInput.click();
-}
 function removeThumbnail(book) {
   const thumbs = readThumbnails();
   delete thumbs[thumbKey(book)];
   writeThumbnails(thumbs);
   renderShelf();
 }
+
+/* ===== Thumbnail picker — canvas-generated covers ===== */
+
+const THUMB_W = 120, THUMB_H = 160;
+
+const THUMB_STYLES = [
+  { name: 'Forest',   from: '#2e6b3a', to: '#0f2914' },
+  { name: 'Ocean',    from: '#1e3a8a', to: '#0c1632' },
+  { name: 'Ember',    from: '#a0522d', to: '#3a1a0c' },
+  { name: 'Violet',   from: '#5b21b6', to: '#1e0b3b' },
+  { name: 'Crimson',  from: '#991b1b', to: '#2a0808' },
+  { name: 'Teal',     from: '#0f766e', to: '#042f2e' },
+  { name: 'Rose',     from: '#9f1239', to: '#3b0a1c' },
+  { name: 'Slate',    from: '#334155', to: '#0f172a' },
+  { name: 'Gold',     from: '#92400e', to: '#1c1917' },
+  { name: 'Indigo',   from: '#3730a3', to: '#1e1b4b' },
+  { name: 'Midnight', from: '#1f2937', to: '#030712', accent: '#60a5fa' },
+  { name: 'Plum',     from: '#7c3aed', to: '#2e1065', accent: '#c4b5fd' },
+];
+
+function _thumbRoundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+}
+
+function _thumbWrapText(ctx, text, cx, cy, maxW, lh) {
+  const words = text.split(' ');
+  const lines = [];
+  let line = '';
+  for (const word of words) {
+    const test = line ? line + ' ' + word : word;
+    if (ctx.measureText(test).width > maxW && line) { lines.push(line); line = word; }
+    else line = test;
+  }
+  if (line) lines.push(line);
+  const startY = cy - ((lines.length - 1) * lh) / 2;
+  lines.forEach((l, i) => ctx.fillText(l, cx, startY + i * lh));
+}
+
+function drawThumb(canvas, style, book) {
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width, h = canvas.height;
+
+  /* Background gradient */
+  const grad = ctx.createLinearGradient(w * 0.8, 0, 0, h);
+  grad.addColorStop(0, style.from);
+  grad.addColorStop(1, style.to);
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, w, h);
+
+  /* Diagonal texture */
+  ctx.save();
+  ctx.globalAlpha = 0.06;
+  ctx.strokeStyle = '#fff';
+  ctx.lineWidth = 1;
+  for (let i = -h; i < w + h; i += 8) {
+    ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i + h, h); ctx.stroke();
+  }
+  ctx.restore();
+
+  /* Spine shadow */
+  const spineG = ctx.createLinearGradient(0, 0, 14, 0);
+  spineG.addColorStop(0, 'rgba(0,0,0,.5)');
+  spineG.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = spineG;
+  ctx.fillRect(0, 0, 14, h);
+
+  /* Top band */
+  ctx.fillStyle = 'rgba(255,255,255,.35)';
+  ctx.fillRect(12, 0, w - 12, 3);
+  if (style.accent) {
+    ctx.fillStyle = style.accent;
+    ctx.fillRect(12, 3, 32, 3);
+  }
+
+  /* Kind badge */
+  const kind = (book && book.type === 'note') ? 'NOTE' : 'BOOK';
+  ctx.font = 'bold 7px system-ui,sans-serif';
+  const bw = ctx.measureText(kind).width + 10, bh = 13;
+  const bx = w - bw - 7, by = 7;
+  _thumbRoundRect(ctx, bx, by, bw, bh, 5);
+  ctx.fillStyle = 'rgba(0,0,0,.5)';
+  ctx.fill();
+  ctx.fillStyle = '#fff';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(kind, bx + bw / 2, by + bh / 2);
+
+  /* Title */
+  if (book && book.title) {
+    ctx.fillStyle = 'rgba(255,255,255,.92)';
+    ctx.font = 'bold 11px system-ui,sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    _thumbWrapText(ctx, book.title, w / 2, h * 0.52, w - 20, 14);
+  }
+
+  /* Subtitle */
+  const sub = book && (book.cls || book.subtitle);
+  if (sub) {
+    ctx.fillStyle = 'rgba(255,255,255,.5)';
+    ctx.font = '9px system-ui,sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(sub, w / 2, h * 0.68);
+  }
+
+  /* Watermark */
+  ctx.fillStyle = 'rgba(255,255,255,.22)';
+  ctx.font = '7px system-ui,sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'bottom';
+  ctx.fillText('MECEE-BL', w / 2, h - 7);
+}
+
+let _thumbPickerBook = null;
+
+function openThumbPicker(book) {
+  _thumbPickerBook = book;
+
+  let back = document.getElementById('thumbPickerBackdrop');
+  if (!back) {
+    back = document.createElement('div');
+    back.id = 'thumbPickerBackdrop';
+    back.className = 'bm-backdrop';
+    back.innerHTML = `
+      <div class="bm-modal" style="width:500px;max-width:calc(100vw - 32px)">
+        <div class="bm-title">🖼️ Choose a thumbnail</div>
+        <div class="bm-subtitle" id="thumbPickerSubtitle"></div>
+        <div class="thumb-grid" id="thumbPickerGrid"></div>
+        <div class="thumb-picker-row">
+          <button class="thumb-picker-btn" id="thumbPickerCancel">Cancel</button>
+          <button class="thumb-picker-btn" id="thumbPickerUpload">📁 Upload image</button>
+        </div>
+      </div>`;
+    document.body.appendChild(back);
+    back.addEventListener('click', e => { if (e.target === back) closeThumbPicker(); });
+    document.getElementById('thumbPickerCancel').addEventListener('click', closeThumbPicker);
+    document.getElementById('thumbPickerUpload').addEventListener('click', () => {
+      closeThumbPicker();
+      _thumbPickBook = _thumbPickerBook;
+      _thumbInput.click();
+    });
+  }
+
+  document.getElementById('thumbPickerSubtitle').textContent =
+    book ? (book.title + (book.cls ? ' — ' + book.cls : '')) : '';
+
+  const grid = document.getElementById('thumbPickerGrid');
+  grid.innerHTML = '';
+  THUMB_STYLES.forEach(style => {
+    const opt = document.createElement('div');
+    opt.className = 'thumb-option';
+    opt.title = style.name;
+    const canvas = document.createElement('canvas');
+    canvas.width = THUMB_W;
+    canvas.height = THUMB_H;
+    drawThumb(canvas, style, book);
+    opt.appendChild(canvas);
+    opt.addEventListener('click', () => {
+      const thumbs = readThumbnails();
+      thumbs[thumbKey(book)] = canvas.toDataURL('image/jpeg', 0.88);
+      writeThumbnails(thumbs);
+      renderShelf();
+      closeThumbPicker();
+    });
+    grid.appendChild(opt);
+  });
+
+  back.classList.add('open');
+}
+
+function closeThumbPicker() {
+  const el = document.getElementById('thumbPickerBackdrop');
+  if (el) el.classList.remove('open');
+  _thumbPickerBook = null;
+}
+
+function pickThumbnail(book) { openThumbPicker(book); }
 
 /* Context menu hook — fires when the user right-clicks a book card. */
 window.appCtxExtraItems = function (e) {
