@@ -3292,9 +3292,10 @@ function isReasoningModel(m) {
 const ERR_LOG_KEY = 'mecee_fc_errors';
 function logError(context, err) {
   const entry = {
-    ts:  Date.now(),
-    ctx: context,
-    msg: err?.message || String(err),
+    ts:    Date.now(),
+    page:  'flashcards',
+    ctx:   context,
+    msg:   err?.message || String(err),
     stack: err?.stack || null,
   };
   try {
@@ -3303,6 +3304,12 @@ function logError(context, err) {
     localStorage.setItem(ERR_LOG_KEY, JSON.stringify(prev.slice(0, 50)));
   } catch (_) {}
   console.error(`[FC error] ${context}:`, err);
+  /* Also ship to the server so it can be read from the terminal. */
+  fetch('/api/client-error', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(entry),
+  }).catch(() => {});
   renderErrorLog();
 }
 function renderErrorLog() {

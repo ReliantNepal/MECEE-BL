@@ -311,6 +311,8 @@ class QuietHandler(http.server.SimpleHTTPRequestHandler):
             return self._worker_config()
         if parsed.path == "/api/openai-key":
             return self._openai_key()
+        if parsed.path == "/api/client-error":
+            return self._api_client_error_get()
         if parsed.path.startswith("/api/sync/state/"):
             return self._sync_state_pull(parsed.path[len("/api/sync/state/"):])
         if parsed.path.startswith("/api/sync/pdf/"):
@@ -568,6 +570,8 @@ class QuietHandler(http.server.SimpleHTTPRequestHandler):
             return self._api_openai_proxy()
         if parsed.path == "/api/set-openai-key":
             return self._api_set_openai_key()
+        if parsed.path == "/api/client-error":
+            return self._api_client_error()
         if parsed.path.startswith("/api/sync/state/"):
             return self._sync_state_push(parsed.path[len("/api/sync/state/"):])
         if parsed.path == "/api/sync/library":
@@ -1090,6 +1094,43 @@ class QuietHandler(http.server.SimpleHTTPRequestHandler):
         if not key.startswith("sk-"):
             return self._json(200, {"enabled": False, "reason": "not an OpenAI key"})
         self._json(200, {"enabled": True, "key": key})
+
+    _ERROR_LOG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "client-errors.jsonl")
+
+    def _api_client_error(self) -> None:
+        """POST — browser sends {ctx, msg, stack, ts, page} when logError fires."""
+        try:
+            payload = json.loads(self._read_body().decode("utf-8") or "{}")
+            entry = {
+                "ts":    payload.get("ts", 0),
+                "page":  payload.get("page", "?"),
+                "ctx":   payload.get("ctx", "?"),
+                "msg":   payload.get("msg", ""),
+                "stack": payload.get("stack") or None,
+            }
+            import datetime
+            entry["time"] = datetime.datetime.fromtimestamp(entry["ts"] / 1000).strftime("%Y-%m-%d %H:%M:%S") if entry["ts"] else "?"
+            print(f"[client-error] [{entry['time']}] {entry['page']} › {entry['ctx']}: {entry['msg'][:200]}", flush=True)
+            with open(self._ERROR_LOG_PATH, "a", encoding="utf-8") as f:
+                f.write(json.dumps(entry) + "\n")
+            self._json(200, {"ok": True})
+        except Exception as e:
+            self._json(500, {"error": str(e)})
+
+    def _api_client_error_get(self) -> None:
+        """GET — return the last 50 client errors as JSON."""
+        try:
+            if not os.path.isfile(self._ERROR_LOG_PATH):
+                return self._json(200, [])
+            with open(self._ERROR_LOG_PATH, "r", encoding="utf-8") as f:
+                lines = [l.strip() for l in f if l.strip()]
+            entries = []
+            for l in lines[-50:]:
+                try: entries.append(json.loads(l))
+                except Exception: pass
+            self._json(200, list(reversed(entries)))
+        except Exception as e:
+            self._json(500, {"error": str(e)})
 
     def _api_set_openai_key(self) -> None:
         """Save a new OpenAI API key to .mecee-secrets/OPENAIAPI.txt."""
