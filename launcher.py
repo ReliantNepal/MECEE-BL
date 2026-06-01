@@ -564,6 +564,8 @@ class QuietHandler(http.server.SimpleHTTPRequestHandler):
             return self._api_create_note()
         if parsed.path == "/api/cleanup-blobs":
             return self._api_cleanup_blobs()
+        if parsed.path == "/api/openai":
+            return self._api_openai_proxy()
         if parsed.path.startswith("/api/sync/state/"):
             return self._sync_state_push(parsed.path[len("/api/sync/state/"):])
         if parsed.path == "/api/sync/library":
@@ -1087,6 +1089,52 @@ class QuietHandler(http.server.SimpleHTTPRequestHandler):
         if not key.startswith("sk-"):
             return self._json(200, {"enabled": False, "reason": "not an OpenAI key"})
         self._json(200, {"enabled": True, "key": key})
+
+    def _api_openai_proxy(self) -> None:
+        """Server-side proxy for OpenAI chat/completions.
+        Browser POSTs the same JSON body it would send to OpenAI directly;
+        the server injects the API key and forwards it. This eliminates all
+        browser-side CORS issues and keeps the key off the network wire."""
+        import urllib.request as _req
+        key_path = os.path.join(SECRETS_DIR, "OPENAIAPI.txt")
+        try:
+            with open(key_path, "r", encoding="utf-8-sig") as f:
+                api_key = f.read().strip().lstrip("﻿")
+        except Exception:
+            return self._json(503, {"error": "OpenAI key not configured on the server"})
+        if not api_key.startswith("sk-"):
+            return self._json(503, {"error": "OpenAI key on server looks invalid"})
+
+        body = self._read_body()
+        request = _req.Request(
+            "https://api.openai.com/v1/chat/completions",
+            data=body,
+            headers={
+                "Content-Type":  "application/json",
+                "Authorization": f"Bearer {api_key}",
+            },
+            method="POST",
+        )
+        try:
+            with _req.urlopen(request, timeout=120) as r:
+                resp_body  = r.read()
+                resp_code  = r.status
+                resp_ctype = r.headers.get("Content-Type", "application/json")
+        except urllib.error.HTTPError as e:
+            resp_body  = e.read() or b"{}"
+            resp_code  = e.code
+            resp_ctype = e.headers.get("Content-Type", "application/json")
+        except Exception as e:
+            return self._json(502, {"error": f"OpenAI unreachable: {e}"})
+
+        self.send_response(resp_code)
+        self.send_header("Content-Type",   resp_ctype)
+        self.send_header("Content-Length", str(len(resp_body)))
+        self.end_headers()
+        try:
+            self.wfile.write(resp_body)
+        except (BrokenPipeError, ConnectionResetError):
+            pass
 
     def _sync_state_pull(self, category: str) -> None:
         if not self._r2_or_503(): return

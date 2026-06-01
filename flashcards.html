@@ -3278,6 +3278,40 @@ function isReasoningModel(m) {
   return /^gpt-5/i.test(m) || /^o\d/i.test(m);
 }
 
+/* ===== Error logger =====
+   Writes timestamped entries to localStorage so errors survive page reloads
+   and show up in the on-page log panel. */
+const ERR_LOG_KEY = 'mecee_fc_errors';
+function logError(context, err) {
+  const entry = {
+    ts:  Date.now(),
+    ctx: context,
+    msg: err?.message || String(err),
+    stack: err?.stack || null,
+  };
+  try {
+    const prev = JSON.parse(localStorage.getItem(ERR_LOG_KEY) || '[]');
+    prev.unshift(entry);
+    localStorage.setItem(ERR_LOG_KEY, JSON.stringify(prev.slice(0, 50)));
+  } catch (_) {}
+  console.error(`[FC error] ${context}:`, err);
+  renderErrorLog();
+}
+function renderErrorLog() {
+  const panel = document.getElementById('fcErrPanel');
+  if (!panel) return;
+  let entries = [];
+  try { entries = JSON.parse(localStorage.getItem(ERR_LOG_KEY) || '[]'); } catch (_) {}
+  if (!entries.length) { panel.hidden = true; return; }
+  panel.hidden = false;
+  const list = panel.querySelector('.fc-err-list');
+  if (!list) return;
+  list.innerHTML = entries.slice(0, 10).map(e => {
+    const t = new Date(e.ts).toLocaleTimeString();
+    return `<div class="fc-err-row"><span class="fc-err-time">${t}</span><span class="fc-err-ctx">${escapeHtml(e.ctx)}</span><span class="fc-err-msg">${escapeHtml(e.msg)}</span></div>`;
+  }).join('');
+}
+
 async function callOpenAI({ apiKey, model, messages, max_tokens = 2000 }) {
   const body = {
     model, messages,
@@ -3290,30 +3324,66 @@ async function callOpenAI({ apiKey, model, messages, max_tokens = 2000 }) {
     body.max_tokens  = max_tokens;
     body.temperature = 0.4;
   }
-  const res = await fetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
-    body: JSON.stringify(body)
-  });
+
+  /* Route through the server proxy (/api/openai) instead of calling OpenAI
+     directly from the browser. This eliminates CORS failures, "Failed to fetch"
+     errors from browser network restrictions, and keeps the API key server-side.
+     Falls back to a direct browser fetch if the proxy returns 404 (old server). */
+  let res;
+  try {
+    res = await fetch('/api/openai', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify(body),
+    });
+    /* If the proxy endpoint doesn't exist yet, fall through to direct fetch. */
+    if (res.status === 404) throw new Error('proxy_not_found');
+  } catch (proxyErr) {
+    if (proxyErr.message !== 'proxy_not_found') {
+      logError('callOpenAI proxy', proxyErr);
+      throw new Error(`Network error reaching local server: ${proxyErr.message}`);
+    }
+    /* Legacy fallback: direct browser→OpenAI fetch */
+    try {
+      res = await fetch('https://api.openai.com/v1/chat/completions', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+        body:    JSON.stringify(body),
+      });
+    } catch (directErr) {
+      logError('callOpenAI direct', directErr);
+      throw new Error(`Failed to reach OpenAI: ${directErr.message}. Check your internet connection.`);
+    }
+  }
+
   if (!res.ok) {
     let detail = '';
     try {
       const j = await res.json();
-      detail = j?.error?.message || j?.error?.code || JSON.stringify(j).slice(0, 200);
+      detail = j?.error?.message || j?.error?.code || JSON.stringify(j).slice(0, 300);
     } catch (_) {
       detail = await res.text().catch(() => '');
-      detail = detail.slice(0, 200);
+      detail = detail.slice(0, 300);
     }
     const hint =
       res.status === 401 ? ' (invalid or expired API key)' :
       res.status === 429 ? ' (rate-limited — wait a moment and retry)' :
-      res.status === 400 ? ' (bad request — model may not support JSON mode)' :
-      res.status === 404 ? ' (model not found — check the model name)' : '';
-    throw new Error(`OpenAI error ${res.status}${hint}: ${detail}`);
+      res.status === 400 ? ' (bad request — model may not support JSON mode or vision)' :
+      res.status === 404 ? ' (model not found — check the model name in the dropdown)' :
+      res.status === 502 ? ' (server could not reach OpenAI — check internet on the VPS)' :
+      res.status === 503 ? ' (OpenAI key not configured — add it to .mecee-secrets/OPENAIAPI.txt)' : '';
+    const err = new Error(`OpenAI error ${res.status}${hint}: ${detail}`);
+    logError('callOpenAI response', err);
+    throw err;
   }
+
   const j = await res.json();
   const content = j.choices?.[0]?.message?.content || '';
-  if (!content) throw new Error('OpenAI returned an empty response — the model may have refused or hit a content filter.');
+  if (!content) {
+    const err = new Error('OpenAI returned an empty response — model may have refused or hit a content filter.');
+    logError('callOpenAI empty response', err);
+    throw err;
+  }
   return content;
 }
 
@@ -3548,6 +3618,7 @@ document.getElementById('genGoBtn').addEventListener('click', async () => {
     }
   } catch (e) {
     console.error(e);
+    logError('generate (book pages)', e);
     setStatus('genStatus', `Failed: ${e.message || e}`, 'err');
     prog.fail();
   } finally {
@@ -3686,6 +3757,7 @@ document.getElementById('imgGoBtn').addEventListener('click', async () => {
     }
   } catch (e) {
     console.error(e);
+    logError('generate (images)', e);
     setStatus('imgStatus', `Failed: ${e.message || e}`, 'err');
     prog.fail();
   } finally {
@@ -3929,6 +4001,7 @@ notesGoBtn.addEventListener('click', async () => {
     }
   } catch (e) {
     console.error(e);
+    logError('generate (notes)', e);
     setStatus('notesStatus', `Failed: ${e.message || e}`, 'err');
     prog.fail();
   } finally {
@@ -5221,5 +5294,29 @@ window.onMeceeSyncApplied = function () {
 <script src="Playlist/tracks.js"></script>
 <script src="player.js"></script>
 <script src="nav-shim.js"></script>
+
+<!-- Error log panel — hidden until there are errors -->
+<div id="fcErrPanel" hidden style="
+  position:fixed; bottom:14px; right:14px; z-index:9999;
+  background:#1a1a1a; border:1px solid #ef5350; border-radius:10px;
+  padding:10px 14px; max-width:420px; font-size:11px; color:#ccc;
+  box-shadow:0 6px 20px rgba(0,0,0,.6); max-height:220px; overflow-y:auto;">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+    <span style="font-weight:700;color:#ef5350;font-size:12px">⚠ Error log</span>
+    <button onclick="localStorage.removeItem('mecee_fc_errors');document.getElementById('fcErrPanel').hidden=true"
+      style="background:none;border:none;color:#888;cursor:pointer;font-size:14px;padding:0 2px">×</button>
+  </div>
+  <div class="fc-err-list"></div>
+</div>
+<style>
+  .fc-err-row { display:flex; flex-direction:column; gap:2px; padding:5px 0; border-top:1px solid #2a2a2a; }
+  .fc-err-time { color:#666; font-size:10px; }
+  .fc-err-ctx  { color:#ffd54f; font-size:10px; font-weight:600; }
+  .fc-err-msg  { color:#ef5350; word-break:break-word; font-size:11px; }
+</style>
+<script>
+  /* Render any saved errors from previous sessions on page load. */
+  if (typeof renderErrorLog === 'function') renderErrorLog();
+</script>
 </body>
 </html>
