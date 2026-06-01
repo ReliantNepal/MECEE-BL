@@ -2144,6 +2144,7 @@ let pdfScale    = 1.0;
 let fitScale    = 1.0;
 let renderTask  = null;
 let renderToken = 0;          // monotonic counter — newest render wins
+let openToken   = 0;          // separate counter — newest openBook() call wins
 let textLayerTask = null;
 /* LRU of recently rendered pages keyed by `${pageNum}@${scale.toFixed(3)}`.
    Value = ImageBitmap of the canvas pixels. Hitting the cache lets a
@@ -2212,23 +2213,20 @@ async function openBook(book, startPage) {
   document.body.classList.add('reader-open');
   requestFullscreen();
 
-  /* Tear down anything from a previous open — both modes.
-     Bumping renderToken invalidates any in-flight renderPdfPage() left
-     over from the previous book: when its awaited render or text-content
-     promise eventually resolves, it sees the newer token and bails
-     instead of painting the old book's content onto the new canvas
-     (this is what caused "open A, close, open B → shows A"). */
+  /* myOpen guards the entire async open sequence. Every subsequent
+     openBook() or closeReader() increments openToken so that after each
+     await we can detect we've been superseded and abort without touching
+     the newer book's state. renderToken is kept separate — it is bumped
+     by renderPdfPage() on every page flip and must not be conflated with
+     the open-sequence guard. */
+  const myOpen = ++openToken;
   ++renderToken;
+
   if (pdfDoc) { try { pdfDoc.destroy(); } catch (_) {} pdfDoc = null; }
   cacheClear();
   pdfCanvas.width = pdfCanvas.height = 0;
   pdfTextLyr.innerHTML = '';
   pdfHlLyr.innerHTML   = '';
-  /* Empty-string src then removeAttribute is the cross-browser reliable
-     way to drop the previously rendered bitmap immediately. Just calling
-     removeAttribute leaves the old image painted in some browsers until
-     the new src finishes loading, which is the visible "shows previous
-     note" bug for image notes. */
   imgViewer.src = '';
   imgViewer.removeAttribute('src');
 
@@ -2254,43 +2252,41 @@ async function openBook(book, startPage) {
   const pdfLoadingEl = document.getElementById('pdfLoading');
   pdfLoadingEl.hidden = false;
 
-  /* Append ?v=1 if the URL has no query string yet — this creates a new
-     cache key the browser has never seen, bypassing any corrupted immutable
-     HTTP-cached copy from an older service-worker version. Range requests
-     still work because the server strips the query string before serving. */
   const pdfUrl = /\?/.test(book.file) ? book.file : book.file + '?v=1';
-
-  /* Loader options — `useSystemFonts: true` lets PDF.js substitute the
-     14 standard PostScript fonts (Helvetica, Times, …) with the OS fonts
-     instead of downloading the embedded subsets, saving a large per-open
-     cost on textbooks. We intentionally do NOT set cMapUrl /
-     standardFontDataUrl: pointing at a CDN that 403s (cdnjs doesn't
-     host those directories) makes PDF.js stall on retries. For latin
-     textbooks the substitution path is enough. */
   const PDFJS_OPTS = { useSystemFonts: true };
 
+  let loadedDoc = null;
   try {
     try {
-      pdfDoc = await pdfjsLib.getDocument({ url: pdfUrl, ...PDFJS_OPTS }).promise;
+      loadedDoc = await pdfjsLib.getDocument({ url: pdfUrl, ...PDFJS_OPTS }).promise;
     } catch (_urlErr) {
-      /* Fallback: download all bytes, bypassing cache entirely. */
       const resp = await fetch(pdfUrl, { cache: 'no-store' });
       if (!resp.ok) throw new Error(`Unexpected server response (${resp.status}) while retrieving PDF.`);
       const buf = await resp.arrayBuffer();
-      pdfDoc = await pdfjsLib.getDocument({ data: new Uint8Array(buf), ...PDFJS_OPTS }).promise;
+      loadedDoc = await pdfjsLib.getDocument({ data: new Uint8Array(buf), ...PDFJS_OPTS }).promise;
     }
   } catch (err) {
+    if (myOpen !== openToken) return;   // superseded — discard silently
     pdfLoadingEl.hidden = true;
     showPdfError(pdfUrl, err);
+    showLibraryError('PDF failed to load', err.message || String(err));
     return;
   }
 
+  /* A newer openBook() fired while we were loading — destroy this doc and bail. */
+  if (myOpen !== openToken) {
+    try { loadedDoc.destroy(); } catch (_) {}
+    return;
+  }
+
+  pdfDoc = loadedDoc;
   pdfPageTot.textContent = `/ ${pdfDoc.numPages}`;
   pdfPageIn.max          = pdfDoc.numPages;
   if (pdfPageNum > pdfDoc.numPages) pdfPageNum = pdfDoc.numPages;
 
-  /* First render — start in fit-to-window mode. */
   await computeFitScale();
+  if (myOpen !== openToken) return;   // superseded during scale computation
+
   pdfScale = fitScale;
   pdfLoadingEl.hidden = true;
   await renderPdfPage(pdfPageNum);
@@ -2443,10 +2439,10 @@ function closeReader() {
   reader.classList.remove('open');
   document.body.classList.remove('reader-open');
   document.getElementById('pdfLoading').hidden = true;
-  /* Invalidate any in-flight renders so a late page.render() resolve from
-     the just-closed book can't paint into the canvas that the NEXT open
-     is about to use. Without this the next openBook() sometimes shows the
-     previous book until the user flips a page. */
+  /* Invalidate any in-flight openBook() sequence and renders. Bumping both
+     tokens ensures a still-loading PDF doesn't land in pdfDoc after close,
+     and any pending page.render() won't paint onto the now-blank canvas. */
+  ++openToken;
   ++renderToken;
   if (pdfDoc) { try { pdfDoc.destroy(); } catch (_) {} pdfDoc = null; }
   cacheClear();
@@ -3042,5 +3038,61 @@ document.addEventListener('click', e => {
 <script src="Playlist/tracks.js"></script>
 <script src="player.js"></script>
 <script src="nav-shim.js"></script>
+
+<!-- Centered error popup for library rendering errors -->
+<div id="libErrPopup" style="
+  display:none; position:fixed; inset:0; z-index:10000;
+  align-items:center; justify-content:center;
+  background:rgba(0,0,0,.55); backdrop-filter:blur(4px);">
+  <div style="
+    background:#1c1c1c; border:1px solid #ef5350; border-radius:14px;
+    padding:24px 26px 20px; max-width:460px; width:calc(100vw - 40px);
+    box-shadow:0 24px 60px rgba(0,0,0,.7); font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    animation:libErrPop .18s ease-out;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+      <span style="font-size:22px">⚠️</span>
+      <span style="font-weight:700;font-size:16px;color:#ef5350" id="libErrTitle">Something went wrong</span>
+      <button id="libErrClose" style="margin-left:auto;background:none;border:none;color:#888;cursor:pointer;font-size:20px;line-height:1;padding:0 4px">×</button>
+    </div>
+    <div id="libErrCtx" style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#ffd54f;margin-bottom:6px"></div>
+    <div id="libErrMsg" style="font-size:13px;color:#f0f0f0;line-height:1.5;word-break:break-word;margin-bottom:16px"></div>
+    <div style="background:#111;border:1px solid #2a2a2a;border-radius:8px;padding:10px 12px;">
+      <div style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#666;margin-bottom:4px">Full log saved to</div>
+      <code id="libErrPath" style="font-size:11px;color:#aaa;word-break:break-all">/root/Desktop/Syllabus/Syllabus/client-errors.jsonl</code>
+    </div>
+    <button id="libErrOk" style="
+      margin-top:16px;width:100%;padding:10px;border-radius:8px;border:none;
+      background:#ef5350;color:#fff;font-size:14px;font-weight:700;
+      cursor:pointer;font-family:inherit;">Dismiss</button>
+  </div>
+</div>
+<style>
+  @keyframes libErrPop { from{transform:scale(.9) translateY(10px);opacity:0} to{transform:scale(1) translateY(0);opacity:1} }
+</style>
+<script>
+(function () {
+  const popup = document.getElementById('libErrPopup');
+  function hide() { popup.style.display = 'none'; }
+  document.getElementById('libErrClose').addEventListener('click', hide);
+  document.getElementById('libErrOk').addEventListener('click',    hide);
+  popup.addEventListener('click', e => { if (e.target === popup) hide(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') hide(); });
+
+  window.showLibraryError = function (ctx, msg) {
+    document.getElementById('libErrCtx').textContent = ctx || '';
+    document.getElementById('libErrMsg').textContent = msg || 'An unknown error occurred.';
+    /* Fetch the real log path from the server and update the display. */
+    fetch('/api/client-error', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ts: Date.now(), page: 'library', ctx: ctx, msg: msg, stack: null })
+    })
+      .then(r => r.ok ? r.json() : {})
+      .then(j => { if (j.log_path) document.getElementById('libErrPath').textContent = j.log_path; })
+      .catch(() => {});
+    popup.style.display = 'flex';
+  };
+})();
+</script>
 </body>
 </html>
