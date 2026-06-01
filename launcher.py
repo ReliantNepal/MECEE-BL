@@ -562,6 +562,8 @@ class QuietHandler(http.server.SimpleHTTPRequestHandler):
             return self._api_upload_blob(parsed)
         if parsed.path == "/api/create-note":
             return self._api_create_note()
+        if parsed.path == "/api/cleanup-blobs":
+            return self._api_cleanup_blobs()
         if parsed.path.startswith("/api/sync/state/"):
             return self._sync_state_push(parsed.path[len("/api/sync/state/"):])
         if parsed.path == "/api/sync/library":
@@ -940,6 +942,25 @@ class QuietHandler(http.server.SimpleHTTPRequestHandler):
             items.append(item)
             save_user_library(items)
             self._json(200, item)
+        except Exception as e:
+            self._json(500, {"error": str(e)})
+
+    def _api_cleanup_blobs(self):
+        """Delete orphaned blob files from a failed gallery upload.
+        Body: {"paths": ["books/biology/foo.jpg", ...]}
+        Only removes files under books/ with no path traversal."""
+        try:
+            payload = json.loads(self._read_body().decode("utf-8") or "{}")
+            paths = payload.get("paths") or []
+            deleted = 0
+            for rel in paths:
+                if not isinstance(rel, str): continue
+                if not rel.startswith("books/") or ".." in rel: continue
+                full = os.path.join(ROOT, rel.replace("/", os.sep))
+                if os.path.isfile(full):
+                    try: os.remove(full); deleted += 1
+                    except OSError: pass
+            self._json(200, {"deleted": deleted})
         except Exception as e:
             self._json(500, {"error": str(e)})
 

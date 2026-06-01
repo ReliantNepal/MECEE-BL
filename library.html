@@ -1696,7 +1696,12 @@ const MAX_GALLERY_LEN =  40;                 // sanity cap so a Finder "Select A
 
 /* Single entry point — picks the right upload path based on what the user
    selected and which tab is active. */
+let _uploadInProgress = false;
 async function uploadSelection() {
+  if (_uploadInProgress) {
+    addErrorEl.textContent = 'An upload is already in progress — please wait for it to finish.';
+    return;
+  }
   addErrorEl.textContent = '';
   const files = Array.from(addFileIn.files || []);
   const title = addTitleIn.value.trim();
@@ -1730,6 +1735,7 @@ async function uploadSelection() {
   }
 
   addSaveBt.disabled = true;
+  _uploadInProgress = true;
 
   if (allImg) {
     return uploadGalleryNote(files, title, sub);
@@ -1973,6 +1979,8 @@ async function uploadPdfNote(file, title, sub, kind) {
     resetUploadProgress();
     addErrorEl.textContent = e.message || 'Upload failed. Is the launcher (Start-MECEE.bat) running?';
     addSaveBt.disabled = false;
+  } finally {
+    _uploadInProgress = false;
   }
 }
 
@@ -1985,40 +1993,27 @@ async function uploadGalleryNote(files, title, sub) {
   startJokes();
   /* Each image gets an equal share of 0–90%. The final 10% is the create-note call. */
   const perImg = 90 / files.length;
-  for (let i = 0; i < files.length; i++) {
-    const f = files[i];
-    const baseProgress = i * perImg;
-    showUploadProgress(baseProgress);
-    const params = new URLSearchParams({ subject: currentSubject, filename: f.name });
-    try {
+  try {
+    for (let i = 0; i < files.length; i++) {
+      const f = files[i];
+      const baseProgress = i * perImg;
+      showUploadProgress(baseProgress);
+      const params = new URLSearchParams({ subject: currentSubject, filename: f.name });
       const r = await xhrUpload(
         '/api/upload-blob?' + params.toString(),
         f, f.type || 'application/octet-stream',
         (frac, loaded, total, speed) => showUploadProgress(baseProgress + frac * perImg, loaded, total, speed)
       );
       paths.push(r.file);
-    } catch (e) {
-      resetUploadProgress();
-      addErrorEl.textContent = e.message || 'Upload failed mid-way. Is the launcher running?';
-      addSaveBt.disabled = false;
-      return;
     }
-  }
 
-  showUploadProgress(95);
-  try {
+    showUploadProgress(95);
     const res = await fetch('/api/create-note', {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        subject:  currentSubject,
-        title:    title,
-        subtitle: sub,
-        kind:     'gallery',
-        files:    paths,
-      }),
+      body: JSON.stringify({ subject: currentSubject, title, subtitle: sub, kind: 'gallery', files: paths }),
     });
-    if (!res.ok) return uploadFail(res);
+    if (!res.ok) { await uploadFail(res); return; }
     const item = await res.json();
     showUploadProgress(100);
     addErrorEl.textContent = '';
@@ -2027,9 +2022,19 @@ async function uploadGalleryNote(files, title, sub) {
     try { window.MeceeSync && MeceeSync.stamp('library', item.id, 'updated'); } catch (_) {}
     setTimeout(() => { closeAddModal(); renderShelf(); }, 350);
   } catch (e) {
+    /* Clean up any blobs that were already saved before the failure. */
+    if (paths.length) {
+      fetch('/api/cleanup-blobs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ paths }),
+      }).catch(() => {});
+    }
     resetUploadProgress();
-    addErrorEl.textContent = 'Couldn\'t finalise the note. Try again.';
+    addErrorEl.textContent = e.message || 'Upload failed. Is the launcher running?';
     addSaveBt.disabled = false;
+  } finally {
+    _uploadInProgress = false;
   }
 }
 
