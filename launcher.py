@@ -566,6 +566,8 @@ class QuietHandler(http.server.SimpleHTTPRequestHandler):
             return self._api_cleanup_blobs()
         if parsed.path == "/api/openai":
             return self._api_openai_proxy()
+        if parsed.path == "/api/set-openai-key":
+            return self._api_set_openai_key()
         if parsed.path.startswith("/api/sync/state/"):
             return self._sync_state_push(parsed.path[len("/api/sync/state/"):])
         if parsed.path == "/api/sync/library":
@@ -1089,6 +1091,23 @@ class QuietHandler(http.server.SimpleHTTPRequestHandler):
         if not key.startswith("sk-"):
             return self._json(200, {"enabled": False, "reason": "not an OpenAI key"})
         self._json(200, {"enabled": True, "key": key})
+
+    def _api_set_openai_key(self) -> None:
+        """Save a new OpenAI API key to .mecee-secrets/OPENAIAPI.txt."""
+        try:
+            payload = json.loads(self._read_body().decode("utf-8") or "{}")
+            key = (payload.get("key") or "").strip()
+            if not key:
+                return self._json(400, {"error": "key is required"})
+            if not key.startswith("sk-"):
+                return self._json(400, {"error": "key must start with sk-"})
+            os.makedirs(SECRETS_DIR, exist_ok=True)
+            key_path = os.path.join(SECRETS_DIR, "OPENAIAPI.txt")
+            with open(key_path, "w", encoding="utf-8") as f:
+                f.write(key + "\n")
+            self._json(200, {"ok": True})
+        except Exception as e:
+            self._json(500, {"error": str(e)})
 
     def _api_openai_proxy(self) -> None:
         """Server-side proxy for OpenAI chat/completions.

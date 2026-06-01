@@ -144,12 +144,20 @@
       '<div class="wp-card" role="dialog" aria-modal="true" aria-labelledby="wpModalTitle">' +
         '<div class="wp-head">' +
           '<div>' +
-            '<div class="wp-title" id="wpModalTitle">🎨 Wallpaper</div>' +
-            '<div class="wp-sub">Choose a theme — applied to all pages</div>' +
+            '<div class="wp-title" id="wpModalTitle">⚙️ Settings</div>' +
+            '<div class="wp-sub">Theme &amp; API key</div>' +
           '</div>' +
           '<button type="button" class="wp-close" id="wpModalClose" title="Close">×</button>' +
         '</div>' +
         '<div class="wp-grid" id="wpModalGrid"></div>' +
+        '<div class="wp-apikey-section">' +
+          '<div class="wp-apikey-label">🔑 ChatGPT / OpenAI API Key</div>' +
+          '<div class="wp-apikey-row">' +
+            '<input type="password" class="wp-apikey-input" id="wpApiKeyInput" placeholder="sk-proj-…" autocomplete="off" spellcheck="false" />' +
+            '<button type="button" class="wp-apikey-save" id="wpApiKeySave">Save</button>' +
+          '</div>' +
+          '<div class="wp-apikey-status info" id="wpApiKeyStatus">Loading…</div>' +
+        '</div>' +
       '</div>';
     document.body.appendChild(modal);
 
@@ -207,13 +215,94 @@
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape') closePicker();
     });
+
+    /* ── API key section ── */
+    var apiInput  = modal.querySelector('#wpApiKeyInput');
+    var apiSave   = modal.querySelector('#wpApiKeySave');
+    var apiStatus = modal.querySelector('#wpApiKeyStatus');
+
+    function setApiStatus(msg, cls) {
+      apiStatus.textContent = msg;
+      apiStatus.className = 'wp-apikey-status ' + (cls || 'info');
+    }
+
+    function loadCurrentKey() {
+      setApiStatus('Checking…', 'info');
+      fetch('/api/openai-key', { cache: 'no-store' })
+        .then(function (r) { return r.ok ? r.json() : { enabled: false }; })
+        .then(function (j) {
+          if (j.enabled && j.key) {
+            var masked = j.key.slice(0, 8) + '••••••••••••••••' + j.key.slice(-4);
+            setApiStatus('✓ Key saved: ' + masked, 'ok');
+          } else {
+            setApiStatus('No key saved yet — paste yours above.', 'info');
+          }
+        })
+        .catch(function () { setApiStatus('Launcher not reachable — key stored locally only.', 'info'); });
+    }
+
+    /* Show/hide the actual value while typing */
+    apiInput.addEventListener('focus', function () { apiInput.type = 'text'; });
+    apiInput.addEventListener('blur',  function () { if (!apiInput.value) apiInput.type = 'password'; });
+
+    apiSave.addEventListener('click', function () {
+      var key = apiInput.value.trim();
+      if (!key) { setApiStatus('Paste your API key first.', 'err'); return; }
+      if (!key.startsWith('sk-')) { setApiStatus('Key must start with sk-', 'err'); return; }
+      apiSave.disabled = true;
+      setApiStatus('Saving…', 'info');
+      /* Save to server file (persists across refreshes) */
+      fetch('/api/set-openai-key', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key: key })
+      })
+        .then(function (r) { return r.json(); })
+        .then(function (j) {
+          if (j.ok) {
+            /* Also mirror to localStorage so any tab picks it up immediately */
+            try {
+              var lsKey = window.MeceeKeys ? window.MeceeKeys.CHAT_API : 'mecee_chat_api_key';
+              localStorage.setItem(lsKey, key);
+            } catch (_) {}
+            apiInput.value = '';
+            apiInput.type  = 'password';
+            setApiStatus('✓ Key saved successfully!', 'ok');
+            loadCurrentKey();
+          } else {
+            setApiStatus('Error: ' + (j.error || 'unknown'), 'err');
+          }
+        })
+        .catch(function () {
+          /* Server unreachable — save to localStorage only */
+          try {
+            var lsKey = window.MeceeKeys ? window.MeceeKeys.CHAT_API : 'mecee_chat_api_key';
+            localStorage.setItem(lsKey, key);
+          } catch (_) {}
+          apiInput.value = '';
+          apiInput.type  = 'password';
+          setApiStatus('✓ Saved locally (launcher not reachable — key works until refresh).', 'ok');
+        })
+        .finally(function () { apiSave.disabled = false; });
+    });
+
+    /* Allow Enter key in the input to trigger save */
+    apiInput.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') apiSave.click();
+    });
+
+    /* Expose so openPicker() can refresh status on every open */
+    modal.__loadCurrentKey = loadCurrentKey;
   }
 
   function openPicker() {
     buildPicker();
     refreshPickerActive(currentTheme());
     var modal = document.getElementById('wallpaperModal');
-    if (modal) modal.classList.add('wp-modal--open');
+    if (!modal) return;
+    modal.classList.add('wp-modal--open');
+    /* Refresh key status each time the modal opens */
+    if (modal.__loadCurrentKey) modal.__loadCurrentKey();
   }
 
   function closePicker() {

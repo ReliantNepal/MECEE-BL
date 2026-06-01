@@ -695,6 +695,63 @@ html, body { margin: 0; padding: 0; }
   .wp-preview { height: 68px; }
 }
 
+/* ── API key section inside the settings modal ── */
+.wp-apikey-section {
+  margin-top: 20px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border);
+}
+.wp-apikey-label {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+.wp-apikey-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.wp-apikey-input {
+  flex: 1;
+  background: var(--surface-2, #232323);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 8px;
+  padding: 9px 12px;
+  font-size: 13px;
+  font-family: monospace;
+  outline: none;
+  transition: border-color .15s;
+}
+.wp-apikey-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(147,51,234,.15); }
+.wp-apikey-save {
+  background: var(--accent);
+  color: var(--accent-text, #fff);
+  border: none;
+  border-radius: 8px;
+  padding: 9px 16px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  white-space: nowrap;
+  transition: filter .15s;
+}
+.wp-apikey-save:hover { filter: brightness(1.12); }
+.wp-apikey-save:disabled { opacity: .5; cursor: not-allowed; }
+.wp-apikey-status {
+  font-size: 11px;
+  margin-top: 6px;
+  min-height: 16px;
+  line-height: 1.4;
+}
+.wp-apikey-status.ok  { color: var(--good, #4caf50); }
+.wp-apikey-status.err { color: var(--bad,  #ef5350); }
+.wp-apikey-status.info { color: var(--muted); }
+
 /* ============================================================
    Emoji background layer (forest / coffee themes)
    Injected by wallpaper.js as the first child of <body> so all
