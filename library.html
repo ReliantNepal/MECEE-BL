@@ -958,11 +958,11 @@
   .upload-joke[hidden] { display: none; }
   .upload-joke.fading  { opacity: 0; }
 
-  /* Floating upload-in-progress button — bottom-left, above the sync FAB */
+  /* Floating upload-in-progress button — same row as sync FAB, just to its right */
   .upload-fab-btn {
     position: fixed;
-    bottom: 74px;
-    left: 14px;
+    bottom: 78px;
+    left: 78px;   /* 22px (sync left) + 48px (sync width) + 8px gap */
     width: 44px;
     height: 44px;
     border-radius: 50%;
@@ -983,8 +983,8 @@
 
   .upload-fab-tooltip {
     position: fixed;
-    bottom: 126px;
-    left: 14px;
+    bottom: 130px;
+    left: 78px;
     background: #1e1e1e;
     border: 1px solid #333;
     border-radius: 10px;
