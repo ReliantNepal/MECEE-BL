@@ -363,47 +363,70 @@
     top: 0;
     z-index: 10;
     background: var(--bg);
-    padding: 10px 0;
+    padding: 10px 0 4px;
     margin-bottom: 14px;
+  }
+  /* inner wrapper carries position:relative so icon/clear are anchored
+     to the input row only, not to the whole sticky block */
+  .search-inner {
+    position: relative;
+    display: flex;
+    align-items: center;
   }
   .search input {
     width: 100%;
-    padding: 12px 16px 12px 42px;
+    padding: 11px 44px 11px 42px;
     background: var(--surface);
-    border: 1px solid var(--border);
+    border: 1.5px solid var(--border);
     border-radius: 12px;
     color: var(--text);
     font-size: 14px;
+    font-family: inherit;
     outline: none;
-    transition: border-color .2s, background .2s;
+    box-sizing: border-box;
+    transition: border-color .2s, box-shadow .2s, background .2s;
   }
-  .search input:focus { border-color: var(--text); }
+  .search input::placeholder { color: var(--muted); opacity: 1; }
+  .search input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(128,128,128,.15);
+    background: var(--surface-2);
+  }
   .search .icon {
     position: absolute;
-    left: 14px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 16px;
-    opacity: 0.6;
+    left: 13px;
+    font-size: 15px;
+    opacity: 0.45;
+    pointer-events: none;
+    line-height: 1;
   }
   .search .clear {
     position: absolute;
-    right: 14px;
-    top: 50%;
-    transform: translateY(-50%);
-    background: transparent;
-    border: none;
+    right: 10px;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
     color: var(--muted);
     cursor: pointer;
-    font-size: 18px;
+    font-size: 14px;
+    line-height: 1;
     display: none;
+    align-items: center;
+    justify-content: center;
+    transition: background .15s, color .15s;
+    padding: 0;
   }
-  .search.has-value .clear { display: block; }
+  .search.has-value .clear { display: flex; }
+  .search .clear:hover { background: var(--text); color: var(--bg); }
   .search-stats {
-    margin-top: 6px;
-    font-size: 12px;
+    margin-top: 5px;
+    font-size: 11px;
     color: var(--muted);
     text-align: center;
+    min-height: 16px;
+    letter-spacing: .3px;
   }
   .subject.hidden, .unit.hidden, .chapter.hidden { display: none; }
 
@@ -723,10 +746,12 @@
     </div>
 
     <!-- GLOBAL SEARCH -->
-    <div class="search" id="searchWrap" style="position:relative;">
-      <span class="icon">🔍</span>
-      <input id="searchInput" type="text" placeholder="Search any chapter or micro-topic (e.g. photosynthesis, Bohr, Mendel, Krebs cycle)..." />
-      <button class="clear" id="searchClear" title="Clear">×</button>
+    <div class="search" id="searchWrap">
+      <div class="search-inner">
+        <span class="icon">🔍</span>
+        <input id="searchInput" type="text" placeholder="Search chapters or micro-topics… (e.g. photosynthesis, Krebs cycle, Bohr)" autocomplete="off" spellcheck="false" />
+        <button class="clear" id="searchClear" title="Clear search">×</button>
+      </div>
       <div class="search-stats" id="searchStats"></div>
     </div>
 
