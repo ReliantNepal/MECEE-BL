@@ -6437,28 +6437,37 @@ document.addEventListener('keydown', e => {
 
   /* ---- quiz ---- */
   async function startQuiz(csvPath, displayName) {
+    // Open the modal instantly — show a loading pulse while fetch happens
+    quiz.fileName = displayName;
+    quizTitleEl.textContent = displayName;
+    quizSubEl.textContent = 'Loading…';
+    qScreen.style.display = '';
+    rScreen.style.display = 'none';
+    questionEl.textContent = '';
+    choicesEl.innerHTML = '<div style="text-align:center;padding:30px;color:var(--muted);font-size:13px">Loading questions…</div>';
+    feedbackEl.textContent = '';
+    pbarFill.style.width = '0%';
+    progressEl.textContent = '';
+    scoreLive.textContent = '';
+    quizBack.classList.add('open');
+    document.body.style.overflow = 'hidden';
+
     try {
       const resp = await fetch(`/api/mcqbank/csv?path=${encodeURIComponent(csvPath)}`);
       if (!resp.ok) throw new Error('HTTP ' + resp.status);
-      const text = await resp.text();
-      const parsed = parseCsv(text);
-      if (!parsed.length) { alert('No valid questions found in this file.'); return; }
+      const parsed = parseCsv(await resp.text());
+      if (!parsed.length) { closeQuiz(); alert('No valid questions found in this file.'); return; }
       quiz.originalQuestions = parsed;
-      quiz.fileName = displayName;
       launchQuiz(shuffle(parsed));
     } catch (e) {
-      alert('Could not load quiz: ' + e.message);
+      closeQuiz(); alert('Could not load quiz: ' + e.message);
     }
   }
 
   function launchQuiz(questions) {
     quiz.questions = questions; quiz.idx = 0;
     quiz.correct = 0; quiz.wrong = 0; quiz.answered = false;
-    quizTitleEl.textContent = quiz.fileName;
     quizSubEl.textContent = `${questions.length} question${questions.length !== 1 ? 's' : ''}`;
-    qScreen.style.display = ''; rScreen.style.display = 'none';
-    quizBack.classList.add('open');
-    document.body.style.overflow = 'hidden';
     renderQuestion();
   }
 
