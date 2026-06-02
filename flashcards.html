@@ -2173,7 +2173,7 @@
   .mcqb-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; font-size: 12px; color: var(--muted); font-weight: 600; }
   .mcqb-score-live { background: var(--surface-2); border: 1px solid var(--border); border-radius: 999px; padding: 3px 10px; }
   .mcqb-question { font-size: 18px; font-weight: 600; line-height: 1.45; margin-bottom: 22px; color: var(--text); }
-  .mcqb-choices { display: grid; gap: 10px; margin-bottom: 20px; }
+  .mcqb-choices { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
   .mcqb-choice {
     background: var(--bg);
     border: 1.5px solid var(--border);
@@ -2218,22 +2218,6 @@
   }
   .mcqb-feedback.ok { color: var(--good); }
   .mcqb-feedback.err { color: var(--bad); }
-  .mcqb-next-btn {
-    width: 100%;
-    padding: 13px;
-    background: var(--accent);
-    color: var(--accent-text);
-    border: none;
-    border-radius: 11px;
-    font-size: 14px;
-    font-weight: 700;
-    cursor: pointer;
-    font-family: inherit;
-    display: none;
-    transition: opacity .15s;
-  }
-  .mcqb-next-btn:hover { opacity: .85; }
-  .mcqb-next-btn.visible { display: block; }
   /* Result screen */
   .mcqb-result {
     text-align: center;
@@ -2362,7 +2346,6 @@
         <div class="mcqb-question" id="mcqbQuestion"></div>
         <div class="mcqb-choices" id="mcqbChoices"></div>
         <div class="mcqb-feedback" id="mcqbFeedback"></div>
-        <button class="mcqb-next-btn" id="mcqbNextBtn" type="button">Next →</button>
       </div>
       <!-- Result screen (shown after last question) -->
       <div id="mcqbResultScreen" style="display:none">
@@ -6125,7 +6108,7 @@ document.addEventListener('keydown', e => {
   const questionEl      = document.getElementById('mcqbQuestion');
   const choicesEl       = document.getElementById('mcqbChoices');
   const feedbackEl      = document.getElementById('mcqbFeedback');
-  const nextBtn         = document.getElementById('mcqbNextBtn');
+
   const qScreen         = document.getElementById('mcqbQuestionScreen');
   const rScreen         = document.getElementById('mcqbResultScreen');
   const scoreBig        = document.getElementById('mcqbScoreBig');
@@ -6362,7 +6345,6 @@ document.addEventListener('keydown', e => {
     quiz.answered = false;
     feedbackEl.textContent = '';
     feedbackEl.className = 'mcqb-feedback';
-    nextBtn.classList.remove('visible');
 
     // Progress
     const pct = (quiz.idx / total) * 100;
@@ -6412,19 +6394,13 @@ document.addEventListener('keydown', e => {
 
     scoreLive.textContent = `✓ ${quiz.correct}  ✗ ${quiz.wrong}`;
 
+    // Auto-advance after a short pause so the user can see the feedback
     const isLast = quiz.idx >= quiz.questions.length - 1;
-    nextBtn.textContent = isLast ? 'See results →' : 'Next →';
-    nextBtn.classList.add('visible');
+    setTimeout(() => {
+      quiz.idx++;
+      if (isLast) showResult(); else renderQuestion();
+    }, isCorrect ? 700 : 1400);
   }
-
-  nextBtn.addEventListener('click', () => {
-    quiz.idx++;
-    if (quiz.idx >= quiz.questions.length) {
-      showResult();
-    } else {
-      renderQuestion();
-    }
-  });
 
   function showResult() {
     const total = quiz.questions.length;
