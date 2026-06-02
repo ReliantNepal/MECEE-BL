@@ -2032,6 +2032,244 @@
   .dbl-confirm-box h3 { margin: 0 0 8px; font-size: 17px; font-weight: 700; }
   .dbl-confirm-box p  { margin: 0 0 20px; color: var(--muted); font-size: 14px; line-height: 1.5; }
   .dbl-confirm-box .dc-row { display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; }
+
+  /* ===== MCQ BANK ===== */
+  .mcqb-tree { display: grid; gap: 10px; }
+  .mcqb-folder {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .mcqb-folder > summary {
+    list-style: none;
+    cursor: pointer;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    font-size: 14px;
+    background: var(--surface);
+    user-select: none;
+  }
+  .mcqb-folder > summary::-webkit-details-marker { display: none; }
+  .mcqb-folder > summary::after {
+    content: "▾";
+    margin-left: auto;
+    color: var(--muted);
+    font-size: 11px;
+    transition: transform .15s;
+  }
+  .mcqb-folder[open] > summary::after { transform: rotate(180deg); }
+  .mcqb-folder > summary:hover { background: var(--surface-2); }
+  .mcqb-folder-body { padding: 8px 12px 12px; }
+  .mcqb-sub-folder {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    overflow: hidden;
+    margin-bottom: 8px;
+  }
+  .mcqb-sub-folder > summary {
+    list-style: none;
+    cursor: pointer;
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    font-size: 13px;
+    user-select: none;
+  }
+  .mcqb-sub-folder > summary::-webkit-details-marker { display: none; }
+  .mcqb-sub-folder > summary::before {
+    content: "▸";
+    color: var(--muted);
+    font-size: 9px;
+    transition: transform .15s;
+  }
+  .mcqb-sub-folder[open] > summary::before { transform: rotate(90deg); }
+  .mcqb-sub-folder > summary:hover { background: var(--surface-2); }
+  .mcqb-files { padding: 4px 8px 8px 28px; display: grid; gap: 6px; }
+  .mcqb-file-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 9px 12px;
+    cursor: pointer;
+    font-size: 13px;
+    font-family: inherit;
+    color: var(--text);
+    text-align: left;
+    transition: all .15s;
+    font-weight: 500;
+  }
+  .mcqb-file-btn:hover { border-color: var(--accent); background: var(--surface-2); transform: translateX(2px); }
+  .mcqb-file-btn .icon { font-size: 16px; flex-shrink: 0; }
+  .mcqb-file-btn .name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .mcqb-file-btn .badge-q {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 2px 9px;
+    font-size: 10px;
+    color: var(--muted);
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  /* Top-level files (directly in folder with no subfolder) */
+  .mcqb-folder-body > .mcqb-files { padding-left: 4px; }
+
+  /* MCQ QUIZ MODAL */
+  .mcqb-quiz-back {
+    position: fixed;
+    inset: 0;
+    background: rgba(8,8,14,.88);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1100;
+    padding: 20px;
+  }
+  .mcqb-quiz-back.open { display: flex; animation: fadeIn .15s; }
+  .mcqb-quiz {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    width: 100%;
+    max-width: 700px;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 28px;
+    color: var(--text);
+    box-shadow: var(--shadow-lg);
+    position: relative;
+    animation: studyIn .2s ease;
+  }
+  .mcqb-quiz .close {
+    position: absolute;
+    top: 14px; right: 14px;
+    background: var(--surface-2);
+    color: var(--muted);
+    border: 1px solid var(--border);
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .mcqb-quiz .close:hover { color: var(--text); background: var(--surface-3); }
+  .mcqb-quiz-header { margin-bottom: 18px; }
+  .mcqb-quiz-title { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+  .mcqb-quiz-sub { font-size: 12px; color: var(--muted); }
+  .mcqb-pbar { height: 5px; background: var(--surface-2); border-radius: 3px; overflow: hidden; margin-bottom: 20px; }
+  .mcqb-pbar > div { height: 100%; background: var(--accent); transition: width .3s ease; border-radius: 3px; }
+  .mcqb-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; font-size: 12px; color: var(--muted); font-weight: 600; }
+  .mcqb-score-live { background: var(--surface-2); border: 1px solid var(--border); border-radius: 999px; padding: 3px 10px; }
+  .mcqb-question { font-size: 18px; font-weight: 600; line-height: 1.45; margin-bottom: 22px; color: var(--text); }
+  .mcqb-choices { display: grid; gap: 10px; margin-bottom: 20px; }
+  .mcqb-choice {
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    cursor: pointer;
+    font-size: 14px;
+    text-align: left;
+    font-family: inherit;
+    color: var(--text);
+    transition: all .15s;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 500;
+  }
+  .mcqb-choice:hover:not(:disabled) { border-color: var(--accent); background: var(--surface-2); }
+  .mcqb-choice:disabled { cursor: default; }
+  .mcqb-choice .letter {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    background: var(--surface-2);
+    border: 1.5px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px;
+    font-weight: 800;
+    flex-shrink: 0;
+    color: var(--muted);
+    transition: all .15s;
+  }
+  .mcqb-choice.correct { border-color: var(--good); background: rgba(102,187,106,.1); }
+  .mcqb-choice.correct .letter { background: var(--good); border-color: var(--good); color: #fff; }
+  .mcqb-choice.wrong { border-color: var(--bad); background: rgba(239,83,80,.08); }
+  .mcqb-choice.wrong .letter { background: var(--bad); border-color: var(--bad); color: #fff; }
+  .mcqb-feedback {
+    text-align: center;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    min-height: 20px;
+    color: var(--muted);
+  }
+  .mcqb-feedback.ok { color: var(--good); }
+  .mcqb-feedback.err { color: var(--bad); }
+  .mcqb-next-btn {
+    width: 100%;
+    padding: 13px;
+    background: var(--accent);
+    color: var(--accent-text);
+    border: none;
+    border-radius: 11px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    display: none;
+    transition: opacity .15s;
+  }
+  .mcqb-next-btn:hover { opacity: .85; }
+  .mcqb-next-btn.visible { display: block; }
+  /* Result screen */
+  .mcqb-result {
+    text-align: center;
+    padding: 10px 0 20px;
+  }
+  .mcqb-result .score-big { font-size: 56px; font-weight: 800; letter-spacing: -2px; line-height: 1; }
+  .mcqb-result .score-label { font-size: 14px; color: var(--muted); margin: 8px 0 20px; }
+  .mcqb-result .breakdown { display: flex; justify-content: center; gap: 20px; margin-bottom: 24px; font-size: 13px; }
+  .mcqb-result .bd-item { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .mcqb-result .bd-num { font-size: 22px; font-weight: 800; }
+  .mcqb-result .bd-lbl { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+  .mcqb-result .retry-row { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+  /* Search bar for MCQ Bank */
+  .mcqb-search-wrap {
+    position: relative;
+    margin-bottom: 16px;
+  }
+  .mcqb-search-wrap input {
+    width: 100%;
+    padding: 10px 36px 10px 14px;
+    border-radius: 10px;
+    font-size: 13px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: inherit;
+  }
+  .mcqb-search-wrap input:focus { outline: none; border-color: var(--accent); }
+  .mcqb-search-clear {
+    position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+    background: none; border: none; color: var(--muted); cursor: pointer; font-size: 14px; padding: 0;
+  }
+  .mcqb-search-clear:hover { color: var(--bad); }
+  .mcqb-loading { text-align: center; color: var(--muted); padding: 30px; font-size: 13px; }
+  /* nav-btn active state for MCQ Bank */
+  .nav-btn.mcqb-active { background: var(--accent); color: var(--accent-text); border-color: var(--accent); }
 </style>
 </head>
 <body>
@@ -2041,6 +2279,7 @@
     <h1>🧠 Flashcards <span class="badge">AI</span></h1>
     <div class="nav">
       <button class="btn" id="openCreateBtn" type="button" style="padding:7px 14px;font-size:13px">+ Create flashcard</button>
+      <button class="nav-btn" id="mcqbankNavBtn" type="button">📝 MCQ Bank</button>
       <a href="tracker.html" class="nav-btn">← Tracker</a>
       <a href="routine.html" class="nav-btn">📅 Routine</a>
       <a href="library.html" class="nav-btn">📚 Library</a>
@@ -2082,6 +2321,66 @@
         </div>
       </div>
       <div id="subjTree"></div>
+    </div>
+  </div>
+
+  <!-- ===== VIEW: MCQ BANK ===== -->
+  <div class="view" id="view-mcqbank">
+    <div class="section">
+      <div class="section-head">
+        <div>
+          <h2>📝 MCQ Bank</h2>
+          <div class="sub">Browse past exam questions by category and test yourself.</div>
+        </div>
+      </div>
+      <div class="mcqb-search-wrap">
+        <input type="text" id="mcqbSearch" placeholder="Search topics or file names…" autocomplete="off" />
+        <button class="mcqb-search-clear" id="mcqbSearchClear" title="Clear">✕</button>
+      </div>
+      <div class="mcqb-tree" id="mcqbTree">
+        <div class="mcqb-loading">Loading MCQ Bank…</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MCQ QUIZ MODAL ===== -->
+  <div class="mcqb-quiz-back" id="mcqbQuizBack" role="dialog" aria-modal="true">
+    <div class="mcqb-quiz">
+      <button class="close" id="mcqbQuizClose" title="Close (Esc)">✕</button>
+      <div class="mcqb-quiz-header">
+        <div class="mcqb-quiz-title" id="mcqbQuizTitle">Quiz</div>
+        <div class="mcqb-quiz-sub" id="mcqbQuizSub"></div>
+      </div>
+      <!-- Progress bar -->
+      <div class="mcqb-pbar"><div id="mcqbPbarFill" style="width:0%"></div></div>
+      <!-- Active question screen -->
+      <div id="mcqbQuestionScreen">
+        <div class="mcqb-meta">
+          <span id="mcqbProgress">1 / 10</span>
+          <span class="mcqb-score-live" id="mcqbScoreLive">Score: 0</span>
+        </div>
+        <div class="mcqb-question" id="mcqbQuestion"></div>
+        <div class="mcqb-choices" id="mcqbChoices"></div>
+        <div class="mcqb-feedback" id="mcqbFeedback"></div>
+        <button class="mcqb-next-btn" id="mcqbNextBtn" type="button">Next →</button>
+      </div>
+      <!-- Result screen (shown after last question) -->
+      <div id="mcqbResultScreen" style="display:none">
+        <div class="mcqb-result">
+          <div class="score-big" id="mcqbScoreBig"></div>
+          <div class="score-label" id="mcqbScoreLabel"></div>
+          <div class="breakdown">
+            <div class="bd-item"><div class="bd-num" id="mcqbBdCorrect" style="color:var(--good)"></div><div class="bd-lbl">Correct</div></div>
+            <div class="bd-item"><div class="bd-num" id="mcqbBdWrong" style="color:var(--bad)"></div><div class="bd-lbl">Wrong</div></div>
+            <div class="bd-item"><div class="bd-num" id="mcqbBdTotal"></div><div class="bd-lbl">Total</div></div>
+          </div>
+          <div class="retry-row">
+            <button class="btn" id="mcqbRetryBtn" type="button">🔄 Retry same set</button>
+            <button class="btn secondary" id="mcqbRetryShuffleBtn" type="button">🔀 Reshuffle &amp; retry</button>
+            <button class="btn secondary" id="mcqbResultCloseBtn" type="button">Close</button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -5783,6 +6082,396 @@ document.addEventListener('keydown', e => {
 
 /* Leave the modal open after save — the success status line lives inside it.
    The user closes it manually (× or Esc) to see the new deck in the tree. */
+
+/* ===================================================================
+   MCQ BANK
+   Fetches the folder tree from /api/mcqbank/tree, renders a browsable
+   tree, and runs a self-test quiz from any CSV file the user picks.
+   CSV format:  question,answer,wrong1,wrong2,wrong3
+   =================================================================== */
+
+(function () {
+  'use strict';
+
+  /* ---- state ---- */
+  let mcqbTree = null;          // cached tree JSON from server
+  let mcqbVisible = false;      // is the MCQ Bank view active?
+  let quiz = {                  // active quiz state
+    questions: [],              // shuffled question objects
+    idx: 0,
+    correct: 0,
+    wrong: 0,
+    answered: false,
+    fileName: '',
+    originalQuestions: [],      // pre-shuffle copy for retry
+  };
+
+  /* ---- elements ---- */
+  const navBtn          = document.getElementById('mcqbankNavBtn');
+  const viewMcqb        = document.getElementById('view-mcqbank');
+  const viewHome        = document.getElementById('view-home');
+  const viewSubject     = document.getElementById('view-subject');
+  const treeEl          = document.getElementById('mcqbTree');
+  const searchInput     = document.getElementById('mcqbSearch');
+  const searchClear     = document.getElementById('mcqbSearchClear');
+
+  const quizBack        = document.getElementById('mcqbQuizBack');
+  const quizClose       = document.getElementById('mcqbQuizClose');
+  const quizTitleEl     = document.getElementById('mcqbQuizTitle');
+  const quizSubEl       = document.getElementById('mcqbQuizSub');
+  const pbarFill        = document.getElementById('mcqbPbarFill');
+  const progressEl      = document.getElementById('mcqbProgress');
+  const scoreLive       = document.getElementById('mcqbScoreLive');
+  const questionEl      = document.getElementById('mcqbQuestion');
+  const choicesEl       = document.getElementById('mcqbChoices');
+  const feedbackEl      = document.getElementById('mcqbFeedback');
+  const nextBtn         = document.getElementById('mcqbNextBtn');
+  const qScreen         = document.getElementById('mcqbQuestionScreen');
+  const rScreen         = document.getElementById('mcqbResultScreen');
+  const scoreBig        = document.getElementById('mcqbScoreBig');
+  const scoreLabel      = document.getElementById('mcqbScoreLabel');
+  const bdCorrect       = document.getElementById('mcqbBdCorrect');
+  const bdWrong         = document.getElementById('mcqbBdWrong');
+  const bdTotal         = document.getElementById('mcqbBdTotal');
+  const retryBtn        = document.getElementById('mcqbRetryBtn');
+  const retryShuffleBtn = document.getElementById('mcqbRetryShuffleBtn');
+  const resultCloseBtn  = document.getElementById('mcqbResultCloseBtn');
+
+  /* ---- helpers ---- */
+  function shuffle(arr) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  function prettifyName(name) {
+    return name.replace(/\.csv$/i, '').replace(/[_\-]/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+  }
+
+  /* Parse a CSV string into question objects.
+     Handles quoted fields and optional BOM. */
+  function parseCsv(text) {
+    const lines = text.trim().split(/\r?\n/);
+    if (!lines.length) return [];
+    // skip header row
+    const dataLines = lines.slice(1);
+    const questions = [];
+    for (const raw of dataLines) {
+      if (!raw.trim()) continue;
+      const cols = splitCsvRow(raw);
+      if (cols.length < 2) continue;
+      const q = cols[0].trim();
+      const answer = cols[1].trim();
+      const wrongs = cols.slice(2).map(c => c.trim()).filter(Boolean);
+      if (!q || !answer) continue;
+      // Filter out single-letter placeholder values (A/B/C/D/E)
+      const cleanWrongs = wrongs.filter(w => w.length > 1 && !/^[A-E]$/.test(w));
+      if (cleanWrongs.length === 0) continue; // skip questions with no real distractors
+      questions.push({ q, answer, wrongs: cleanWrongs });
+    }
+    return questions;
+  }
+
+  function splitCsvRow(row) {
+    const result = [];
+    let cur = '';
+    let inQuote = false;
+    for (let i = 0; i < row.length; i++) {
+      const ch = row[i];
+      if (ch === '"') {
+        if (inQuote && row[i + 1] === '"') { cur += '"'; i++; }
+        else inQuote = !inQuote;
+      } else if (ch === ',' && !inQuote) {
+        result.push(cur); cur = '';
+      } else {
+        cur += ch;
+      }
+    }
+    result.push(cur);
+    return result;
+  }
+
+  /* ---- tree rendering ---- */
+  function showView() {
+    mcqbVisible = true;
+    navBtn.classList.add('mcqb-active');
+    viewHome.classList.remove('active');
+    viewSubject.classList.remove('active');
+    viewMcqb.classList.add('active');
+    if (!mcqbTree) loadTree();
+  }
+
+  function hideView() {
+    mcqbVisible = false;
+    navBtn.classList.remove('mcqb-active');
+    viewMcqb.classList.remove('active');
+    // restore whichever view was previously active (home by default)
+    if (typeof applyViewFromHash === 'function') applyViewFromHash();
+  }
+
+  navBtn.addEventListener('click', () => {
+    if (mcqbVisible) hideView(); else showView();
+  });
+
+  async function loadTree() {
+    treeEl.innerHTML = '<div class="mcqb-loading">Loading MCQ Bank…</div>';
+    try {
+      const resp = await fetch('/api/mcqbank/tree');
+      if (!resp.ok) throw new Error('HTTP ' + resp.status);
+      mcqbTree = await resp.json();
+      renderTree(mcqbTree, '');
+    } catch (e) {
+      treeEl.innerHTML = `<div class="mcqb-loading" style="color:var(--bad)">Failed to load MCQ Bank: ${e.message}</div>`;
+    }
+  }
+
+  function renderTree(node, query) {
+    treeEl.innerHTML = '';
+    const q = query.toLowerCase().trim();
+    // Top-level children of the root node are the subject folders
+    const folders = node.children || [];
+    if (!folders.length && !(node.files || []).length) {
+      treeEl.innerHTML = '<div class="mcqb-loading">No MCQ files found.</div>';
+      return;
+    }
+    for (const folder of folders) {
+      const el = buildFolderEl(folder, q, /*depth*/0);
+      if (el) treeEl.appendChild(el);
+    }
+    // Root-level files (rare)
+    if ((node.files || []).length) {
+      const filesDiv = buildFilesEl(node.files, q);
+      if (filesDiv) treeEl.appendChild(filesDiv);
+    }
+    if (!treeEl.children.length) {
+      treeEl.innerHTML = '<div class="mcqb-loading">No matches found.</div>';
+    }
+  }
+
+  function matchesQuery(name, q) {
+    if (!q) return true;
+    return name.toLowerCase().includes(q);
+  }
+
+  function buildFolderEl(folder, q, depth) {
+    const hasMatch = subtreeMatches(folder, q);
+    if (q && !hasMatch) return null;
+
+    const tag = depth === 0 ? 'details' : 'details';
+    const cls = depth === 0 ? 'mcqb-folder' : 'mcqb-sub-folder';
+    const det = document.createElement(tag);
+    det.className = cls;
+    if (!q) det.open = false; else det.open = true;
+
+    const sum = document.createElement('summary');
+    sum.textContent = prettifyName(folder.name);
+    det.appendChild(sum);
+
+    // Subfolder body
+    const body = document.createElement('div');
+    body.className = depth === 0 ? 'mcqb-folder-body' : '';
+
+    // Nested subfolders
+    for (const child of (folder.children || [])) {
+      const childEl = buildFolderEl(child, q, depth + 1);
+      if (childEl) body.appendChild(childEl);
+    }
+
+    // Files in this folder
+    const filesEl = buildFilesEl(folder.files || [], q);
+    if (filesEl) body.appendChild(filesEl);
+
+    det.appendChild(body);
+    return det;
+  }
+
+  function buildFilesEl(files, q) {
+    const matching = q ? files.filter(f => matchesQuery(f.name, q)) : files;
+    if (!matching.length) return null;
+    const div = document.createElement('div');
+    div.className = 'mcqb-files';
+    for (const file of matching) {
+      const btn = document.createElement('button');
+      btn.className = 'mcqb-file-btn';
+      btn.type = 'button';
+      btn.innerHTML = `<span class="icon">📄</span><span class="name">${prettifyName(file.name)}</span><span class="badge-q">Start quiz</span>`;
+      btn.addEventListener('click', () => startQuiz(file.path, prettifyName(file.name)));
+      div.appendChild(btn);
+    }
+    return div;
+  }
+
+  function subtreeMatches(folder, q) {
+    if (!q) return true;
+    if (matchesQuery(folder.name, q)) return true;
+    for (const f of (folder.files || [])) { if (matchesQuery(f.name, q)) return true; }
+    for (const c of (folder.children || [])) { if (subtreeMatches(c, q)) return true; }
+    return false;
+  }
+
+  /* ---- search ---- */
+  let searchTimer = null;
+  searchInput.addEventListener('input', () => {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => {
+      if (mcqbTree) renderTree(mcqbTree, searchInput.value);
+    }, 220);
+  });
+  searchClear.addEventListener('click', () => {
+    searchInput.value = '';
+    if (mcqbTree) renderTree(mcqbTree, '');
+  });
+
+  /* ---- quiz ---- */
+  async function startQuiz(csvPath, displayName) {
+    try {
+      const resp = await fetch(`/api/mcqbank/csv?path=${encodeURIComponent(csvPath)}`);
+      if (!resp.ok) throw new Error('HTTP ' + resp.status);
+      const text = await resp.text();
+      const parsed = parseCsv(text);
+      if (!parsed.length) { alert('No valid questions found in this file.'); return; }
+      quiz.originalQuestions = parsed;
+      quiz.fileName = displayName;
+      launchQuiz(shuffle(parsed));
+    } catch (e) {
+      alert('Could not load quiz: ' + e.message);
+    }
+  }
+
+  function launchQuiz(questions) {
+    quiz.questions = questions;
+    quiz.idx = 0;
+    quiz.correct = 0;
+    quiz.wrong = 0;
+    quiz.answered = false;
+    quizTitleEl.textContent = quiz.fileName;
+    quizSubEl.textContent = `${questions.length} question${questions.length !== 1 ? 's' : ''}`;
+    qScreen.style.display = '';
+    rScreen.style.display = 'none';
+    quizBack.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    renderQuestion();
+  }
+
+  function renderQuestion() {
+    const q = quiz.questions[quiz.idx];
+    const total = quiz.questions.length;
+    quiz.answered = false;
+    feedbackEl.textContent = '';
+    feedbackEl.className = 'mcqb-feedback';
+    nextBtn.classList.remove('visible');
+
+    // Progress
+    const pct = (quiz.idx / total) * 100;
+    pbarFill.style.width = pct + '%';
+    progressEl.textContent = `${quiz.idx + 1} / ${total}`;
+    scoreLive.textContent = `✓ ${quiz.correct}  ✗ ${quiz.wrong}`;
+
+    questionEl.textContent = q.q;
+
+    // Build shuffled choices
+    const choices = shuffle([q.answer, ...q.wrongs].filter(Boolean));
+    const letters = ['A', 'B', 'C', 'D'];
+    choicesEl.innerHTML = '';
+    choices.forEach((text, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'mcqb-choice';
+      btn.type = 'button';
+      btn.innerHTML = `<span class="letter">${letters[i]}</span><span>${text}</span>`;
+      btn.dataset.value = text;
+      btn.addEventListener('click', () => handleAnswer(btn, q.answer));
+      choicesEl.appendChild(btn);
+    });
+  }
+
+  function handleAnswer(btn, correctAnswer) {
+    if (quiz.answered) return;
+    quiz.answered = true;
+    const chosen = btn.dataset.value;
+    const isCorrect = chosen === correctAnswer;
+
+    // Highlight all choices
+    choicesEl.querySelectorAll('.mcqb-choice').forEach(b => {
+      b.disabled = true;
+      if (b.dataset.value === correctAnswer) b.classList.add('correct');
+      else if (b === btn && !isCorrect) b.classList.add('wrong');
+    });
+
+    if (isCorrect) {
+      quiz.correct++;
+      feedbackEl.textContent = '✓ Correct!';
+      feedbackEl.className = 'mcqb-feedback ok';
+    } else {
+      quiz.wrong++;
+      feedbackEl.textContent = `✗ Correct answer: ${correctAnswer}`;
+      feedbackEl.className = 'mcqb-feedback err';
+    }
+
+    scoreLive.textContent = `✓ ${quiz.correct}  ✗ ${quiz.wrong}`;
+
+    const isLast = quiz.idx >= quiz.questions.length - 1;
+    nextBtn.textContent = isLast ? 'See results →' : 'Next →';
+    nextBtn.classList.add('visible');
+  }
+
+  nextBtn.addEventListener('click', () => {
+    quiz.idx++;
+    if (quiz.idx >= quiz.questions.length) {
+      showResult();
+    } else {
+      renderQuestion();
+    }
+  });
+
+  function showResult() {
+    const total = quiz.questions.length;
+    const pct = Math.round((quiz.correct / total) * 100);
+    pbarFill.style.width = '100%';
+    qScreen.style.display = 'none';
+    rScreen.style.display = '';
+    scoreBig.textContent = pct + '%';
+    let label = pct >= 80 ? 'Excellent work!' : pct >= 60 ? 'Good effort!' : pct >= 40 ? 'Keep practising.' : 'Keep going — you\'ll get there!';
+    scoreLabel.textContent = label;
+    bdCorrect.textContent = quiz.correct;
+    bdWrong.textContent = quiz.wrong;
+    bdTotal.textContent = total;
+  }
+
+  function closeQuiz() {
+    quizBack.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  quizClose.addEventListener('click', closeQuiz);
+  quizBack.addEventListener('click', e => { if (e.target === quizBack) closeQuiz(); });
+  resultCloseBtn.addEventListener('click', closeQuiz);
+
+  retryBtn.addEventListener('click', () => {
+    launchQuiz(quiz.originalQuestions.slice()); // same order
+  });
+  retryShuffleBtn.addEventListener('click', () => {
+    launchQuiz(shuffle(quiz.originalQuestions)); // new shuffle
+  });
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && quizBack.classList.contains('open')) closeQuiz();
+  });
+
+  /* Patch applyViewFromHash so navigating via hash also hides MCQ Bank */
+  const _origApplyViewFromHash = applyViewFromHash;
+  window.applyViewFromHash = function () {
+    if (mcqbVisible) {
+      mcqbVisible = false;
+      navBtn.classList.remove('mcqb-active');
+      viewMcqb.classList.remove('active');
+    }
+    _origApplyViewFromHash();
+  };
+
+})();
 
 /* ===== Init ===== */
 renderTagChip();

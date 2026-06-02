@@ -326,6 +326,10 @@ class QuietHandler(http.server.SimpleHTTPRequestHandler):
             return self._sync_pdf_get(parsed.path[len("/api/sync/pdf/"):])
         if parsed.path.startswith("/api/sync/blob/"):
             return self._sync_blob_get(parsed.path[len("/api/sync/blob/"):])
+        if parsed.path == "/api/mcqbank/tree":
+            return self._api_mcqbank_tree()
+        if parsed.path == "/api/mcqbank/csv":
+            return self._api_mcqbank_csv(parsed)
         if parsed.path.lower().endswith(self._BLOCKED_EXT):
             return self._json(403, {"error": "forbidden"})
         if self._serve_static_compressed(parsed):
@@ -677,6 +681,65 @@ class QuietHandler(http.server.SimpleHTTPRequestHandler):
         if parsed.path.startswith("/api/sync/blob/"):
             return self._sync_blob_head(parsed.path[len("/api/sync/blob/"):])
         return super().do_HEAD()
+
+    # MCQBANK_DIR lives one level above ROOT (Syllabus/) — the user extracted
+    # MCQBANK.zip into Desktop/Syllabus/ so it sits at ../MCQBANK relative to
+    # the server root.
+    MCQBANK_DIR = os.path.normpath(os.path.join(ROOT, "..", "MCQBANK"))
+
+    def _api_mcqbank_tree(self) -> None:
+        """Return a nested JSON tree of all MCQBANK folders and CSV files."""
+        base = self.MCQBANK_DIR
+        if not os.path.isdir(base):
+            return self._json(404, {"error": "MCQBANK directory not found"})
+
+        def build_tree(path: str, rel: str) -> dict:
+            node: dict = {"name": os.path.basename(path), "path": rel, "children": [], "files": []}
+            try:
+                entries = sorted(os.scandir(path), key=lambda e: (not e.is_dir(), e.name.lower()))
+            except PermissionError:
+                return node
+            for entry in entries:
+                entry_rel = rel + "/" + entry.name if rel else entry.name
+                if entry.is_dir(follow_symlinks=False):
+                    node["children"].append(build_tree(entry.path, entry_rel))
+                elif entry.is_file() and entry.name.lower().endswith(".csv"):
+                    node["files"].append({"name": entry.name, "path": entry_rel})
+            return node
+
+        try:
+            tree = build_tree(base, "")
+            self._json(200, tree)
+        except Exception as e:
+            self._json(500, {"error": str(e)})
+
+    def _api_mcqbank_csv(self, parsed) -> None:
+        """Serve a CSV file from the MCQBANK directory.
+        ?path= must be a relative path with no .. traversal."""
+        params = dict(urllib.parse.parse_qsl(parsed.query))
+        rel = params.get("path", "").lstrip("/")
+        if not rel or ".." in rel.replace("\\", "/").split("/"):
+            return self._json(400, {"error": "invalid path"})
+        full = os.path.normpath(os.path.join(self.MCQBANK_DIR, rel.replace("/", os.sep)))
+        if not full.startswith(os.path.normpath(self.MCQBANK_DIR) + os.sep):
+            return self._json(403, {"error": "forbidden"})
+        if not os.path.isfile(full) or not full.lower().endswith(".csv"):
+            return self._json(404, {"error": "file not found"})
+        try:
+            with open(full, "r", encoding="utf-8-sig", errors="replace") as f:
+                data = f.read()
+            body = data.encode("utf-8")
+            self.send_response(200)
+            self.send_header("Content-Type", "text/csv; charset=utf-8")
+            self.send_header("Content-Length", str(len(body)))
+            self.send_header("Cache-Control", "no-cache")
+            self.end_headers()
+            try:
+                self.wfile.write(body)
+            except (BrokenPipeError, ConnectionResetError):
+                pass
+        except Exception as e:
+            self._json(500, {"error": str(e)})
 
     def _json(self, code: int, payload) -> None:
         body = json.dumps(payload).encode("utf-8")
