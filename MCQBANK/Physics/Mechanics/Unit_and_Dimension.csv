@@ -1,0 +1,72 @@
+question,answer,wrong1,wrong2,wrong3
+1 torr is,1mm of Hg,1 atm,1 cm of Hg,1 barr
+What is the dimension of capacitance?,\(M^{-1}L^{-2}T^4A^2\),\(M^{-1}L^2T^{-3}A^{-2}\),\(LT^{-4}\),\(ML^2T^{-4}A^{-2}\)
+Dimension of which are same,Work and moment of force.,Torque and force.,Velocity and velocity gradient,.All
+Dimension of universal gas constant is:,\(ML^2T^{-2}K^{-1}mol^{-1}\),\(M^oL^2T^{-2}K^{-1}\),\(ML^2T^{-2}K^{-1}mol^{-2}\),\(ML^2T^{-2}K^{-1}mol^{-2} mol\)
+The least count is 0.01 mm. Two wires of length L1 and L2 are measured and they are connected forming a single wire. Then the measurement is:,(L1+ L2)m ± 0.02 mm,(L1+ L2) m± 0.01 mm,(L1-L2) m± 0.02 mm,(L1-L2) m± 0.01 mm
+The dimension of Boltzmann's constant is:,\(ML^{2}T^{-2}K^{-1}\),\(ML^2T^{-2}K^1\),\(ML^{-2}T^{-2}K^{-1}\),\(ML^3T^{-2}K^1\)
+The dimensional formula for coefficient of viscosity is,\(ML^{-1}T^{-1}\),\(ML^2T^{-2}\),\(ML^{-1}T^1\),\(ML^2T^{-1}\)
+In a micrometer gauge the reading is done by rotating terminal screw on account of worn out threads on circular scale in same sense to prevent:,Backlash error,Zero error,Instrumental error,Absolute error
+"If force, length and time are taken a fundamental unit then the dimension of mass will be:",\(F^1L^{-1}T^2\),\(F^1L^1T^{-2}\),\(F^0L^0T^{-2}\),\(F^1L^2T^{-2}\)
+Inductance divided by resistance will have the unit:,Sec.,Ampere/sec,Volt/sec,Per sec
+Planck's constant has the dimensions of:,Angular momentum.,Energy,Mass,Frequency
+Dimension of torque is:,\(M^1L^2T^{-2}\),\(M^1L^2T^2\),\(M^1L^2T^1\),\(M^1L^1T^1\)
+Dimension of moment of inertia of a body is,\(M^1L^2T^{0}\),\(M^1L^{-2}T^{-1}\),\(M^2L^2T^0\),\(M^1L^1T^1\)
+The dimension of inductance,\(ML^2T^{-2}A^{-2}\),\(ML^2T^{-2}A^{-1}\),\(ML^2T^{-3}A^{-2}\),\(MLT^1A^{-1}\)
+The coefficient of thermal conductivity is expressed in the unit,Joule per Kelvin per meter per second.,Watt (Kelvin per meter),Watt. (meter per Kelvin).,Joule (Kelvin per meter per second).
+Dimension of Work is same as,Torque,Force,Power,All
+Which one of the following pairs of physical quantities has the same dimesion,Work and energy.,Power and energy.,Force and momentum.,Energy and momentum.
+The dimension of which of the following has [ML-1T-1],Viscosity,Angular momentum,Force,Surface tension
+Dimension of the stress,\(ML^{-1}T^{-2}\),\(ML^{-2}T^{-2}\),\(ML^2T^2\),\(ML^1T^2\)
+Candela is the unit of,Intensity of flame.,Amount of substance.,Level of sound.,None
+1 Watt Second is equal to,Joule,N/M,Nm/Kg,Joule/second
+Find out the dimension of K in the equation: W=1/2 \(kx^2\),\(ML^0T^{-2}\),\(ML^0T^{-1}\),\(M^0LT^{-1}\),\(ML^{-1}T^{-2}\)
+"If energy E, velocity V and time T are as fundamental units, the dimensional formula for surface tension becomes",\((EV^{-2}T^{-2})\),\((E^0V^{-2}T^{-2})\),\((E^2V^2T^{-2})\),\((EV^{-2}T^2)\)
+Which of the following system of units cannot enter into fundamental units?,"Velocity, frequency and acceleration","Length, mass and time","Energy, force and density","Volume, time period and moment of inertia"
+What are the dimensions of angular displacement?,None,(L),\((M^0LT^{-1})\),\((L^2)\)
+The position x of a particle at time t is given by \(x=\frac{b}{a} (1-e^{at})\) where a and b are non-zero constants. The dimensions of b are,\((M^0LT^{-1})\),\((M^0LT^2)\),\((M^0LT^0)\),\((M^0L^0T^{-1})\)
+In Vander Waal's equation \((P=\frac{a}{V^2} )(V-b)=Rt\) the dimensions of 'a' are,\(ML^5T^{-2}\),\(ML^3T^{-1}\),\(M^0L^6T^0\),\(ML^7T^{-2}\)
+The unit of Stefan's Boltzmann constant σ is,\(\frac{Watt}{m^2*K^4} \),\(\frac{Watt}{m*K^4} \),\(\frac{Calorie}{m^2*K^4} \),\(\frac{Joule}{m^2*K^4} \)
+Which of the following have same dimension,Work and Torque,Angular momentum and linear momentum,Work and power,Torque and Pressure
+Which of the following is a correct unit of gravitational constant?,\(m^3kg^{-1}s^{-2}\),\(m^3kg^{-2}s^{-1}\),\(m^{-3}kg^{-1}s^2\),\(m^{-3}kg^2s^{-1}\)
+"Dimension of Angstrom (Å), Micron (u), Fermi (F) and Nanometer (nm) is the same. Which one of the following represent the correct arrangement of their magnitude in the decreasing order?","μ, nm, Å, F","μ, Å, nm, F","Å, μ, F, nm","F, Å, nm, μ"
+S.I unit equivalent to the magnetic field Tesla (T) may be,\(Vsm^{-2}\),\(Vsm^2\),\(Vs^{-1}m^2\),\(V^{-1}sm^{-2}\)
+The dimensional formula or coefficient of viscosity is,\((ML^{-1}T^{-1})\),\((ML^0T^0)\),\((ML^{-2}T^{-1})\),\((ML^{-1}T^{-1})\)
+\(NC^{-1}\)has the same dimension as,Volt/meter,Volt meter,Farad meter,Farad/meter
+The dimensional formula of impulse is,\((MLT^{-1})\),\((MLT^{-2})\),\((ML^2T^{-1})\),\((M^2LT^{-1})\)
+The star nearest to earth is 4 light years away. The distance is,\( 37.84 * 10^{15}m\),\(9.46×10^{15}m\),\( 37.84 * 10^{12}m\),\(9.5 * 10^{12}m\)
+The dimensions of angular momentum are,\(ML^2T^{-1}\),\(MLT^{-1}\),\(ML^{-1}T\),\(MLT^{-2}\)
+The dimensional formula for stress is the same as that for,pressure,force,torque,work
+Dimension of permittivity of free space is,\(M^{-1}L^{-3}T^4A^2\),\(M^{-1}L^3T^4A^2\),\(M^{-1}L^{-3}T^{-4}A^{-2}\),\(M^{-1}L^{-3}T^4A\)
+The dimension of Universal Gravitational constant is,\((M^{-1}L^3T^{-2})\),\((ML^{-1}T^{-2})\),\(M^{-1}L^2T^{-2}\),\(M^0L^{-1}T^{-2}\)
+The dimension of velocity gradient is the same as that of,frequency,time period,acceleration,angular velocity
+"If unit of force & length are doubled, then unit of power becomes",four times,six times,2 times,none
+The dimension \( (M^1L^2T^{-2})\) refers to a physical quantity that has unit:,Joule,Pascal,Newton,Watt
+The dimensional formula for Plank's constant is,\(M^1L^2T^{-1}\),\(M^1L^2T^2\),\(MLT^{-2}\),\(M^2L^2T^{-1}\)
+The diameter of nucleus is of order of,\(10^{-13}cm\),\(10^{-12}cm\),\(10^{-11}cm\),\(10^{-10}cm\)
+"The unit of ε0, the absolute permitivity of free space are.",\(CV^{-1}m^{-1}\),\(CA^{-1}m^{-1}\),\(C^{-2}m^{-2}\),\(F^1m\)
+The dimension of current is:,\(M^0L^0T^{-1}Q\),\(M^0L^0TQ^{-1}\),\(M^0LT^{-1}Q^{-1}\),\(M^0L^0T^{-1}Q^{-1}\)
+The dimensional formula for kinetic energy is,\(ML^2T^{-2}\),\(M^0L^2T^{-2}\),\(ML^2T^{-1}\),\(MLT^{-1}\)
+Which of the following have same dimension?,linear momentum & impulse,power and energy,linear momentum & torque,torque & power
+\(ML^2T^{-3}I^{-1}\)  is a unit of,potential difference,resistivity,electric field,capacitence
+"""Light year"" is the unit of",Length,Velocity,Time,Momentum
+The S.I unit of electric flux are:,\(N.m^2/C\),\(N/C^2\),\(N.m/C\),\(C/N.m\)
+The dimensional of modulus of rigidity is:,\((ML^{-1}T^{-2})\),\((ML^{-2}T^{-2})\),\((MLT^{-2})\),\((ML^{-1}T^{-1})\)
+Weight of milky way galaxy is,\( 3×10^{41} Kg\),\( 4×10^{41} Kg\),\( 6×10^{41} Kg\),\( 7×10^{41} Kg\)
+Which is not a unit of length?,Debye,Parsec,Light year,Angstrom
+The pair NOT having identical dimension is,Moment of inertia and moment force,Impulse and linear momentum,Planck's constant and angular momentum,Young's modulus and pressure
+The dimension of E/B is same as that of,velocity,momentum,force,acceleration
+If the current in electric bulb drops by one percent the power decreases by:,2%,10%,1/2%,4%
+Which of the relations is correct from dimensional point of view?,\(v^2=u^2+2as\),\(v^2=u^2+2as^2\),\(v^2=u^2+2a^2s\),none
+The density of a material of a cube i calculated by measuring its mass and- side. What is the maximum percentage error in the density if the errors in measurement of side and mass are 3 and 4 % respectively,13%,15%,7%,5%
+"In Astronomy, there is a unit of distance called AU. The astronomical unit. The denotes the distance between",The sun and Earth,The sun and the planet Mercury,The Moon and Earth,The two poles of Earth (its diameter)
+The dimensional formula of surface tension is,\(MLT^{-2}\),\(MLT^{-1}\),\(ML^0T^{-2}\),\(ML^{-1}T^1\)
+The term 'light year' is used for,the unit of distance light travels in a year,the time taken for light to travel from the sun to the earth,the particular year that the light intensity is maximum,the time taken for light to travel from the nearest star to the earth
+"If the radius of earth were to decrease by 1%, its mass remaining the same, the acceleration due to gravity on the surface of the earth will",increase by 2%,Increase by 1%,decreases by 2%,decrease by 1%
+Coefficient of viscosity η has the dimension\(Nm^{-2}S\) It is equivalent to,Pascal second,Decipoise,Centipoise,Millipoise
+\(\frac{e^2}{ε0hc} \) has dimension of,Dimensionless,Time,Length,Mass
+The unit of Resistance in SI system is,\(kgm^2sec^{-3}A^{-2}\),\(kgm^2sec^{-2}A^{-1}\),\(kgm^2sec^{-3}A^{-1}\),\(kgm^2sec^{-2}A^{-1}\)
+The dimension \(ML^{-1}T^{-2}\) corresponds to:,Pressure,Work done by force,Linear momentum,Coefficient of viscosity
+What will reduce the systematic errors when taking a measurement?,adjusting the needle on a voltmeter so that it reads zero when there is no potential difference across it,"timing 20 oscillations, rather than a single oscillation, when finding the period of a pendulum",measuring the diameter of a wire at different points and taking the average,reducing the parallax effects by using a marker and a mirror when measuring the amplitude of oscillation of a pendulum
+"A body is moving with kinetic energy E. When the momentum of the body is increased by 50%, then the change in KE is",125%,25%,100%,300%
+"If the change in KE is 4%, then momentum changes by:",2%,8%,6%,1%

@@ -1,0 +1,46 @@
+question,answer,wrong1,wrong2,wrong3
+A man goes 10 km/hr east and 20 km/hr north. Find the relative velocity.,22.36 km/hr,22.46 km/hr,24.36 km/hr,22.56km/hr
+What will be the maximum magnitude of \(\) \((\vec{A}-\vec{B})\) ?,A+B,A-B,\(\sqrt{A^2+B^2}\),\(\sqrt{A^2-B^2}\)
+"Two vectors \(\vec{A}\)= \(\hat5{i}+\hat7{j}-3\hat{k}\) and \(\vec{B}\) = \(\hat2{i}+2\hat{j}-a\hat{k}\)  are perpendicular to each other, then value of 'a' is",-8,12,-12,8
+A vectors of length l is turned through the angle θ about its tail. What is the change in the position vector of its head?,2lcosθ/2,lcosθ/2,2lcosθ/2,lsinθ/2
+The resultant of two force 3p and 2p is R. If the first force is doubled then the resultant is also doubled. The angle between the force is,120°,45°,90°,60°
+Which of the following is vector,Electric field intensity,Electric potential,Electric flux,charge density
+"Two bodies are moving with velocities V1 and V2 respectively. V1 is along X axis and V2 moving the first quadrant, makes an angle θ with V1. The relative velocity of V1 with respect to x component of V2 will be",V1-V2 cosθ,V1- V2 sin θ,V1cosθ-V2,V2sinθ+V2
+A body A moving in north with 3 km/s and B with 4 km/s East. What is the relative velocity of a body A with respect to B,5 km/s west of north,5 km/s east of north.,5 km/s towards north.,5 km/s towards west.
+A vector remains unchanged,When it slided parallel to itself,When it is rotated by an orbitary angle.,When it is cross multiplied by a unit vector.,When it is multiplied by scalar
+"A body moves 30 m due north, 20 m due east and 30√2 m due south west. The total displacement covered by body from its initial position is",10 m west.,14 m S-W.,28 m south.,18 m south.
+"The x- component of a vector making
+an angle of 30° with horizontal is 3. Its y-component is",√3,3,√3/2,3/√2
+Which of the following is a scalar quantity,Electrostatic potential,Electric field,Angular moment,Torque
+Two forces of magnitude F have a resultant of the same magnitude F. The angle between the two forces is:,120,45,150,180
+"Three vectors are arranged to form a right angled triangle of sides 5, 12 and 13 units. The sum of the two vectors is equal to the third. The angle between those of magnitudes 12 and 13 will be",\( cos^{-1} (12/13)\),\( sin^{-1} (12/13)\),\( cos^{-1} (5/13)\),\(tan^{-1} (5/13)\)
+Resultant of two forces F1 and F2 is Fi and the resultant is at right angle to the force F1. Then the force F2 is equal to,√2F1,2F1,0,F1
+Magnetic moment is,vector quantity,a scalar quantity,universal constant,tensor
+"Two vectors have a sum A and a difference B. If A=B then, the angle between the two vectors is","90°,",0°,45°,120°
+Which of the following is not a vector quantity,energy,angular momentum,magnetic intensity,torque
+"If \(\vec{A},\vec{B},\vec{C}\) have magnitude 6, 8 & 10 respectively, \(\vec{A}+\vec{B}=\vec{C}\) angle between A & B is",90°,0°,45°,180°
+"Three forces of magnitudes 1N, 3N and 2N are acting at angles of 0°, 90° and 120° with +ve X-axis respectively, then the resultant will act along the:",positive y-axis,positive x-axis,negative x-axis,negative y-axis
+The condition for \(\vec{A}+\vec{B}=\vec{A}-\vec{B}\)....... is that,\(\vec{B}=0\),\(\vec{B}\) is a unit vector,\(\vec{A}=\vec{B}\),\(\vec{A}=0\)
+The resultant of two forces 8N and 6N is,10N,1N,15N,20N
+The resultant of two forces \(\vec{P}\) and \(\vec{Q}\) is perpendicular to \(\vec{P}\) and is equal to P. Then the magnitude of another force \(\vec{Q}\) is,√2P,√3P,2P,P
+The sum of two unit vectors is a unit vector. Then their difference will be,√3,2,√2,zero
+The dot product of two vectors is 6 and their magnitude are 4 and 3. Then angle between these vectors will be,60°,30°,45°,90°
+The vector sum and vector difference of two vectors are at right angle. Then these vectors,must have equal magnitude,must be equal,must be perpendicular,must be parallel
+The dot product of vector is √√3 times the magnitude of their cross product. Then angle between these vectors will be,30°,45°,60%,75°
+If \(\vec{a}=\vec{b}\)then,Both,a=b,\(\hat{a}=\hat{b}\),None
+The angle between \(\vec{A}\) and \(\vec{B}\) is 0. The value of \(\vec{A}.\vec{B}*\vec{A}\)is,Zero,\(A^2B\),\(A^2B sinθ\),\(A^2Bcosθ\)
+Which of the following can't be resultant of the vectors of magnitude 5 and 10?,2,7,15,5
+What is the projection of \(\vec{A}=2\hat{i}+3\hat{j} \) along \(\vec{B}=\hat{i}+\hat{j}\) ?,5/√2,5√2,10√2,10/√2
+"If \(\vec{a}=\vec{b}+\vec{c}\)  and \(|\vec{a}|=5,|\vec{b}|=4,|\vec{c}|=3\) then angle between \(\vec{a} \) and \(\vec{c}\) is",\(cos^{-1}(3/5)\),\(cos^{-1}(4/5)\),π/2,\(sin^{-1}(3/4)\)
+Which of the following is not defined in vectors?,division,addition,subtraction,multiplication
+if \(|\vec{a}.\vec{b}|=|\vec{a}*\vec{b}|\) then \(|\vec{a}+\vec{b}|=\),\(\sqrt{a^2+b^2+\sqrt{2}ab}\),a+b,a-b,\(\sqrt{a^2+b^2+2ab}\)
+Which set of forces acting on a body never produces zero acceleration?,"7N,12N,20N","10N, 10N, 20N","6N, 8N, 10N","1N, 2N, 3N"
+The unit vector along  \(\hat{i}+\hat{j}\) is,\((\hat{i}+\hat{j})/√2\),\(\vec{k}\),\(\hat{i}+\hat{j}\),\((\hat{i}+\hat{j)}/2\)
+Two diagonals of a parallelogram are \((2\hat{i}+2\hat{j}) \) and \((2\hat{i}-2\hat{j}) cm\) then area of parallelogram will be,\(4cm^2\),\(8 cm^2\),\(4√2cm^2\),\(2cm^2\)
+What is the projection of  \(\hat{i}+2\hat{j}+3\hat{k }\) on \(\hat{i}+\hat{j}+\hat{k}\),2√3,3√2,√3,4√2
+"The length, breadth and height of a hall are 12m, 4m and 3m. What is the displacement of a fly which flies from one corner to another corner of the hall?",13 m,15 m,17 m,19 m
+The forces \(\vec{F1}= (3\hat{i}+4\hat{j})N\) and \(\vec{F2}=(4\hat{i}+3\hat{j})\) are acting on a body. The resultant force on the body is,7√2N,5√2N,10N,14N
+Let the angles between two non-zero vectors \(\vec{P}\) and \(\vec{Q}\) be 120° and its resultant be \(\vec{R}\). Then,\(\vec{R}\) must be less than |P-Q|,\(\vec{R}\) must be equal to |P-Q|,\(\vec{R}\) must be greater than |P-Q|,\(\vec{R}\) may be equal to |P-Q|
+"If the two same vector V & V1, having same magnitude, then which of following is not true for the sum their magnitude?",4V,0,1/4V,2V
+A physical quantity which has direction as well as magnitude is known as:,vector,weight,Scalar,force
+The minimum number of non-unequal coplanar vector to give zero resultant is,4,2,3,5

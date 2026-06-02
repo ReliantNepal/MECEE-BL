@@ -1,0 +1,30 @@
+question,answer,wrong1,wrong2,wrong3
+"Mutual inductance of two coils is 5mH. The current changes from 3A to 2A in 0.01 sec, then emf produced is",0.5V,1V,5V,50V
+Eddy current is produced in,Non uniform magnetic field,Heated magnetic field,Uniform magnetic field,Change in electric field
+"An iron is placed horizontally, what will be the acceleration of falling magnet",Less than g,Greater than g,Equal to g,Less than or greater than g
+"A solenoid having 600 number of turns has self inductance 280 mH, if new number of turns is 300 then new self-inductance is ....mH",70,140,560,1120
+Transformer are used,In AC circuits only,In DC circuits only,In both DC and AC circuits,Neither in DC nor in AC circuits
+A transfrmer is designed to work from 22 0volts AC mains to give a supply at 11 volts AC to run a device. The primary coil has 480 turns. The numberof turns in the secondary coil should be,24,480,240,9600
+Lenz's law is consequence of the law of conservation of,Energy,Charge,Momentum,Mass
+"In which of the following devices, the eddy current effect is not used?",Electric heater,Induction furnace,Magnetic break in train,Electromagnet
+"In electromagnetic induction, the induced emf in a coil is independent of",Resistance of the circuit,Change in the flux,Time,None of the circuit
+"The magnetic flux linked with a coil is given by an equation 
+
+ϕ(in webers) = *t^2 + 3t +5 .The induced emf in the coil at the forth second will be",67 units,16 units,39 units,145 units
+Faraday's law are consequences of conservation of,Energy,Energy and magnetic field,Charge,Magnetic field
+A 10 meter wire is kept in east-west falling with velocity 5m/s perpendicular tothe field 0.3 x 10^4 Wb/m^2. The induced emf across the terminal will be,1.5 mV,0.15 V,1.5 V,15 V
+"When a wire loop is rotated in a magnetic field, the direction of induced e.m.f changes once in each",1/2 revolution,1/4 revolution,1 revolution,2 revolution
+The equivalent quantity of mass in electricity is,Inductance,Charge,Potential,Current
+"When the current through a solenoid increases at a constant rate, the induced current",Is a constnat and is opposite to the direction of the inducing current,Is constant is in the direction of the inducing current,Increases with time and is in the direction of the inducing current,Increases with time and opposite to the direction of the inducing current
+Two pure inductors each of self inductance L are connected in parallel but are well separated from each other. The total inductance is,L/2,2L,L,L/4
+The unit of inductance is,Volt-sec/ampere,Volt/ampere,Joule/ampere,Volt-ampere/sec
+The primary winding of a transformer has 100 turns and its secondary winding has 200 turns. The primary is connected to an ac supply of 120 V and the current flowing in it is 10 A. The voltage and the current in the secondary are,"24V,5A","240V,10A","60V,20A","120V,2A"
+A 50mH coil carries of 2 ampere. The energy stored in joules is,0.1,1,0.05,0.5
+The net magnetic flux through any closed surface is,Zero,Positive,Infinity,Negative
+"A square loop of side 1m and resistance 1 ohm is placed in a magnetic field o 0.5T. If theplane of loop isperpendicular to the direction of magnetic field, the magnetic flux through the loop is:",0.5 weber,2 weber,1 weber,Zero weber
+"A 12V, 60 W lamp is connected to the secondary of a step down transformer, whose primary is connected to AC mains of 220V. Assuming the transformer to be ideal what is the current in the primary winding?",0.27 A,27 A,3.7 A,0.37 A
+Wha is increased in step-down transformer,Current,Voltage,Power,Current density
+"In a circuit with a coil of resistance 2 ohms, the magnetic flux changes from 2.0 Wb to 10.0 Wb in 0.2 second. The charge that flows in the coil during this time is",4 coulomb,5 coulomb,1 coulomb,0.8 coulomb
+The magnetic energy stored in an inductor of inductance 4mH carrying a current of 2A is,8 miu J,4mJ,8 mJ,4 miu J
+A metal rod of length 2m is rotating with an angular velocity of 100 rad/sec in a plane perpendicular to a uniform magnetic field of 0.3T. The potential difference between the ends of the rod is,60 V,30 V,40 V,600 V
+A step-down transformer is used on a 1000 V line to deliver 10 A at 120 V at the secondary coil. If the efficiency of the transformer is 80% the current drawn from the line is,3A,30A,0.3A,24A

@@ -1,0 +1,62 @@
+question,answer,wrong1,wrong2,wrong3
+In diode when current flows from P to N it is called,Forward biased,Reversed bias,Biassing opposite,Negative biased
+A certain glass of material with a wide forbidden band between the valence and conduction bands is called,Insulator,conductor.,Semiconductor,super-conductor
+Zener diode are used for,stabilization of voltage,rectification,amplification,detector
+"When antimony is doped with silicon, extrinsic semiconductor obtained is",n-type,p-type,n-p-n type,p-n-p type
+The silicon semiconductor formed by doping trivalent atoms will be,p-type,n-type,n-p-n type,p-n-p type
+The energy gap between the conduction band  on the valence band of a certain material is 0.7eV. The material is,semiconductor,An insulator,A conductor,semimetal
+"What is (voltage gain) in a common emitter amplifier, where  input resistance  is 3Ω & load resistance 24Ω;  β=0.6?",4.8,8.4,2.4,480
+In npn transistor electron move from,emitter to base,base to emitter,collector to emitter,base to emitter
+Voltage gain of amplifier depends on,load resistance,voltage applied,current,none
+Electrical conductivity of semiconductor of this type increases with increase in temperature:,"Intrinsic,semiconductor",P-type semiconductor,N-type semiconductor,None
+Which of the following is doped with silicon to form N-type semiconductor?,As,Al,Be,In
+When P-N junction diode is forward biased;,decrease in barrier potential,increase in barrier potential,increase in minority carrier current,none
+If the temperature of a semiconductor is lowered from T1 to T2. The resistance of semiconductor,increases,decreases,remains constant,none
+To a silicon sample traces of aluminium are added as an impurity. The resultant sample would behave like:,p-type semiconductor,conductor,n-type semiconductor,insulator
+"In which of the following, transistor amplifier configuration, the voltage gain is highest.",common emitter,common base,common collector,none
+The current gain in a transistor is 0.98. If the change in emitter current is 5mA. The change in collector current is:,4.9mA,5.1mA,0.96mA,0.19mA
+Which of the following shows forward biasing?,,,,
+The silicon semiconductor formed by doping trivalent atoms will be a,p-type,n-type,n-p-n-type,p-n-p type
+Which is correct for a transistor?,Collector is reverse biased and emitter is forward biased,Collector and emitter both are forward biased,Emitter is reverse biased and collector. is forward biased,Both emitter and collector are reverse biased
+The energy gap between the conduction band and the valance band of a certain material is 0.7 eV. The material is,Semiconductor,An insulator,A conductor,Semimetal
+"When p-n junction diode is forward biased, the width of depletion layer",decreases,increases,remains unchanged,None
+The impurity atoms with which pure silicon should be doped to make on n- type semi-conductor is:,Phosphorus,Aluminum,Boron,Indium
+"Silicon and silver both are cooled from 100°C to 0°C, their conductivity changes as",conductivity of silicon decreases and that of silver increases,conductivity of silicon increases,conductivity of silicon increases,both a and b
+For proper use of a transistor:,Emitter & base are forward biased and base & collector are reverse biased,Both are reversed biased,Both are forward biased,We don't have proper knowledge of using transistor
+A device for generating an Alternating current of a desired frequency is known as,Oscillator,Amplifier,Rectifier,Diode
+A conductor & charging non-conductor when brought together,they attract each other,they repel each other,Nothing happen,charge transfer from conductor to non-conductor.
+The potential barrier in the depletion player is due to,lons,Electrons,Holes,Forbidden band
+In a semiconductor diode P-side is earthed and N side is applied a potential of -2 V the diode shall,Conduct,Breakdown,Conduct partially,Not conduct
+Forbidden energy gap shows the order,Conductor<Semi-conductor<Insulator,Semi-conductor<conductor<Insulator,All the same,Conductor-Insulator<semi-conductor
+"In a PN junction diode, when no potential is applied",holes diffuse from P to N and electrons from N to P.,a small electric field is set up.,no effect,holes only diffuse from P to N.
+A transistor is essentially a:,current operating device,voltage operated device,power driven device,resistance operated device
+When P-N junction diode is forward biased and then reverse biased the flow of current is mainly due to,diffusion of electrons in first case and drift velocity in the second case,drift velocity in first case and diffusion of electrons in the second case,diffusion of electrons in both cases,drift velocity in both cases
+The resistivity of semi conductor depends on,atomic nature of semi conductor,atomic reactivity of semi conductor,atomic number of semi conductor,none
+Which of the following is correct?,\(α= \frac{β}{1+β} \),\(α= \frac{β}{1-β} \),\(α=β+1/β\),\(α= \frac{1-β}{β} \)
+A  N-P-N transistor in a common emitter circuit has,Valid Kirchoff's laws,a low transfer ratio,a low AC current gain,leakage of current independent of temperature
+The drift current in a PN junction diode is,from n side to p side,from the n side to the p side if the junction is the forward biased,from the n side to the Р side if the junction is the reverse biased,"from p side to n side,"
+Comparison of conductivity of Ge and Cu when temperature falls from 25°C to 80 K,conductivity of Ge decreases and Cu increases,conductivity of Ge increase and Cu decrease,conductivity of both increase,conductivity of both decreases
+Ge transistor can be operated at a temperature,Upto 90°C,Upto 40°C,Above 100°C,Upto 20°C
+"The ratio of electron and hole current in a semiconductor is and the ratio of drift velocities of electron and holes is, then the ratio of concentration of electrons and holes will be",7/3,3/7,25/49,49/25
+"If a semiconductor has an intrinsic carrier concentration of 1.41×10^16/m3 when doped with 10^21/m3 phosphorous atoms, then the concentration of holes/m3 at room temperature will be",\( 2 × 10^{11} \),\( 2 × 10^{21} \),\( 1.41× 10^{10} \),\( 1.41 × 10^{16} \)
+"The depletion layer in silicon diode is 1μm wide and the knee voltage is 0.6V, the electric field in the depletion layer will be.",\(6*10^5 V/m\),0,0.6V/m,\(6*10^4 m/s\)
+"A n-p-n transistor circuit has α = 0.984, if Ic= 2mA, then value of Ib is",0.03 m A,0.003m A,0.66m A,0.015m A
+"If Dc and Dь and De be the doping levels of emitter, base and collector respectively of a transistor then,",De>Dc>Db,De=Db=Dc,De>Db>Dc,De<Db<Dc
+The electrical conductivity of semiconductor,increases with increase of temperature.,is independent of temperature,decreases with increase of temperature,first increases and then decreaes with increase of temperature
+An n-type semiconductor is,neutral,negatively charged,. positively charged,may be negatively or positively charged depending on amount of impurity.
+An electric field is applied to a semiconductor. Let the number of charge carriers be n and the average drift speed be 'v' if the temperature is increased,n will increase but v will decrease,both n and v will increase,v will increase and n will decrease,both n and v will decrease
+Diffusion current in a p-n junction is  greater than the drift magnitude if,the junction is forward biased,. the junction is reverse-biased,the junction is unbiased,in no case
+The dominant mechanism for motion of charge carriers in forward and reverse bioned silicon p-n function are:,"diffusion in forward bias, drift in reverse bias.","drift in forward bias, diffusion in reverse bias.",diffusion in both forward and reverse bias.,drift in both forward and reverses as
+In a good conductor energy gap between the conduction band and valance band is,zero,infinite,wide,narrow
+"In an n-p-n transistor circuit, the collector current is 10mA. If 90% of the
+electrons emitted reach the collector","Iɛ = 11mA, IB = 1mA","Iɛ = 1mA, IB = 11mA","Iɛ = 1mA, IB = 9mA","Iɛ = 9mA, IB = 1mA"
+"When the conductivity of a semiconductor is only due to breaking of covalent bond, the semiconductor is called.",intrinsic,extrinsic,n-type,P-type
+Filter circuit,eliminates a.c. component,eliminates d.c. component,does not eliminate a.c. component,none
+Current gain of a transistor in common base model is 0.95. It's value in common emitter mode is,19,0.95,1.5,19^-1
+"The current gain of a transistor in a common emitter configuration is 40. If the emitter current is 8.2 mA, then base current is",0.2 mA,0.02 mA,2 mA,0.4 mA
+"For a common base amplifier, the values of resistance gain and voltage gain are 3000 and 2800 respectively. The current gain will be",0.93,1.1,0.98,0.83
+"In an NPN transistor the collector current is 24 mA. If 80% of electrons reach collector, the base current is",6mA,36mA,26mA,16mA
+"Mercury is cooled to 4K, it behaves as",Superconductor,Semiconductor,Insulator,Conductor
+When intrinsic semiconductor is dopped with impurity then conductivity is:,increases,decreases,constant,none
+Forward biasing of p-n junction offers:,Low resistance,High resistance,No resistance,Infinite resistance
+Avalanche breakdown is due to:,Increase in depletion layer thickness,Decrease in depletion layer thickness,Collision in minority charge carriers,None

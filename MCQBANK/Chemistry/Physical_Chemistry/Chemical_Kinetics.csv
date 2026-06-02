@@ -1,0 +1,70 @@
+question,answer,wrong1,wrong2,wrong3
+The rate of reaction doesn't depend on,Concentration of product,Concentration of reactant,Suitable catalyst,Temperature
+The rate of reaction depends upon,Temperature,Initial concentration of reactants,Pressure,Volume
+The factor which does not influence the rate of reaction is,Molecularity,Nature of reactant,Concentration,Temperature
+"75% of a first order reaction was completed in 32 minutes, when was 50% of the reaction completed?",16 min,24 min,8 min,4 min
+"Suppose that the rate law for the reaction A → B has been found to be of the form Rate = \(K[A]^{m}\) . What will be the overall order of the reaction based on the following data?
+
+Initial concentration of A         Initial rate                     (M)                                  (M/sec)
+
+          0.05                                      3×10⁵ 
+
+          0.10                                      12x10⁵ 
+
+          0.20                                      48x10⁵",Two,One,Three,Four
+A radioactive substance remains 1/8th of its original mass after 96 days. What is the half-life period of the radioactive substance?,32,16,44,40
+"The rate constant of a zero order reaction is 'K' and the initial concentration is a, the half life of the reaction will be",a/2K,1/aK,K/2,aK/2
+The order of a reaction is,Sum of power of concentration of the reactant on which the rate depends,Sum of stoichiometric coefficients of all reactants,Sum of stoichiometric coefficient of the reactants on which the rate depends,Sum of power of concentration of all reactants
+The half life of a reaction is 20 min. The reaction will be completed after,Infinite time,20 min,40 min,40 hrs
+"When the concentration of both the reactants A and B is doubled then its rate constant is 8 but when the concentration of only B is doubled, then the rate constant is 2, then find the overall rate of the reaction",Third,First,Second,Fourth
+The average minimum energy that must be associated with the reactant molecules in order to be capable of forming products,Threshold energy,Activation energy,Collision energy,Transition energy
+A lump of coal burns slowly while coal dust burns explosively. This is because of,Larger surface area of coal dust,A high mass of lump of coal,Lower ignition temperature of coal dust,Higher ignition temperature of coal dust
+"For the reaction A + 2B→C, the rate of reaction at a given instant can be represented by",,,,
+"In a reaction 2A+B→A2B , the reactant A will disappear at",twice the rate at that B will decrease,half the rate at that B will decrease,the same rate at that B will decrease,the same rate at that A2B will form
+The specific rate constant of a reaction depends on the,Temperature,Concentration of the reactant,Concentration of the product,Time
+Rate of first order reaction depends upon,all the three,time,concentration of reactant,temperature
+"In which of the following cases, does the reaction go farthest to completion",K = 10²,K = \(10^{-2}\),K = 10,K = 1
+Which one of the following statements about the order of a reaction is true?,The order of a reaction can only be determined by experiment,The order of a reaction increases with increase in temperature,The order of a reaction can be determined from the balanced equation,A second order reaction is also bimolecular
+Order of reaction is decided by,mechanism of reaction as well as relative concentration of reactants,temperature,molecularity,pressure
+"For a first-order reaction, the half life period is independent of",initial concentration,cube root of initial concentration,first power of final concentration,square root of final concentration
+"When the rate of a reaction is equal to the reaction constant, the order of the reaction is",Zero order,First order,Second order,Third order
+Which of the following is a first order reaction?,NH4NO2 → N2 + 2H2O,2HI → H₂+I₂,2NO2 → 2NO + O2,2NO + 02 → 2NO2
+,First order,Second order,Third order,Zero order
+,Pseudounimolecular,Second order,Unimolecular,None of these
+The order of a reaction of a radioactive decay is,one,zero,two,three
+Hydrolysis of ester in alkaline medium is,second order reaction with molecularity two,first order reaction with molecularity one,first order reaction with molecularity two,second order reaction with molecularity one
+"The reaction, 2N2O5 ⇌ 2N2O4 + O2 is",bimolecular and first order,biomolecular and second order,unimolecular and first order,bimolecular and zero order
+"If reaction between A and B to give C shows first order kinetics in A and second order in B, the rate equation can be written as",rate = k [A] [B]²,rate = k [A] \([B]^{1/2}\),rate = k \([A]^{1/2}\)[B],rate = k[A]² [B]
+The conversion of molecules of A and B follows a second order kinetics. Doubling the concentration of A will increase the rate of formation of B by a factor of,4,2,1/2,1/4
+What will be the order of the reaction if doubling of the concentration of a reactant increases the rate by a factor of 4 and trebling the concentration of the reactant by a factor of 9 ?,Second order,First order,Zero order,Third order
+"The rate of a gaseous reaction is given by the expression k [A] [B]. If the volume of the reaction vessel is suddenly reduced to 1/4 th of the initial volume, the reaction rate relating to original rate will be",16,1/10,1/8,8
+"For a reaction: 2A + B → Products, the active mass of B is kept constant and that of A is doubled. The rate of reaction will then",increase four times,increase two times,decrease two times,decrease four times
+"If the concentration is expressed in moles per litre, the unit of the rate constant for a first order reaction is",\(Sec^{-1}\),Mole \(litre^{-1} sec^{-1}\),Mole \(liter^{-1}\),\(Mole^{-1}\)
+The unit of second order reaction rate constant is,liter \(mole^{-1} sec^{-1}\),\(liter^{-1}\) mole \(sec^{-1}\),liter² \(mole^{-2} sec^{-1}\),\(sec^{-1}\)
+Half-life of a reaction is found to be inversely proportional to the cube of initial concentration . The order of reaction is,4,2,3,5
+"If 75% of first order reaction is completed in 32 min, then 50% of the reaction would be completed in",16 min,24 min,10 min,20 min
+The temperature coefficient of most of the reactions lies between,2 and 3,1 and 3,1 and 4,2 and 4
+The rate of reaction is doubled for every 10° rise in temperature. The increase in reaction rate as a result of temperature rise from 10° to 100° is,512,112,400,614
+The rate of chemical reaction is doubled for every 10°C rise in temperature because of,increase in the number of activated molecules,increase in the activation energy,decrease in the activation energy,increase in the number of molecular collision
+"For an endothermic reaction, where ΔH represents the enthalpy of the reaction in kJ/mol, the minimum value for the energy of activation will be",equal to ΔH,less than ΔH,zero,more than ΔH
+"When we increase the temperature, the rate of reaction increases because of",more number of collisions,decrease in mean free path,more number of energetic electrons,less number of energetic electrons
+Collision theory is applicable to,bimolecular reactions,first order reactions,zero order reactions,intramolecular reactions
+"If initial concentration is reduced to 1/4th in a zero order reaction, the time taken for half the reaction to complete",becomes one-fourth,remains same,becomes 4 times,doubles
+The half-life of a reaction is halved as the initial concentration of the reaction is doubled. The order of the reaction is,2,0.4,1,0
+If concentration of reactants is increased by 'x' then the k becomes,k,ln(k/x),k/x,k+x
+"According to law of mass action, rate of a chemical reaction is proportional to",molar concentration of reactants,concentration of reactants,concentration of products,molar concentration of products
+Order of reaction can be,"integer, fraction, zero",zero,fraction,whole number
+"The rate law for a reaction between the substances 'A' and 'B' is given by:
+
+Rate K \([A]^{n} [B]^{m}\) , on doubling the concentration of A and having the concentration of 'B' the rate ratio of new rate to earlier rate of reaction will be as:",\(2^{n-m}\),\(1/2^{m+n}\),m+n,n-m
+,,,,
+Order of reaction is decided by,Mechanism of reaction as well as relative concentration of reactants,Temperature,Molecularity,Pressure
+,1st order reaction,2nd order reaction,Independent of the initial concentration,A zero order reaction
+The time taken for the completion of 3/4 of a first order reaction is,,,,
+A reaction involving two different reactants can never be,Unimolecular reaction,First order rection,Second order reaction,Bimolecular reaction
+A substance with initial concentration of 'a' mol \(dm^{-3}\) reacts according to zero order kinetics. The time it takes for completion of the reaction is (K = rate constant),a/K,K/a,a/2K,2K/a
+"In Arrhenius plot, intercept is equal to",InA,-E/R,Ink,log 10 a
+Which of the following kind of catalysis can be explained by the adsorption theory?,Heterogenous catalysis,Homogenous catalysis,Acid-base catalysis,Enzyme catalysis
+The time for 90% of the 1st order reaction to be completed is,3.3 times that of half life,1.1 times that of half life,2.2 times that of half life,10 times that of half life
+"In a reaction: 2X + Y→ M+ N; the concentration of Y is kept constant and that of X is tripled. Now, the rate of reaction will",Increase 9 times,Increase 3 times,Decrease 3 times,Increase 6 times
+The order of a reaction with respect to \(OH^{-}\) is-1. The \(OH^{-}\) species,Acts as inhibitor,Acts as catalyst,Will always be involved in the overall reaction,Helps in increasing reaction rate

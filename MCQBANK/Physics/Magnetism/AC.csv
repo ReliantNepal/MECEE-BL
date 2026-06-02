@@ -1,0 +1,60 @@
+question,answer,wrong1,wrong2,wrong3
+Which one is quality factor?,1/R (L/C)^1/2,R*L/C,R(C/L)^1/2,1/R (C/L)^1/2
+"In RC circuit, charge on capacitor (when being discharged) is maximum at",t=0,t=∞,t=Rc,t=1/Rc
+A circuit has resonance frequency f. If capacitance is doubled then new frequency of circuit is:,f/(2)^1/2,(2)^1/2f,f/2,none
+A door metal detector uses a principle based on,alternating current and pulse,diffraction of sound,interference,beat frequency
+A coil of inductance 8.4 mH and resistance 6Ω is connected to a 12V battery. The current in the coil is 1A at approx. time?,1ms,500s,320ms,35ms
+An emf of 15 volt is applied in a circuit coil containing 5 Henry inductance and 10Ω resistance. The ratio of the current at time t=∞ and at t=1 sec is,e²/e²-1,(e^1/2) / (e^1/2 -1),1-e^-1,e^-1
+"In LCR circuit having L=8 Henry ,C=0.5 µf and R=100Ω connected in series produces natural angular frequency",500 radian,200 radian,300 radian,400 radian
+At resonance condition the effective resistance in LCR series circuit is,minimum,maximum,zero,infinity
+"In Nepal, the supply of AC voltage is 220V. The peak voltage is",310V,220V,110V,350V
+"In a purely resistive AC circuit, the current",is in phase with emf,lags behinds the emf in phase,leads the emf in phase,leads the emf in half the cycle and lags behind it in the other half
+In LR circuit,voltage leads by current by ¶/2,current and voltage are in phase,current leads voltage by ¶/2,current leads voltage by ¶/2
+"An inductive coil has resistance of 100Ω when an AC of frequency 100Hz is fed to coil, applied voltage led the current by 45°, the inductance of the coil is approximately;",16mH,10mH,12mH,18mH
+"The resonant frequency of a LCR series circuit having L=8H, C=0.5µF and R=100Ω is;",250/¶,6000,1000,300
+Power dissipation in AC circuit depends upon,resistance,capacitive reactance,impedance,inductive reactance
+"An AC supply gives 30V RMS which is fed on a pure resistance of 10Ω, the power dissipated in this is;",90W,90.2W,180W,45W
+Admittance of an alternating cirucit is defined as reciprocal of,Impedance,Inductance,Capacitance,Alternating emf
+A wire of mass 200kg has capacitance 0.0014µF/kg and frequency 50KHz. Then what is the inductance when impedance is minimum?,0.37µH,0.30µH,0.477µH,0.50µH
+"An a.c having angular angular frequency 1000 rad/sec is passed through a capacitor of 1µF, then capacitive reactance is.........",1000Ω,100Ω,500Ω,200Ω
+Power dissipated in pure inductor inductance 'L' when current 'I' passes through it is,Zero,1/2 LI,1/2 LI²,LI²
+"In an a.c circuit Vrms=100V : capacitance 20µF,current 0.628A, the frequency of ac is",50Hz,1 Hz,2Hz,100Hz
+You and your friends are listening to the radio. Your friends wants to decrease the capacitive reactance Xc of the radio transistor.,increase frequency,decrease frequency,increase wavelength,decrease wavelength
+"In an AC circuit capacitance is 20µF, inductance is 500mH and resistance is 4 Ω If 2.5 Amperes current flows in the circuit then the power delivered in the circuit is:",25W,35W,65W,45W
+Capacitative reactance for dc is,infinity,one,zero,none of these
+If the capacitance is increased then,reactance of capacitor decreases and current increases,reactance of capacitor increases and current decreases,reactance of capacitor increases and current increases,reactance of capacitor decreases and current decreases
+The inductance L and a resistance R are connected in series with a battery of emf E Find the maximum rate at which energy is stored in the magnetic field.,E²/4R,E²/R,E²/2R,E²/3R
+A choke coil should have,low resistance and high inductance,high reistance and low resistance,high resistance and high inductance,low resistance and low inductance
+"In a LCR circuit, Inductor,Capacitor and Resistor are in series working at ω=1/(LC)^1/2 and emf Vo. Then the sum of potential dropped across inductor and capacitor is",zero,Vo/ωt,2Vo/ωL,2Vo
+"In a series combination of R, L and C to and ac source at resonance if R=20Ω, then impedance of the combination is",20Ω,10Ω,zero,400Ω
+Laminated cores are used in transformers,to reduce eddy loss,to reduce hysterises loss,to reduce magnetic effect,for all above purposes
+An induction coil is used to,step up a dc voltage,convert ac into dc,convert dc into ac,step up or down an ac voltage
+"In an AC circuit, the electrical energy is dissipated in",R only,L only,C only,"all L,C and R"
+"A 20 volt ac is applied to a circuit consisting of a reisistance and a coil with negligible resistance. If the voltage across the resistance is 12 volt, the voltage across the coil is",16 volt,10 volt,8 volt,6 volt
+"In a circuit, the value of the ac is measured by hot wire ammeter is 10 ampere. Its peak value will be",14.14A,10A,20A,7.07A
+A sinusoidal AC current flows through a resistance R. If the peak current is Io then power dissipated is,Io²R/2,Io²RcosΦ,4/¶ ²* IoRc,Io²R/¶²
+A highly inductive circuit has a power factor which is,low,high,zero,fluctuating
+"In an LCR circuit contains L=8H, C=0.5µF, R =100Ω in series, then the resonant frequenct will be",500 rad/s,600 rad/s,600Hz,5000 Hz
+"In an LCR circuit contains L=8H, C=0.5µF, R =100Ω in series, then the resonant frequenct will be",500 rad/s,600 rad/s,600Hz,5000 Hz
+"The reactance of a capacitance at 50Hz is 5Ω. If the frequency is increased to 10 Hz , the new reactance is :",2.5Ω,5Ω,10Ω,125Ω
+An AC circuit consists of a resistance 4Ω and reactance 3Ω. The combination is connected to a potential of 10V. The current flowing in the circuit will be,2A,2*2^1/2A,(10/7)A,20*2^1/2A
+In a circuit I is given by I= Iosin(ωt-¶/2) when AC potential of E=Eo sinωt has been applied.Then the power consumption P in the circuit would be:,zero,EoIo/(2)^1/2,EoIo/2,EI/(2)^1/2
+Alternating voltage V=400sin(500¶t) is applied across a resistance of 0.2kΩ. The rms value of current will be,1.414A,2A,0.414A,14.14A
+An alternating voltage E= 200(2)^1/2 sin 100t volt is connected to a 1µF capacitor through an AC ammeter. The reading of the ammeter is,20mA,10mA,40mA,80mA
+"In an AC circuit, voltage applied is V=220 sin 100t. If the impedence is 110Ω and phase difference between current and voltage is 60°, the power consumption is equal to",110W,55W,220W,330W
+In an ac circuit voltage V and current i are given by V= sin100t volts i=100sin(100+¶/3)mA.The power dissipated in the circuit is,2.5W,10^4 W,10W,5W
+"If resistance in an ac circuit is increased, then its power factor:",increases,decreases,remains same,decreases and becomes zero
+"An LCR circuit with R=100Ω is connected to an ac source 100V, 50Hz. The magnitude of the phase difference between current and voltage becomes 30°,When either C is removed or when L is removed. The power dissipated in LCR circuit is :",100W,50W,86.5W,200W
+An alternating current is given by equation I=I1 cosωt+I2sinωt. The r.m.s value of current is given by :,1/(2)^1/2  * (I1²+I2²)^½,(I1+I2) / (2)^1/2,(I1+I2)² / (2)^1/2,(I1²+I2²)^½ / 2
+"In the non resonant circuit, what will be the nature of the circuit for frequencies  higher than the resonant frequency?",Inductive,resistive,capacitative,None
+"The power factor of a series RL circuit is 0.5. If R=100Ω,f=50Hz, then L is",3^½ /¶ H,¶ H,(2¶)^½ H,4¶ /(2)^½ H
+An ac source is 120V - 60Hz. The value of voltage after 1/720 sec from start will be:,84.8A,42.4V,106.8V,20.2V
+"A coil having an inductance of 1/¶ H is connected is series with a resistance of 300 ohm. If 20V-200Hz AC source is impressed across the combination, the phase angle between voltage and current is",tan^-1 (4/3),tan^-1 (5/4),tan^-1 (4/5),tan^-1 (3/4)
+"A resistor, an inductor  and a capacitor are connected in series to an ac power supply. When measured with the help of an ac voltmeter the voltages across them are found to be 80V,30V and 90V respectively .What is the supply voltage ?",100V,200V,140V,200 / (2)^½ V
+"An LR circuit consists of a resistance of 50Ω and a coil of inductive reactance 120Ω. If the circuit is connected across 260 V a.c mains, the current in the circuit is",2 amp,26/17 amp,26/5 amp,13/6 amp
+A pure resistance and a pure inductance are connected in series across a 100 volt AC line. A voltmeter give the same reading whether connected across resistance or inductance. What does it read?,70.7V,50V,88.2V,100V
+In an oscillating LC circuit the maximum charge on the capacitor is Q. The charge on the capacitor when the energy is stored equally between the electric and magnetic field is,Q / (2)^½,Q/2,Q/3,Q/ (3)^½
+"If an alternating current of frequency 50Hz is flowing through a conducting wire, then how many times does the current becomes zero in one second?",100 times,125 times,75 times,25 times
+An A.C. circuit contains resistance 4Ω and capacitive reactance 3Ω. Then the impedance of circuit is,5Ω,4Ω,3Ω,7Ω
+On doubling the frequency of R-C circuit impedance,decreases,increases,remains same,doubles
+A resistor having resistance 10KΩ is connected in series with the capacitor of capacitance 0.5 µF. If current in the conductor is 1.5 mA & angular frequency is 100rad/sec then Vrms across capacitor is:,30V,130V,150V,1500V

@@ -1,0 +1,9 @@
+question,answer,wrong1,wrong2,wrong3
+Karun is taller than Samir but not as tall as Rohan. Sumin is shorter than Karun but taller than Arya. Who among them is shortest ?,Cant be determine,Karun,Manish,Arya
+"A is elder to B while C and D are elder to E who lies between A and C. If C be elder to B, which one if tbe following statements is necessary true ?",E is elder to b,A is elder to c,C is elder to D,D is elder to c
+Five children are sitting in a row. S is sitting next to P but not T. K is sitting next to R who is sitting on the extreme left and T is not sitting next to K. Who is sitting adjacent to S ?,P ans T,K and P,R and P,Only P
+"Six persons A, B, C, D, E and F are standing in a cricle. B lies between D and C. A is between E and C. F is to the right of D. Who is between A and F ?",E,B,C,D
+"Alka is taller than Samu but not taller than Rinku. Rinku and Jigna are of the same height. Alka is shorter than Ayanka. Amongst all the girls, who is the shortest?",Samu,Ayanka,Rinku and Jigna,Alka
+"P, Q, R, S and T are sitting around a circular table. R is to the right of P and is second to the left of S. T is not between P and S. Who is second to the left of R?",Q,S,T,Data inadequate
+"A, B, C, D, E, F are sitting around a round table. A is between E and F, E is oppsoite D and C is not in either of the neighbouring seats of E. What is opposite to B?",F,C,D,None
+"Garima is taller than Sarita but not taller than Reena. Reena and Tanya are of the same height. Garima is shorter than Anu. Amongst all the girls, who is the shortest?",Sarita,Anu,Reena and Tanya,Garima

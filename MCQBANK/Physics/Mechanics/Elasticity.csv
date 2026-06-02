@@ -1,0 +1,53 @@
+question,answer,wrong1,wrong2,wrong3
+Which of the following unit of young's modulus is in MKS system:,\(N/m^2\),N/m,N*m,\(N*m^2\)
+The elasticity of highly elastic body is:,∞,1,0,0.5
+Breaking stress (in \( Nm^{-2}\)) of a wire of radius 3 mm is F. The breaking stress of the same material of radius 6 mm will be,F,F/4,F/3,F/2
+"The stress-strain graph is obtained for copper and rubber, Slope of rubber and copper are given as tanθr, and tanθc respectively then",tanθ > tanθr,tanθ < tanθr,tanθ ≥tanθr,tanθ = tanθr
+The energy density of a wire of strain S is,\(S^2Y/2\),\(S^2/2Y\),\(2S^2Y\),\(2Y/S^2\)
+"In an experiment to determine the young's modulus of elasticity of the material of wire, the length of the wire are both and the suspended load doubled. The ratio of stress to strain",Remains unchanged.,Becomes double.,Becomes four times.,Becomes sixteen times.
+Which of the following is correct?,"In case of elasticity, stress is directly proportional to strain.","In case of plasticity, strain occur upto certain limit",Elasticity is only defined for solid,Elasticity for perfectly plastic body is infinite
+Modulus of rigidity is,Ratio of shear stress to shear strain,Ratio of bulk stress to bulk strain,Ratio of shear stress to bulk strain,Product of normal stress and normal strain
+The pressure 'P' is applied perpendicular to the area of the wire. Find out the energy stored per unit volume.,\(\frac12P^2/Y\),\(\frac12P^2Y\),\(\frac12PY\),\(\frac{1}{2P^2Y}\)
+"A material has poison's ratio 0.20, If a uniform rod of it suffers a longitudinal strain of \(2 × 10^{-3},\) then the percentages in volume is",+0.12%,-0.12%,+0.28%,-0.28%
+The energy stored per unit volume is what if stress is S and young's modulus is Y,\(\frac{S^2}{2Y}\),\(\frac{2S^2}{Y}\),\(\frac{S^2}{Y}\),\(\frac{S}{2Y^2}\)
+"A nylon rope 3 cm in diameter has a breaking strength of \(1.5×10^5\) N, The breaking strength of a similar rope 1.5cm in diameter is?",\(0.375 * 10^5N\),\(0.75 * 10^5N\),\(0.75 * 10^6N\),\(6 * 10^5N\)
+Two springs A and B have force constant Ka and Ks such that Ka = 2Kb are stretched by applying same force. Energy stored in spring A is E and energy stored in B will be,2E,E,4E,8E
+A wire of 300 cm long and of cross section 0.003 cm increases by 0.5 cm when a force of 10 million dynes is applied on it. The young's modulus of the wire is:,\(2 *10^{12} dynes/cm^2\),\(4 *10^4 dynes/cm^2\),\(4 *10^{11}dynes/m^2\),\(10^{12} dynes/cm^2\)
+"The young modulus of a materials is \(2 x 10^{10} N/M^2.\) If its length is doubled then find the force applied on it if it has area
+\(100m^2\)",\( 2 * 10^{12} N\),\( 4 * 10^{12} N\),\( 2 * 10^{-12} N\),\(10^{18}N\)
+The Young modulus of a materials is \(2* 10^{10} N/m^2\). If its length is doubled then find the force applied on it if it has area \(100 m^2\),\(2* 10^{12} N\),\(4 * 10^{12} N\),\(2* 10^{-12} N\),\(10^{18}N\)
+"Steel is more elastic than rubber. This means for same applied stress, the strain will be",Less for steel,More for steel,Equal for steel and rubber,More or less for steel
+"In order to elongate a given wire to double its length, one requires a stress which is:",equal to Young's modulus,of infinite magnitude,double Young's modulus,half of Young's modulus
+A metal rod of Young's modulus of elasticity \(2 x 10^{11} Nm^2\) undergoes an elastic strain of 0.05. The energy stored per unit volume of the rod in \(Jm^{-3}\) is,\(2.5*10^8\),\(5*10^9\),\(3.5*10^7\),\(4*10^6\)
+A steel wire of length 2.5 m and cross- sectional area \(0.80 × 10^{-6}\) \(m^2\) has a Young modulus of \(2.0 * 10^{11}\) Pa. The upper end of the wire is fixed and a load of 8 N is tied at the other end The extension in mm of the wire is:,0.125,0.250,0.500,0.750
+"When an elastic material with Young's modulus Y is subjected to stretching stress S, the elastic energy stored per unit volume of the material is",\(S^2/(2Y)\),\(YS/2\),\(S^2/(Y/2)\),\(S/2Y\)
+"A wire of length 'L' and area of cross section 'A' is made up of Young's modulus 'Y'. It is stretched by an amount x, the work done is:",\(Yx^2A/2l\),\(YxA/2l\),\(Yx^2A/l\),\(2Yx^2A/l\)
+P.E. in a string when stretched by 2cm is U. Its P.E when stretched by 10cm is,25U,U/25,U/5,5U
+"The mean density of sea water isρ, and bulk modulus 'B'. The change in density of sea water in going from the surface of water to a depth 'h' is",\(ρ^2gh/B\),\(Bρ^2/gh\),\(Bρgh\),\(ρgh/B\)
+Which one of the following substances possesses the highest elasticity?,steel,rubber,glass,copper
+A force of \(10^6 N/m^2 \)is required for breaking a material. If the density of the material is \(3×10^3 kg/m^3\) than what should be the length of the wire made of material so that it breaks by its own weight?,34m.,30m.,38m.,42m.
+Four wires of same material are stretched by the same load. The dimensions are given below. Which of them will elongate the most?,length 4.0m & diameter 0.5mm,length 1.0 m & diameter 1mm,length 3.0m & diameter 3mm,length 2.0m & diameter 2mm
+"The upper end of a wire, 1m long and. 4mm radius is clamped. The lower end is twisted by an angle of 30°. The angle of shear at surface is",0.12°,12°,1.2°,0.012°
+A body of mass m is tied at one end of  spring and whirled round in a horizontal plane with a constant angular velocity. The elongation in spring is 1cm. If the angular velocity is doubled the elongation in the spring is 5cm. The original length of the spring is:,15cm,16cm,14cm,13cm
+A wire on loading by a weight. Mg extends in length by l. The work done in this process is,\(1/2 * Mgl\),Mgl,2Mgl,zero
+The elastic deformation energy produced per unit volume in fresh water of compressibility β at a depth h below the surface is (density of water = ρ),\(1/2*​​(hgρ)^2β\),\(β(hgρ)^2\),\((hgρ)^2/2β\),\(1/2*(hgρ)β\)
+The Young's modules of brass and steel are \(10^{11} N/m^2\) & \(2*10^{11} N/m^2\). A brass wire and a steel wire of the same length are extended by 1mm under the same force. If radii of brass and steel wires. are  \(R_B\) and \(R_S\) then,\(R_S\) = \(R_B\)/√2,\(R_S\) =√2 \(R_B\),\(R_S\) =4 \(R_B\),\(R_S\) = \(R_B\)/4
+"A metal wire of length L, area of cross- section A and Young's modulus Y behaves as a spring of spring constant K given by",\(K= YA/L\),\(K= 2YA/L\),\(K= YL/A\),\(K= YA/2L\)
+A beam of metal supported at the two ends is loaded at its centre. The depression at the centre is proportional to,1/Y,\(Y^2\),Y,\(1/Y^2\)
+The longitudinal strain in a stretched cylindrical wire is \(10^{-3}\) and Poisson's ratio is 0:2. Then the percentage change in its volume is,0.06%,0.02%,0.04%,0.6%
+The radius of a air bubble gets n times when it rises from the bottom of lake to its surface. If atmospheric pressure at the place is equal to height H of mercury column then the depth of the lake is,\(h=(n^3-1)H*13.6 \),\(h=(n^3-1)H\),\(h=(n-1)H*13.6 \),\(h=(n-1)H\)
+To what depth a rubber ball(bulk modulus =\( 1×10^9N/m^2\)) is dipped inside the sea water so that its density increases by 0.2% (density of water = \(10^3kg/m^3\)).,200M,100m,50m,500m
+"The compressibility of water is \(5*10^{- 10}m^2/N\), 1 litre of water is subjected to a pressure of \(2×10^7N/m^2\). The decrease in its volume is",5cc,10cc,4cc,1cc
+"If Young's modulus of iron \(2*10^{11}N/m^2 \)and the interatomic spacing between two molecules is \(3×10^{-10}m,\) the inter atomic force constant is",3 N/m,60N/m,120N/m,180 N/m
+"According to Hooke's Law, if stress is increased, the ratio of stress to strain",Decreases,Increases,Remains constant,None
+"A metallic wire can 'sustain 80kg. If it is divided into two identical parts so that length of each parts is half of initial, then each part now sustain",20kg,40kg,80kg,None
+The breaking force for a wire of radius r of given material is F. The breaking force for the wire of same material of radius 2r is,4F,F,2F,F/4
+"Two rods A and B of the same material and length have radius r1 and 12 respectively. When they are rigidly fixed at one end and twisted by the same couple applied at the other end, the ration    
+
+(Angle of twist at end of A )/(Angle of twist at end of B) is,",\(\frac{r_2^4}{r_1^4}\),\(\frac{r_1^2}{r_2^2}\),\(\frac{r_2^3}{r_1^3}\),\(\frac{r_1^4}{r_2^4}\)
+"A metallic bar is heated from 0°C to 100°C but it is so held that it can neither expand nor bend, then the force developed is",\(F ∝ l^0\),\(F∝l\),F ∝ 1/l,\(F ∝1/A\)
+"The length of an elastic spring is 'a' meter when the tension is 4N and 'b' meter when the tension is 5N. The length in meter when the tension is 9N is,",5b-4a,4a-5b,5b+4a,9(b-a)
+Which of the following stress changes shape of object?,Shear stress,Bulk stress,Tensile stress,Longitudinal stress
+Young's modulus is.,Ratio of normal stress to longitudinal strain,Ratio of normal stress to lateral strain,Product of normal stress to longitudinal strain,Ratio of shear stress to lateral strain
+With the increase in temperature the young modulus,Decreases,Increases,Remains constant,First increases then decreases
+"Two wires of same radius and material have their length in the ratio 1:2. If they are stretched by the same force, then strain produced will be in the ratio of:",1:1,1:2,2:1,1:4

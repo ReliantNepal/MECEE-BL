@@ -1,0 +1,32 @@
+question,answer,wrong1,wrong2,wrong3
+An ammeter of range 1A has a resistance 0.9Ω to extend the range to 10A. The necessary shunt required is,0.1Ω,0.01Ω,0.9Ω,1Ω
+An ammeter shows a current flowing through it. Now if the equal resistance to ammeter is joined parallel then,The reading in ammeter will be exactly halved,The reading in ammeter will be exactly doubled,The reading in ammeter will be exactly one fourth,The reading in ammeter will be exactly one eighth
+A galvanometer of internal resistance 10Ω needs 10^-3A for full scale deflection. The shunt resistance required for 1A measurement is,0.01Ω,2Ω,1Ω,0.1Ω
+A galvanometer can be converted to a voltmeter by connecting,A high resistance in series,A low resistance in series,A low resistance in parallel,High resistance in parallel
+A potentiometer consists of wire of length 4m and resistance 10Ω. It is connected to a cell of emf 2V. The p.d. per unit length of the wire will be,0.5 V/m,2 V/m,5 V/m,10 V/m
+The sensitivity of moving coil depends on:,Torsional constant of the speed,The angle of reflection,Earth's magnetic field,The moment of inertia of the coil
+"A galvanometer show full scale deflection when a current of 2mA flows through it. If the resistance of galvanometer is 100Ω, what is the range of voltmeter without adding high resistance in series?",0.2V,1V,0.01V,0.001V
+Which of the following is likely to have largest resistance?,voltmeter of range 10V,moving coil galvanometer,ammeter of range 1A,A copper wire of length 1m and diameter 3mm
+Which of the following is likely to have largest resistance?,voltmeter of range 10V,moving coil galvanometer,ammeter of range 1A,A copper wire of length 1m and diameter 3mm
+"Ten identical cells each of E and internal resistance r are connected in series to form a closed circuit. An ideal voltmeter connected across three cells, will read",3E,10E,13E,7E
+A moving coil galvanometer has resistance of 900Ω.  In order to send only 10% of the main current through this galvanometer the resistance of the required shunt is:,100Ω,0.9Ω,405Ω,90Ω
+A galvanometer of resistance 20Ω gives a full scale deflection when a current of 0.04A is passed through it.It is desired to convert it into an ammeter reading 20A in full scale. The only shunt available is 0.05Ω. The resistance that must be connected in series with the coil of the galvanometer is,4.95Ω,5.94Ω,9.45Ω,12.62Ω
+"An ammeter having resistance 10Ω allows a current of 0.002A to flow through it. For it to allow a current of 2A, we should :",join a resistance of 0.01Ω in parallel,join a resistance of 0.02Ω in series,join a resistance of 0.02Ω in parallel,join a resistance of 0.01Ω in series
+To convert a galvanometer into an ammeter:,a low resistance should be connected in parallel to the galvanometer,a high resistance should be connected in parallel to the galvanometer,a low resistance should be connected in series with the galvanometer,a high resistance should be connected in series with the galvanometer
+The resistance of a voltmeter should be large to ensure that,it doesnot appreciably change the potential difference to be measured,it doesnot get overheated,it doesnot draw excessive current,it can measure large potential difference
+"A meter of internal resistance R can measure a max volume of 10 mV for it to measure a max of 10V, we have to:",Put an external resistance very large than R in series,Put an external resistance very small than R in series,Put an external resistance very large than R in parallel,Put an external resistance very small than R in parallel
+Which has greater resistance?,Milliammeter has more resistance,Ammeter has more resistance,both have equal resistance,depends on size of meter
+The deflection in a galvanometer falls from 50 divisions to 20 when a 12 ohm shunt is applied. The galvanometer resistance is,18 ohms,36 ohms,24 ohms,30 ohms
+"A galvanometer of resistance 5 ohms gives a full scale deflection for a potential difference of 10mV.To convert the galvanometer into a voltmeter giving a full scale deflection for a potential difference of 1V, the size of the resistance that must be attached to the voltmeter is",495 ohms,0.495 ohms,49.5 ohms,4950 ohms
+"A voltmeter with a resistance of 50*10³ Ω is used to measure voltage in a circuit. To increase its range to 3 times, the additional resistance to be put in series in",10^5 Ω,9*10^6 Ω,1.5*10^5 Ω,9*10^5 Ω
+An ammeter has a resistance R0 and range I. Which of the following resistance can be connected on series with it to decrease its range to I/n,none of the above,R0/n,R0(n-1),R0(n+1)
+"A milliammeter of resistance 8Ω gives a full scale deflection for a current of 25mA. If it is used as a voltmeter, it will give a full scale deflection for a potential difference",0.02V,,0.002V,2V
+"A voltmeter of resistance of 50*10³Ω is used to measure voltage in a circuit.To increase its range to 3 times, the additional resistance to be put in series is",10^5Ω,9*10^6 Ω,1.5 *10^5 Ω,9*10^5Ω
+"A moving coil galvanometer has a resistance of 90Ω. If only 10% of the main current may flow through the galvanometer, in what way and which resistance is to be used?",10Ω in parallel,10Ω in series,810Ω series,810Ω in parallel
+"A voltmeter has resistance 2000Ω and it can measure upto 2V. If we want to increase its range by 8V, then required resistance in series will be",8000Ω,4000Ω,6000Ω,7000Ω
+If only 2% if the main current is to be passed through a galvanometer of resistance of shunt will be,G/49,G/50,50G,49G
+A galvanometer of resistance 10Ω gives a full scale deflaction when a current of 0.04A is passed through it.It is desired to convert it into a ammeter reading 10A in a full scale. The only shunt available is 0.06Ω. The resistance that must be connected in series with the coil of the galvanometer is,4.94Ω,14.94Ω,9.88Ω,2.47Ω
+Galvanometer constant of tangent galvanometer depends upon :,earth magnetic field,resistance of coil,magnetic field of galvanometer,current in the coil
+"A potentiometer is used to measure the emf of a cell & it is found 50cm as balancing length for 1.02 volt battery. Now, if the battery is replaced & balancing length is found to be 75cm. Then emf of the new battery is:",1.53V,2.25V,3.5V,2V
+Two moving coil galvanometers A and B using the spring of same spring constant and same area of each turn have 20 turns and 10Ω and 10 turns & 4Ω respectively.The ratio of their voltage sensitivity of B to A is:,1.25,1.5,3,5
+If a potentiometer wire having emf 2V is balanced by 20cm. What will be its length if it's emf is 4V?,40,30,60,20

@@ -1,0 +1,37 @@
+question,answer,wrong1,wrong2,wrong3
+,c,a,b,d
+"A body is executing simple harmonic motion with frequency 'n', the frequency of it's potential energy is",2n,n,3n,4n
+A spring is stretched by 5 cm by a force 10 N. The time period of the oscillation when a mass of 2 kg is suspended by it is,0.628 s,0.0628 s,6.28 s,3.14 s
+The graph plotted between acceleration and displacement in SHM will be a,Straight line,Hyperbolic,Parabolic,Eclipse
+Two bobs are simultaneously executed in S.H.M. The resultant if they have phase difference of,2π,π/2,π,π/4
+The SHM of a particle is given by an equation y = 3 sin wt + 4 cos wt. The amplitude is,5,7,1,12
+"If the kinetic energy of a body executing SHM is 1/3 of the potential energy, the displacement of the body is x percent of the amplitude, x must be( nearly)",87,33,50,67
+"In a body executing SHM, in the mean position",Both A and B,No force acts on the body,The velocity of the body becomes maximum,None
+"A simple pendulum has a time period T1 when on earth's surface, and T2 when taken to a height 'R' above the earth surface,  ( where R is the radius of the earth) then the value of T2/T1 is",2,4,√2,1
+"A hollow sphere is filled with water through a small hole in it. It is hung by a  thin thread and made to oscillate. As the water slowly flows out of the hole at the bottom, the period if oscillation will",First increases and then decreases,First decrease and increases,Continuously increase,Continuously decrease
+A pendulum clock keeping correct time is taken to high altitudes,It's length should be decreased to keep correct time,It will keep correct time,It's length should be increased to keep correct time,It will not keep correct time even if it's length is changed
+"If the period of oscillation of mass M suspended from a spring is 1s, then the period of the oscillation of mass 4 m will be",2 sec,1/2 sec,1/4 sec,4sec
+"Two simple harmonic motion are given by x1 = asin(wt) and x2 = BCOS(wt). The phase difference between them, in radians, is",π/2,π,π/4,Zero
+The time period of a simple pendulum inside a satellite orbiting the earth is,Infinity,Zero,1 sec,9.8 sec
+A hole is drilled through the centre of the earth and a stone is dropped into it. When the stone reaches at the centre of the earth it's.,acceleration will be zero,Mass will be zero,Velocity will be zero,KE will be zero
+The kinetic and potential energies of a particle expecting simply harmonic motion with amplitude A will be equal when its displacement is,A/√2,A√2,A/2,A/√2/3
+For a simple pendulum graph between T² and l comes out to be,St.line,Parabola,Circle,Ellipse
+The motion of a particle executing SHM is given by x= 0.01 sin 100 π ( t + 0.005) where x is in meters and t in seconds. The time period of motion in second is,0.02,0.01,0.1,0.2
+"A particle starts S.H.M from the mean position. It's amplitude is A and time period is T, At the time when it's speed is half of the maximum speed, its displacement y is",A√3/2,A/2,A/√2,2A/√3
+A simple harmonic oscillator has an amplitude a and time period T. The time required by it to travel from x = a to x = a/2 is,T/6,T/4,T/3,T/2
+A particle expecting simple harmonic motion along y- axis has it's motion described by the equation y= Asin(wt) + B. The amplitude of the simple harmonic motion is,A,B,A+B,√A+B
+Which one of the following is a simple harmonic motion,Wave moving through a string fixed at both ends,Earth spinning about its own axis,Ball bouncing between two rigid vertical walls,Particle moving in a circle with uniform speed
+The maximum velocity and the maximum acceleration of a body moving in a simple harmonic oscillator are 2 m/s and 4 m/s². Then angular velocity will be,2 rad/sec,3 rad/sec,0.5 rad/sec,1 rad/sec
+The amplitude of a particle expecting S.H.M with frequency of 60 Hz is 0.01 m. The maximum value of the acceleration of the particle is,144 π²m/sec²,144 m/sec²,144/π² m/sec²,288π²m/sec
+"For a particle expecting simply harmonic motion, which of the following statements is not correct",The acceleration of the particle is maximum at the equilibrium position,The total energy of the particle always remains the same,The restoring force of always directed towards a fixed point,The restoring force is maximum at the extreme position
+The total energy of a particle executing S.H.M is proportional to,Square of amplitude of motion,Displacement from equilibrium position,Frequency of oscillation,Velocity in equilibrium position
+The total energy of the body executing SHM is E. Then the kinetic energy when the displacement is half of the amplitude is,3E/4,E/2,E/4,√3E/4
+"A particle moves such that it's acceleration a is giving by a = -bx, where x is the displacement from equilibrium position and b is a constant. The period of oscillation is",2π/√b,2π√b,2π/b,2√π/b
+"A chimpanzee swinging on a swing in a sitting position, stands up suddenly the time period will",Decrease,Become infinite,Remain same,Increase
+"In a second pendulum, mass of bob is 30 GM. If it is replaced by 90 GM mass. Then it's time period will",2sec,1 sec,4 sec,3sec
+"Two bodies M and N of equal masses are suspended from two separate massless spring of force constant k1 and k2 respectively. If the two bodies oscillate vertically such that their maximum velocities are equal, the ratio of the amplitude M to that of N is",√k2/k1,k1/k3,√k1/k2,k2/k1
+A mass m is suspended from the two coupled springs connected in series. The force constant for sorinyare K1 and K2. The time period of the suspended mass will be,T = 2π √ { m(K1 + K2)/ K1K2},T = 2π √{m/K1+ K2},T = 2π √ { m/ K1 + K2},T = 2π √ {mK1K2/K1 +K2}
+A spring having a spring constant 'K' is loaded with a mass 'm'. The spring is cut into two equal parts and one of these is loaded again with the same mass. The new spring constant is,2K,K/2,K,K²
+"A mass m attached to a spring oscillates every 2 sec. If the mass is increased by 2 kg, then time period increases by 1 sec. The initial mass is",1.6 kg,3.9 kg,9.6 kg,12.6 kg
+A S.H.M is represented by x = 5√2(sin2πt + cos2πt). The amplitude of the S.H.M is,10 cm,20 cm,5√2cm,50 cm
+Resonance is an example of,Forced vibration,Tuning fork,Free vibration,Damped vibrantion

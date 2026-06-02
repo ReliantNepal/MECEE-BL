@@ -685,7 +685,7 @@ class QuietHandler(http.server.SimpleHTTPRequestHandler):
     # MCQBANK_DIR lives one level above ROOT (Syllabus/) — the user extracted
     # MCQBANK.zip into Desktop/Syllabus/ so it sits at ../MCQBANK relative to
     # the server root.
-    MCQBANK_DIR = os.path.normpath(os.path.join(ROOT, "..", "MCQBANK"))
+    MCQBANK_DIR = os.path.normpath(os.path.join(ROOT, "MCQBANK"))
 
     def _api_mcqbank_tree(self) -> None:
         """Return a nested JSON tree of all MCQBANK folders and CSV files."""

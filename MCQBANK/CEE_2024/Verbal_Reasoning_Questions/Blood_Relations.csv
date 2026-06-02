@@ -1,0 +1,18 @@
+question,answer,wrong1,wrong2,wrong3
+A and B are brother. C and D are sister. A's son is D's brother. How is B related to C?,Uncle,Father,Brother,Grandfather
+"Arun said, "" Aishwarya is the wife of the grandson of my mother."" Who is Arun to the Aishwarya ?",Father-in-law,Father,Grandfather,Husband
+"Pointing to an old man, Kunal said, ""His son is my son's uncle,"". How is the old man related to Kunal?",Father,Brother,Uncle,Grandfather
+"Pointing to a photograph, a woman says, ""This man's son's sister is my mother-in law."" How is the woman's husband related to the man in the photograph?",Grandson,Son,father,Uncle
+"If X is the brother of the son of Y's son, how X is related to Y?",Grandson,Son,Uncle,Nephew
+"Pointing towards a boy, veena said, ""He is the son of only son of my grandfather"". How is that boy related to veena?",Brother,Ucle,Cousin,Data inadequate
+"Pointing to a man, woman said, ""His mother is the only daughter of my mother"". How is the woman related to the mother?",Mother,Daughter,Sister,Grandmother
+A woman introduces a man as the son of the brother of  her mother. How is the man related to the woman?,Cousin,Nephew,Son,Uncle
+"A+B , means A is the sister of B
+
+A*B, means A is the wife of B
+
+A%B, means A is the father of B
+
+A-B, means A is the brother of B
+
+Which of the following means T is the daughter of P?",P*Q%R-T+S,P*Q%R+S-T,P*Q%R+T-S,P*Q%R+S+T

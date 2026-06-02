@@ -1,0 +1,39 @@
+question,answer,wrong1,wrong2,wrong3
+"If the power consume through 10KΩ resistance is 1W , then current is :",0.01A,1A,0.001A,0.0001A
+"A bulb rated 100W, 200V was supplied with 160V line. What was power dissipated",64W,75W,52W,85W
+A heater coil is cut into two equal parts and only one part is used in the heater. How will the heat generated vary?,doubled,becomes on fourth,halved,becomes four times
+"Two electric bulbs A and B are connected in parallel to a constant voltage source.A and B are rated as 60 Watt and P Watt respectively. If the resistance of A and B are in the ratio 2:3, P will be",40 Watt,20 Watt,25 Watt,30 Watt
+Heaters is 1000W then energy consumed in 2 hrs is,2K Whr,2J,20KJ,200W
+25 W - 220V and 100 W - 220 V is joined in series with 220V mains then  power will be,4W and 16W,32W and 16 W,8W and 32W,16W and 63W
+"A bulbs is rated at 100V, 220W, when the voltage drops by 2% , then change in power of bulb is:",decreases by 4%,Increased by 2%,increase by 4%,decreases by 2%
+If the strength of current increases by 1% then the power of the bulb will change by,2%,1%,8%,4%
+If the power of a heater is 1W. 1A ampere of current is passed through it. Then find the resistance,1Ω,4.2Ω,4200Ω,0.1Ω
+Two electric bulb have tungsten filaments of same length. If one of them gives 60W and other give 100W then thickness of,100W is greater than 60W filament,60W is greater than 100W filament,Both some,Thickness doesnot determine the wattage of wire.
+"The power and voltage of a bulb is 100W and 220V. When the voltage is made 110V, the power would be",25 Watt,50 Watt,100 Watt,75 Watt
+The two bulbs at same voltage have power 200 Watt and 100 Watt resp. Find out the ratio of their resistance.,R2=2R1,R1=R2,R1=2R2,R1=4R2
+Fuse wire should have,"high resistivity, low melting point","high resistivity, high melting point","low resistivity, high melting point",low resistivity and low melting point
+"Two identical electric bulbs 200W, 250 V are connected in parallel across 250V. Power consumed by the combination is",400W,100W,1600W,1200W
+A bulb is rated as 60 watt and 120 volt. the current through the bulb when the bulb is lighted at the rated voltage is,0.5A,5A,25A,0.25A
+If the strength of the current is decreased by 4% the power of the bulb will change by,8%,0.01%,2%,nearly 4%
+A bulb with 220 volt consume the power of 66 Watt. If it will be connected with 160 Volt then the power consumed by the bulb wil be,35 W,10 W,40 W,60 W
+"The power of two heater coils is P1 and P2. If they are connected in series , the resultant power is",P1P2/(P1+P2),P1+P2,0,(P1P2)^1/2
+"The power of a bulb is 100Watt at 220V. When the voltage is 110V, power of the bulb is :",25W,150W,50W,120W
+If two bulbs whose resistances are in the ratio 1:2 are connected in series. Then their powers will be in the ratio,1:2,1:1,2:1,1:4
+Calculate energy dissipated when 0.3A of current is passed at 6V in 2 minutes,216J,206J,318J,122J
+"Two resistances 10Ω and 20Ω are connected in parallel. If P is the power consumed by 10Ω, then power consumed by 20Ω is",P/2,P,2P,2P/3
+"Two resistance of 10Ω & 20Ω joined in series, the power in 10Ω resistor is P then what is the power in 20Ω resistor",2P,P,4P,P/2
+"A resistor operated at 100V generates joule hest at a rest of 20W . When placed across a 50v source, it will draw:",0.1A,5A,20A,4A
+Three identical bulbs are arranged in parallel across 220V supply and the current across each is 40A. The total consumed in 1hr is,26.4 kWh,8.8kWh,16.6kWh,80kWh
+Power dissipated by R1 and R2 resistor are 100 Watt and 200 Watt respectively. when connected to same voltage. Their relation between R1 and R2 is,R1=2R2,R1=R2,R1=R2/2,R2=3R1
+"Two heater wires of equal length are 1st connected in series and then in parallel, the ratio of heat production in the two cases is",1:4,2:1,1:2,4:1
+Two wires of the same mass and material are drawn 1mm and 2mm thick. They are connected in series and a current is sent through them. The heat produced will be in the ratio,16:1,1:16,4:1,2:1
+In order to light a 6W - 6V bulb at rated power a battery of emf 6V and internal resistance 2Ω is used the bulb will light at power:,27/8W,6W,4W,16/3W
+"Five equal resistors when connected in series dissipated 5 watt power. If they are connected in parallel, the power dissipated will be",125W,25W,50W,100W
+"If R1 and R2 are respectively the resistances of a 200 W bulb and a 100W bulb designed to operate on the same voltage, then",R2=2R1,R1=2R2,R2=4R1,R1=4R2
+In the current in an electric bulb drops by 2% the power decreases by,4%,1%,2%,16%
+"Two bulb 25W , 220V and 100W, 220V are connected in parallel across 220V mains. The current is more though",100W bulb,25W bulb,same in both bulbs,I is fluctuating
+"A 25W ,220V bulb and a 100W , 220V bulb are joined in series and connected to the mains. Which bulb will grow brighter?",25W bulb,100W bulb,first 25W bulb then 100W bulb,both will glow with same brightness
+"A 25W, 220V bulb and a 100W, 220V bulb are joined in parallel and connected to the 220V  mains.Which bulb wil grow brighter?",100W bulb,25W bulb,First 25W bulb then 100 W bulb,both will grow with same brightness
+Two resistances R and 2R are connected in series in an electrical circuit. The ratio of heat in 2R to that in R is:,2:1,4:1,1:2,1:4
+"Two bulbs 100W, 250V and 200W, 250V are connected in series across a 500V line. Then:",100W bulb will be fused,200W bulb will be fused,both bulb will be fused,no bulb wil be fused
+A uniform wire when connected directly across a 200V line produces heat H per second. If the wire is divided into n parts and all parts are connected in parallel across a 200V line. The heat per second will be,n²H,H,nH,H/n²

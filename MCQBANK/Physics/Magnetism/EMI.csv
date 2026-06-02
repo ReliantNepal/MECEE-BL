@@ -1,0 +1,73 @@
+question,answer,wrong1,wrong2,wrong3
+"Mutual inductance of two coils is 5mH. The current changes from 3A to 2A in 0.01sec, then the emf produced is",0.5V,1V,5V,50V
+Eddy current is produced in,non uniform magnetic field,heated magnetic field,uniform magnetic field,change in electric field
+"An iron is placed horizontally , what will be the acceleration of falling magnet",less than g,greater than g,equal to g,less or greater than g
+The core of transformer is made up to:,soft iron,steel,nickel,invar
+"Two coils are at fixed locations. When coil 1 has no current in coil 2 increases at the 15.0A/s, the emf in coil 1 is 25mV, when coil 2 has no current and coil 1 has a current of 3.6 A, the flux linkage in coil 2 is?",6.00mWb,16 mWb,10 mWb,4.00 mWb
+"In a dynamo, voltage is 6V current 0.5A . What is the power generated?",3,12,1.5,5
+"A uniform metal disc of radius R lies in XY- plane and rotates with uniform angular velocity ω about the Z-axis. If a constant field is parallel to the Z-axis, the total induced EMF between the center and the rim of the disc is equal to:",1/2 ωBR²,ωBR,1/2 ωBR,1/2 ωB²R
+A transformer is designed to work from 220 volts AC mains to gice a supply at 11 volts AC to run a device. The primary coil has 480 turns . The number of turns in the secondary coil should be,24,480,240,9600
+A straight conducting rod of length 0.4 m is moving perpendicular to magnetic flux density of 0.9W/m² with a speed of 7m/s. The emf developed in the rod is :,2.52V,25.4 V,5.62 V,1.36V
+Which of the following has zero average value in electromagnetic field?,magnetic force,magnetic field,electric force,electric field
+A coil of metal wire is kept stationary in a non uniform magnetic field,An emf and current both are induced in the coil,An emf but not the current is induced in the coil,Current but not emf is induced in the coil,Neither emf nor current is induced in the coil
+"When a motor car starts, the brightness of bulb is decreased then after some time its brightness increases due to :",increases in back emf,reduced in back emf,armature current is maximum,none
+Lenz's law is a consequence of the law of conservation of,energy,charge,momentum,mass
+Two parallel conductors carrying current in same direction,attract each other,repel each other,neither repeal nor attract,can attract or repeal each other
+An electron enters a field of 1 Tesla with a velocity of 1000m/s parallel the field. The force experienced by it is,0,1.6*10^-16,9.31*10^-28,1.6N
+A freely falling magnet passes length wise through a horizontal circular coil of conductor.The correct expression relating the accleration of the falling magnet a and the accleration due to gravity(g) is,a<g,a>g,a=g,can't be said from the given data
+Laminated cores are used in a transformer in order to:,reduce eddy current,increase electric flux,use the transformer as a rectifier,use the transformer in A.C
+"If the flux associated with a coil varies at the rate of 1 Weber per minute, the induced emf is",1/60V,1V,Zero,60 V
+Transformer is a device to,Transform AC voltage,convert mechanical energy to electrical energy,convert AC to DC,convert DC to AC
+"A rectangular loop carrying a current ""i"" is situated near a long straight wire such that the wire is in the plane of the loop and in the plane of the loop, if steady current 'I' is established in the wire than the loop will",move away from the wire,rotate about an axis parallel to the wire,move toward the wire,remain stationary
+If a wire resistance 10Ω is moving in a non uniform magnetic field in such a way that decrease in KE is 10. What is current induced in wire?,0.25A,0,4A,8A
+"A rectangular loop carrying a current 'i' is situated near a long straight wire such that the wire is in the plane of the loop and in the plane of the loop, if steady current 'I' is established in the wire than the loop will",move away from the wire,rotate about an axis parallel to the wire,move towards the wire,remains stationary
+The magnetic resonance imaging (MRI) is based on the phenomenon of:,nuclear magnetic resonance,electron spin resonance,electron paramagnetic resonance,diamagnetism of human tissue
+"When an electron moves in the influence of magnetic field with velocity 'v' in a circle of radius 'r', given that magnetic field = B and mass of electron is m. Then r is equal to",mv/Be,me/Bv,mB/ev,mv²/Be²
+A circular loop of radius 0.1m and carrying a current of 10A is placed parallel to a magnetic field of 0.1T. The torque acting on the loop is Nm is:,0.01¶,0.1¶,0.0001¶,0.001¶
+The magnetic field at a point at a large distance r at the axis of a current carrying circular coil of small radius is proportional to,1/r³,r²,r³,1/r²
+A circular coil is moving parallel to magnetic field then value of emf is,zero,depends upon value of magnetic field,depends upon the area of coil,depends upon vel.
+The phenomenon of acquiring temporary electrification under the influence of a charged body is called,electrical induction,magnetic induction,capacitance,electrolysis
+The energy per unit volume is given by,1/2ε0E²,E²/ε0,ε0E²,2ε0E²
+A cylindrical bar magnet is kept along the axis of a circular coil. The magnet is rotated about its axis such that north poles faces the coil. The induced current in the coil,is zero,is clockwise ffrom magnet side,may be clockwise or anti clockwise,is anticlockwise form magnet side
+"A helicopter rises vertically with a speed of 10m/s. If helicopter has length of 10m and horizontal component of earth's magnetic field is 1.5*10^-3 Wb/m², the e.m.f induced between tip of nose and tail of helicopter is",5V,0.15V,125V,130V
+"A magnetic flux 5*10^-4 is passing through a coil of 1000 turns. If the emf induced through coil is 5volt, the time interval will be",0.1sec,1 sec,0.01sec,0.001sec
+"A coil of cross sectional are 10²cm² is placed in the magnetic field, which changes to 4*10^-2 Wb/cm² within 5 sec. What will be current across 5Ω resistance?",0.16A,0.016A,1.6A,16.0A
+A coil having 500 square loops each of side 10cm is placed normal to a magnetic field which increases at the rate of 1Wb/m². The induced emf is,5.0V,0.1V,0.5V,1.0V
+"A coil of area 100cm² having 50 turns is perpendicular to a magnetic field of intensity 0.02weber/m².The resistance of the coil is 2 ohm. If it is removed in 1 sec from the magnetic field, the induced charge produced is",0.005C,5C,0.5C,0.05C
+The current passing through a choke coil of 5H is decreasing at the rate of 2As^-1 The emf developed across the coil is,+10V,-10V,2.5V,-2.5V
+"A coil of mean area 500cm² and having 1000 turns is held perpendicular to a uniform field of 0.4 gauss. The coil is turned through 180° in1/10 second, the induced emf is",0.04V,4V,0.4V,4*10³V
+"A circular coil and a bar magnet placed nearby are made to move in the same direction.lf the coil covers a distance of 1m in 0.5 sec and the magnet a distance of 2m in 1 sec , the induced emf produced in the coil is",zero,0.5V,1V,2V
+Two solenoids of same cross-sectional area having their lengths and number of turns in ratio of 1:2 The ratio of self inductance of two solenoids is,1:2,1:1,2:1,1:4
+"Two coils, a primary of 400 turns and a secondary of 20 turns are wound over an iron core of length 20¶cm and cross section of 2cm radius. If µr=800, then coefficient of mutual induction is approximately",1.6*10^-4 H,1.6*10^7 H,1.6*10³H,1.6H
+Two coils A and B have 200 and 400 turns respectively. A current of 1A in coil A causes a flux per turn of 10^-3 Wb to link with A and a flux per turn of 0.8*10^-3 Wb through B. The ratio of mutual inductance of A and B is,0.625,1.25,1.5,1.625
+Magnetic flux Φ in weber in a closed circuit of resistance 10Ω varies with time t(sec) as  Φ=6t²-5t+1. The magnetic of induced current at t =0.25s is,0.2A,0.6A,1.2A,0.8A
+"When a wire loop is rotated in a magnetic field, the direction is induced emf changes in every",1/2 revolution,1 revolution,1/4 revolution,2 revolution
+A coil is wound on an iron core and looped back on itself so that core has two sets of closely wound coils carrying current in opposite directions. The self-inductance is,zero,2L,2L+M,2L+2M
+A coil is wound on an iron core and looped back on itself so that core has two sets of closely wound coils carrying current in opposite directions. The self-inductance is,zero,2L,2L+M,2L+2M
+A magnet is moved towards a coil through a certain distance slowly in one case and quickly in second cases. The emf induced is,more in second case,more in first case,equal to both case,zero in either case
+"A coil of area A and resistance R is kept inside a uniform magnetic field B normal to plane of coil, the charge induced in the coil if it is revolved end for end is",2BA/R,zero,BA/R,BA/2R
+"Current in the coil start from 10A decreases linearly with time and become zero at 2 sec, then change in flux through the coil if resistance of coil is 10Ω is",100Wb,10Wb,0.1Wb,1000Wb
+A circular coil of radius r is kept inside magnetic field B normal to plane of coil then emf induced in the coil if it is converted in square in time t is,[B(¶r²-¶²r²/4)]/t,[B(¶²r²-¶²r²/4)]/t,B¶²r²/4t,none
+"A coil and an electric bulb are connected in series with a DC source. A soft iron is now inserted in the coil, the",intensity of bulb decreases,intensity of bulb increases,intensity of bulb remains same,the bulb ceases to glow
+"The number of turns of primary and secondary coils of transformer are 5 and 10 respectively and mutual inductance of the transformer is 25H. Now, the number of turns in primary and secondary are made 10 and 5 respectively.Mutual inductance of the transformer will be",25H,12.5H,6.25H,50H
+"A coil is wound on a core of rectangular cross-section.If all the linear dimensions of core are increased by a factor 2 and number of turns per unit length of coil remains same, the self inductance increases by a factor of",8,16,4,2
+A coil of wire of a certain radius has 100 turns and a self inductance of 15mH. The self inductance of second similar coil of 500 turns will be,375mH,75mH,15mH,325mH
+A d.c. circuit contains 10Ω of resistance in series with 10H coil. The impedence of the circuit is,10Ω,20Ω,1Ω,0Ω
+"The charge which will flow through a 20Ω galvanometer connected to 400Ω circular coil of 100 turns wound on a wooden stick 200mm in diameter, if B= 0.012T parallel to the axis of the stick decreased suddenly to zero is",6.3µC,63µC,0.63µC,630µC
+The induced emf of a generator when the flux of poles is doubled and speed is doubled,becomes 4 times,becomes half,remains same,becomes double
+"The armature of a shunt wound motor can withstand current upto 8A before it overheats and is damaged. If the armature resistance is 0.5Ω minimum back emf that must be generated to avoid motor damage, when the motor is connected to a 120V line is",116V,120V,124V,4V
+"When an electric motor is run at 120 volt, 10A current flows through it and the induced back emf is 115Volt, What will be the current flowing in the coil at the time of switch off?",230A,10A,240A,Zero
+"A circuit has a self inductance of 1H and carries a current of 2A. To prevent sparking, when the circuit is broken, a capacitor which can withstand 400V is used. The least capacitance of the capacitor is",25µF,125µF,100µF,50µF
+"A 5cm long solenoid having 10 ohms resistance and 5mH inductance is joined to a 10V battery. At steady state, current through solenoid is",1A,5A,2A,0A
+"In a noiseless transformer, an A.C of 2A is flowing in the primary coil , The number of turns in the primary and secondary coils are 100 and  20resp.The current in the secondary coil is",10A,0.08A,0.4A,5A
+The number of turns in a secondary coil is twice the number of turns is primary.A Leclanche cell of 1.5V is connected across the primary The voltage across the secondary is,zero,1.5V,3V,240V
+The number of turns in primary and secondary coils are 500 and 5000 respectively. Input voltage is 20V and frequency is 50 Hz. Then in output we have,50Hz,5Hz,500Hz,2.5Hz
+"A transformer is used to light 140W, 24V lamp from 240V ac mains. The current in the mains is 0.7 A. The efficiency of the transformer is nearest to",80%,90%,70%,60%
+"In a step up transformer, use of 120V line, provides a pot. diff. of 2400V. If the primary coil has 75 turns , number of turns in secondary coil is:",1500,150,1200,1575
+"The primary winding of a transformer has 200 turns and its secondary winding has 50 turns. If the current in the secondary winding is 40A, the current in the primary is",10A,80A,160A,8000A
+The power loss in transformer working on 220V a.c supply is 30%. The ratio of primary to secondary current when output voltage is 110V is,5:7,1:2,2:1,1:1
+"A transformer is used to reduce the mains supply of 220V to 11V. If the current in the primary and secondary coil are 5A and 90A respectively, efficiency of transformer is",90%,40%,75%,60%
+The self inductance of a straight conductor is,zero,infinity,very large,very small
+"If the length of a solenoid is doubled and no. of turns doubled, keeping area constant , then inductance becomes",doubled,halved,constant,Quadrupled
+A circcular coil with its horizontal axis perpendicular to the magnetic field . What is the angle between magnetic field and the plane of coil when induced emf is maximum?,90°,0°,45°,30°
+Transformers are used in:,A.C circuits only,integrated circuits,DC circuits only,all the three circuits(repulsive)

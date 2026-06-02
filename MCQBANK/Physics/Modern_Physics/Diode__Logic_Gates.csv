@@ -1,0 +1,20 @@
+question,answer,wrong1,wrong2,wrong3
+Childs law relation,\(i^2 ∝ V^3\),\(i∝ V^3\),\(i^2 ∝ V^5\),\(i^3 ∝ V^2\)
+"At a constant plate potential, if the grid is moved closer to the amplification factor of triode is:",decreased,increased,unchanged,depends upon the nature of biasing
+The dynamic resistance of a vacuum tube diode in saturation region will be,Infinity,Zero,a finite number,dependent on plate potential
+"Before the saturation state of a diode at the plate voltages of 400V and 200V respectively the current are I, and I2 respectively. The ratio of I1 to 12 will",2√2,√2/4,2,1/2
+"The value of plate resistance of 2 triode is 3×10^3 and its mutual conductance factor is 1.5×10^-3, then its amplification factor will be",4.5,\(2*10^6\),45,\(4.5*10^{-5}\)
+A triode has mutual conductance of 2×10-3 mho and an amplification factor of 50. The anode is connected through a resistance of 25 kilo ohm to a 250 volt supply. The voltage gain of this amplifier is,50,25,100,125
+"The amplification factor of a triode is 20. If the grid voltage is reduced by 1. volt, how much the plate voltage should be increased so that the pate remains constant.",20 volt,10 volt,1/10 volt,1/20 volt
+In a triode valve current in the plate circuit is controlled by,grid,anode,cathode,ammeter
+"In a triode, the grid is at -ve potential of 2V with respect to cathode. An electron is ejected with an initial K-E of 5eV. The energy of the electron when it reaches the grid is:",3eV,zero,5eV,7eV
+In a diode value a change in anode voltage from 200V to 240V on a constant gird voltage produces an increase of anode current from 5 mA to 9.6 mA. The a.c anode resistance is,87000 Ω,870Ω,8700Ω,870000Ω
+Which of the following can acts as the building blocks for the other gates?,NAND and NOR,NAND and AND,XOR and OR,Not and OR
+The following table is of which logic gate,AND,OR,NOT,NAND
+The following table is truth table of,NAND,XOR,NOR,AND
+what is the value of A+Ã in the Boolean algebra?,1,0,A,Ã
+The only function of a NOR gate is to,invert an input signal,stop a signal,re-complement a signal,act as universal gate
+NAND gate is a combination of,AND gate and NOT gate,AND gate and OR gate,NOT gate and OR gate,NOT gate and NOT gate
+Two inputs of NAND gates are shorted. This gate is equivalent to,NOT gate,OR gate,AND gate,NOR gate
+Two NOT gates are connected at the two inputs of a NAND gate. This combination will behave like,OR gate,NAND gate,AND gate,NOR gate
+Which of the following is/are not equal to 1 in the Boolean algebra?,A.Ā,A+1,A+Ā,ĀĀ

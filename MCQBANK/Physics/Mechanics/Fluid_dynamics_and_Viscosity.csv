@@ -1,0 +1,61 @@
+question,answer,wrong1,wrong2,wrong3
+An aeroplane of mass \(3 *10^4\) kg and total wing area 120 \(m^2\) level flight at some height. The difference in pressure between upper and lower surfaces of its wings in kilopascal is (g = \(10 m/s^2\)).,2.5,5.0,10.0,12.5
+Viscosity of liquid and gases. With increase in temperature,Decreases and increases,Increases and decrease.,Increases.,Decreases.
+A cork rises up from bottom of water to finally float in water. Then its graphical representation will be:,,,,
+"Equal volume of two immiscible liquids of densities ρ and 2ρ are filled in a vessel. Two small holes are punched at depth h/2nand 3h/2  from the surface of lighter liquid. If V1 and V2 are the velocities of efflux at these two holes, then V1/V2  is",\(\frac{1}{2\sqrt{2}}\),1/2,1/4,\(\frac{1}{\sqrt{2}}\)
+"If the density of air is neglected, then radius of liquid drop with density \(900kg/m^3\) moving in air with coefficient of viscous medium \(1.85 *10^{- 5 }\)Ns/m with terminal velocity \(2.76 * 10^{-4}\) m/s",1.6μm,1.6 mm,1.6cm,1.6nm
+The terminal velocity of an object in a liquid is 100m/s. What will be the terminal velocity of the object in the vacuum?,<100 m/s,> 100 m/s,= 100 m/s,Value cannot be attained.
+When temperature of gas is increased its viscosity:,Remain constant.,Increases.,Decreases,First decreases then increases.
+"Two drops of water having same radius moving in air downwards with constant velocity (v). If the drops coalesced, what will be the new new velocity",\(2^{1/3}u\),\((2^{2/3}-1)u\),\(2^{2/3}\),\((2^{2/3}-1)v\)
+Two parallel square plates of length of 10 cm and moving with velocity 10 cm/s pass in liquid of viscosity 0.01 poise. If the force between the plates in liquid of 200 dyne then the separation between the plates is:,0.05 cm,5 cm,0.5 cm,0.005 cm
+One poise is equal to:,\(0.1N-s/ m^2\),\(1N-s/ m^2\),\(10N-s/ m^2\),\(0.01N-s/ m^2\)
+. Bernoulli's theorem is based on conservation of,Energy,Mass,Momentum,Pressure
+"Two identical rain drops are falling with a terminal velocity v. If they coalesce to from a big drop, the terminal velocity of the bigger drop is",\(2^{2/3}v\),\(2^{1/3}\),v,\(\frac23v\)
+"In a wide river, the velocity of water at the middle",Decreases with depth,Increase with depth,Is the same everywhere,Is zero
+One poise equals to,\(10^{-1} Nsm^{-2}\),\(10^{} Nsm^{-2}\),\(100 Nsm^{-2}\),\(10^{-2} Nsm^{-2}\)
+"A liquid kept in a cylindrical vessel is rotated along its axis. The liquid rises at side. If the radius of vessel is 0.05m and the speed of rotation is 2 rev/s, find the difference in the height of the liquid at the centre of the vessel and its sides.",0.02m,0.04m.,0.004m,0.002m
+"Two hailstones with radii in the ratio 1:2 fall from a great height through the atmosphere. Then, their momentum are in the ratio after they attain terminal velocity is",1:32,1:2,1:4,1:16
+"A liquid is flowing in a tube under streamline flow. If the radius of tube is doubled, the rate of flow becomes",16 times,4 times,2 times,1/4 times
+"Two liquids of densities d1 and d2 are flowing in identical capillaries under same pressure difference. If t1 and t2 are times taken for the flow of equal quantities (masses) of liquids, then the ratio of coefficients of viscosities liquids will be",\(\frac{d_1t_1}{d_2t_2}\),\(\frac{t_1}{t_2}\),\(\frac{d_2t_2}{d_1t_1}\),\(\sqrt{\frac{d_1t_1}{d_2t_2}}\)
+"The reading of a manometer fitted to a closed top is \(4×10^5N/m^2\). If the valve is opened, the reading of the manometer falls to \(3×10^5 N/m^2\). The velocity of water is:",12.1 m/sec,1.41 m/sec,2 m/sec,20 m/sec
+"A tank full of water has a small hole at its bottom. If one fourth of the tank is emptied in t1 second and the remaining three fourth of the tank is emptied in t2 is; second, then the ratio t1/t2 is,",\(1/\sqrt{3}\),\(\sqrt{3}\),\(\sqrt{2}\),\(2\)
+\(4m^3\) of water is to be pumped to a height of 20m and forced into a reservoir at a pressure of \( 2×10^5N/m^2\) The work done by the motor is (External pressure = \(10^5N/m^2\)),\(12×10^5 J\),\(8×10^5 J\),\(10×10^5 J\),\(32×10^5 J\)
+The terminal velocity of a raindrop falling through air is v. If eight such identical drops get coalesced then  terminal velocity of the big drop through air will be,4v,8v,2v,v
+"Liquid is flowing laminarly through a  non-uniform tube. The velocity of liquid at a section of diameter 20cm is 5cm/s, then velocity of liquid at section of diameter 10cm will be",20cm/s,1.25cm/s,2.5cm/s,10cm/s
+Water is poured into a vertical tank at rate of \(70cm^3/s\) and the tank has a open 2 hole of \(1cm^2.\) The maximum height of liquid possible in the tank is,2.5cm,5cm,2cm,0.25cm
+"A solid ball of volume V is dropped in a viscous liquid. It experiences a viscous force F falling with speed v. If the solid ball of volume 8V is dropped in the same fluid when falling with same speed v, then viscous force would be",2F,8F,4F,16F
+"A metallic sphere of mass m falls through glycerine with a terminal velocity v. If we drop a ball of mass 8m of the same metal into a column of glycerine, the terminal velocity of the ball will be",4V,8V,6V,V
+"A small steel ball falls through a syrup at a constant speed of 10cm/s. If the steel ball is pulled upwards with a force equal to twice its effective weight, how fast will it move upward?",10cm/s,20cm/s,5cm/s,zero
+"A rain drop of radius r has a terminal velocity v m/s in air. The viscosity of air is η poise and the viscous force on it is F. If the radius of drop be 2r and the drop falls with terminal velocity in same air, the viscous force on it will be",8F,F/2,F,4F
+"A hole is made at the bottom of a tank filled with water. If the total pressure at the bottom of tank is 3 atmosphere and density of water is \(1000kg/m^3\), then velocity of efflux is",20m/s,10√2 m/s,10√6 m/s,10√5 m/s
+"Water flows in a tube of diameter 2cm so that the flow is streamlined. If the Reynold number is 2000 and coefficient of viscosity of water be \(10^{-3}kgm^{-1}s^{-1}\), then maximum average velocity of water is",0.1m/s,1m/s,0.2m/s,2m/s
+"32 units of a liquid flow per unit time through a capillary tube connected to a pressure head. If a tube of half the radius and same length is connected to the same pressure head, the quantity of water flowing per unit time will be",2 units,1 unit,4 units,8 units
+A two pipe are joined which has length L & 2L and radius R & 2R. What is the pressure difference between those two pipes.,8,1/8,4,2
+Bernoulli's equation is applicable in,Fluid mechanics,Magnetic field,Electric field,Sound & waves
+"A ball of density\( 0.9 g/cm^3\) is dipped in water. If it's diameter is 1 mm, then with what terminal velocity its rises up (η  = 15 centipoise)?",3.7,1.8,2.7,5.6
+Fog drop is suspended in air which is balanced by:,Upthrust of air,Force of gravity,Surface tension,None
+The block of wood floats in the water with 2/3th of its volume submerged then density of wood,\(0.66 g/cm^3\),\(0.33 g/cm^3\),\(1  g/cm^3\),\(0.56 g/cm^3\)
+A body weighs 60 g in air and 40g in water. The specific gravity of body is,3,1.5,\(2*10^3\),0.5
+A body weighs 160g in air and 130g in water and 136g in oil. The specific gravity of oil is,0:8,1.6,1.3,3.2
+The value of g at a place decreases by 2%. The barometric height of mercury,remains unchanged,increases by 2%,decreases by 2%,sometimes increases and sometimes decreases
+"A beaker has oil of relative density 1.2 upto a height of 3cm. On top of the oil is a water column of height 10cm. If the relative density of mercury is 13.6, the pressure at the bottom of the beaker is",1cm of Hg,5cm of Hg,13cm of Hg,15cm of Hg
+An iceberg \(2100cm^3\) of density \(0.8g/cm^3\) is floating in the sea water (density = \(1.2g/cm^3\)). Then the volume of the iceberg immersed inside water is,\(1400cm^3\),\(1500cm^3\),\(1600cm^3\),\(1800cm^3\)
+What fraction of a wooden raft of density 0.8g/cc will be outside the sea water of density 1.2g/cc?,1/3,2/3,1/2,2/5
+An alloy contains 75% of a metal of relative density 10 and remaining 25% of another metal of relative density 5. Then the density of the alloy will be,\(8× 10^3kg/m^3\),\(7.5 × 10^3kg/m^3\),\(9 × 10^3kg/m^3\),\(6 × 10^3kg/m^3\)
+A wooden block floats in a liquid with 40% of its volume outside liquid surface. Then the density of the wood will be (specific gravity of liquid is,\(720kgm^{-3}\),\(600kgm^{-3}\),\(680kgm^{-3}\),\(800kgm^{-3}\)
+"A wooden block of 2kg is floating in a liquid with one-fourth of its volume submerged. What vertical downward force can immerse it,",60N,5N,20N,45N
+A block of solid is insoluble in water and a given liquid of specific gravity 1.1. The block weighs 24g in air and 21g when completely immersed in water. What will be its weight when it is completely immersed in the liquid,20.7g,19.9g,22.1g,21.6g
+How much lead of specific gravity 11 should be added to a piece of cork of specific gravity 0.2 weighing 10g so that it may just float on water?,44g,4.4g,440g,2.2g
+"When a air bubble rises from the bottom of a lake to the surface, its radius doubles. The atmospheric pressure is equal to that of a column of water of height H. The depth of lake is",7H,H,2H,8H
+"A light body A of specific gravity ρ1 and a metallic body B of specific gravity ρ2 are bound together. The combination is placed in a liquid of specific gravity ρ. If it neither floats nor sink in the liquid, the ratio of masses of A and B is",\(\frac{\frac{ρ}{ρ_2}-1}{1-\frac{ρ}{ρ_1}}\),\(\frac{ρ_1}{ρ_2}\),\(\frac{ρ_1(​​ρ+ρ_2)}{ρ_2(ρ+ρ_1)}\),\(\frac{\frac{ρ}{ρ_2}+1}{\frac{ρ}{ρ_1}+1}\)
+A wooden block 120kg floats in water and its density is \(600kg/m^3\). What mass can be put on the block to make it just sink,80kg,40kg,20kg,60kg
+"A balloon has a volume of \( 1000m^3. \)It is filled with hydrogen of density \(0.09kg/m^3\). If the density of air is \(1.29kg/m^3\), it can lift a total weight of",1200kg,1800kg,600kg,300kg
+A boat having a length of 3m and a breadth of 2m is floating on a lake. The boat sinks by 1cm when a man gets on it. The mass of the man is,60kg,72kg,12kg,120kg
+"A wooden cube floats in water partially immersed. When a 200gm weight is put on the cube, it is further immersed by 2cm. The length of the side of the cube is",10cm,15cm,25cm,30cm
+A fisherman hooks an old log of wood of weight 12N and volume \(1000cm^3.\) He pulls the log half way out of water. The tension in his line at this instant is,7N,12N,10N,5N
+A body floats with one-third of its volume outside water and three fourth of its volume outside another liquid. The density of another liquid is,\(\frac{8}{3}gm/cc\),\(\frac{9}{4}gm/cc\),4.8 gm/cc,\(\frac{3}{8}gm/cc\)
+A large block of ice 10m thick has a vertical hole drilled through it and it is floating in the middle of a lake. What is the minimum length of a rope required to scoop up a bucket full of water through the hole (density of ice = 0.9 gm/cc)?,1m,10m,9m,5m
+"A metallic sphere with a cavity weighs 200g in, air and it weighs 120g when immersed in water. If. density of the metal is \(5g/cm^3,\) then volume of the cavity will be",\(40cm^3\),\(80cm^3\),\(120cm^3\),\(20cm^3\)
+A metallic sphere with a spherical cavity just floats in a liquid which is eight times lighter than the metal. Then the ratio of radius of cavity to that of sphere is,\(\frac{7^{1/3}}{2}\),\(\frac12\),\(\frac14\),\(1-\frac{7^{3/2}}{2}\)
+The common hydrometer reads 1.6 specific gravity. The mark 1.5 is:,upwards,downwards,Same at that place,Depends of the hydrometer
+A cylindrical block of wood has cross- sectional area A and weight W. It is totally immersed in water with its axis  vertical. The block experiences pressures \( p_t \)and \(p_b \) at its top and bottom surfaces respectively. Which expression is equal to the Unthrust on the block?,\((p_b-p_t)A\),\((p_b-p_t)\),\((p_b-p_t)A-W\),\((p_b-p_t)A+W\)

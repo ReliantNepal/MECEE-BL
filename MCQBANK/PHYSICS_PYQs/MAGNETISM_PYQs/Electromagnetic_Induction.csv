@@ -1,0 +1,54 @@
+question,answer,wrong1,wrong2,wrong3
+Coefficient of self induction is independent of,Resistance of conductor,No. of turns of the coil,length of wire,Diameter of wire
+"If area remains constant, the no. of turns of solenoid should be increased by ....... to increase self inductance by 4 times",two times,4 times,half,16 times
+If the rate of change of current in a circuit is unity. What is the induced emf?,Equal to self inductance,Double of self inductance,Quadruple of self inductance,Half of self inductance
+A coil of area 0.04 m^2 having 1000 turns suspended perpendicular to magnetic field 5*10^-5 wb/m^2 is rotated through 180º in 0.1sec. Calculate emf induced.,40 mV,20 mV,20 V,2 V
+"A solenoid having 600 number of turns has self inductance 280 mH, if new number of turns is 300 then new self inductance is ......mH",70,140,560,1120
+A circular coll with its horizontal axis is perpendicular to the magnetic field . What is the angle between magnetic field and the plane of coil when the induced emf is maximum?,0º,45º,30º,90º
+"If the length of a solenoid is doubled and no. of turns doubled, keeping the area constant, then inductance becomes",Doubled,Halved,Constant,Quadrupled
+"In electromagnetic wave, orientation of electric and magnetic waves is",90º,0º,180º,120º
+"A conduction wire of length 10cm moves with a velocity of 10 ms^-1 at right angles to a magnetic field of flux density 0.01 T. Then the ""emf"" generated in the wire is:",0.01V,0V,0.1V,1.0V
+Tramsformer is a device to:,Transform AC voltage,Convert mechanical energy to electrical energy,Convert AC to DC,Convert DC to AC
+"The emf Produced in a straight conductor of length 1m placed perpendicular to magnetic field of V=100m and s, B=1mT is",0.1V,0.5V,0.4V,0.6V
+A coil of area 50cm^2 is perpendicular to a uniform field of flux density 10^-3 tesla. Then the flux passing through the coil is :,5*10^-6 weber,5*10^-5weber,6*10^-6 weber,6*10^-6 weber
+Lenz's law is a consequence of the law of conersation of:,energy,charge,momentum,mass
+For a purely resistive circuit in a.c the current,Is same phase with e.m.f,Lags of 𝝅/2 with e.m.f,Leads by 𝝅/2 with e.m.f,Leads by 𝝅 with e.m.f
+Lenz's law follows the priciple of conversation of,energy,Charge,mass,momemtum
+Lenz law is the conquance of conversation of,energy,charge,mass,momemtum
+"If the flux associated with a coil varies at the rate of 1 weber per minute, the induced emf if",1/60V,1V,Zero,60 V
+A freely falling magnet passes lengthwise through a horizontal circular coil of conductor . The corrcet expression relating the accleration of the falling magnet (a) and the accleration due to gravity(g) is,a<g,a>g,a=g,can't be said from the given data
+Laminated cores are used in a transformer in order to :,reduce eddy current,increase electric flux,use the transformer as a rectifier,use the transformer in A.C.
+A copper ring is held horizontally and a bar magnet is dropped through the ring with its length along the axis of the ring. Then the accleration of the falling magnet is:,"less than ""g""","euqal to ""g""","more than ""g""",none
+Which of the following is independent upon the transformer ?,Frequency,Voltage,Current,eddy current
+Induction is due to,Eddy current,Electric current,Magnetic current,Electromagnetic current
+A freely falling magnet passes lengthwise through a horizontal coil of conductor. The correct expression relating the accleration of the falling magnet 'a' and accleration due to gravity 'g'is?,a<g,a>g,a=g,can't be said from the given data
+"Mutual inductance of two coils is 5mH. The current changes from 3A to 2A in 0.01sec, then the emf produced is",0.5V,1V,5V,50V
+A current through a choke coil of self inductance 5H is decreasing at the rate of 2A/S the emf developed across the coil is,10 volt,-10 volt,2.5 volt,-2.5 volt
+"When a motor car starts, the brightness of bulb is decreased then after sometimes its brightness increases due to",increase in back emf,Reduced in back emf,armature current is max,none
+Eddy current is produced in,non uniform magnetic field,heated magnetic field,uniform magnetic field,change in electric field
+"An iron is placed horizontally, what will be the acceleration of falling magnet:",less than g,greater than g,equal to g,less or greater than g
+"Uniform magnetic field has its direction from east to west , then direction of current is directed towards",North,East,West,South
+The core of transformer is made up of,Soft iron,Steel,Nickel,Invar
+"Two coils are at fixed locations. When coil 1 has no current in coil 2 increases at the 15.0 A/s the e.m.f in coil 1 in 25.0 mv, when coil 2 has no current and coil 1 has a current of 3.6 A, the flux linkage in coil 2 is ?",6.00 mwb,16 mwb,10 mwb,4.00 mwb
+"The self induced emf in closing a d.c. current circuit is ec in breaking it is eb and the emf of the source is eo, then",ec<eb<eo,ec>eo>eb,ec<eo<eb,ec=eb<eo
+What is the coefficient of mutual inductance when the magnetic flux changes by 2*10^-2 Wb and change in current is 0.01 A.,2H,3H,4H,8H
+A transformer transfers electrical energy from primary to secondary circuits usually with a change in :,voltage,frequency,power,time period
+"A transformer is designed to work from 220 volts AC mains and to give supply at 22 volts AC. If the primary coil has 240 turns, what is the number of turns of the secondary coil?",24,48,2400,12
+The instrument used to measure magnetic induction,fluxmeter,bolometer,pyrometer,thermoneter
+"A plane is travelling west at the speed of 108km hour . What is the e.m.f developed between the ends of wings 25m long, if the earth's magnetic field ar the location has a magnitude of 5.0*10^-4 T and the dip angle is 30º?",0.18 v,0.25 v,0.235 v,0.135 v
+Electrical supply to kathmandu from marsyangdi Hydro Electric station via the national Grid requires the following for efficient distribution :,Ensuring of cable connection and using of step up transformer at production site,Ensuring of cable connection and same voltage at production site and substation,Ensuring of cable connection and using of transformer at production site,Ensuring of insulation only and higher voltage at the generation point itself without transformer use
+A transformer with primary and secondary turns 2000 and 3000 respectively has input voltage of 20V. What is the secondary voltage per turn?,0.01V,0.001V,4*10^-3,none
+A coil of resistance R=𝝅^2 radius 30cm when placed in a magnetic field B=10^-2 tesla revolves with a frequency of 200 revolutions per minute. Find the maximum current induced in the coil.,6mA,4𝝅^2,15mA,32mA
+The armature of D.C. motor has 20Ω resistance. It draws current of 2.5 amphere when run by 220 volts D.C. supply . The value of back e.m.f in it will be,170V,150V,180V,190V
+A coil of copper having 1000 turns is placed in a magnetic field (B=4*10^3 T) perpendicular to its axis. The cross section area of the coil is 0.05m^2. If it turns through 180º then the charge induced in the coil (if the resistance of the coil is 100Ω)is :,4 MC,100 C,400 µC,0C
+A transformer has 100 turns in primary coil and 200 turns in secondary coil. Then,"Vp=3V, Ip=12A          Vs=6V, Is=6A","Vp=6 V, Ip=12A           Vs=3V, Is=24A","Vp=3V, Ip=12A         Vs=6V, Is=12A","Vp=6V, Ip=6A         Vs=12V, Is=6A"
+Transformer are used:,In AC circuit only,In DC circuit only,In both DC & AC circuit,In integrated circuit
+Lenz law follows the conservation of,Energy,Charge,Momentum,Mass
+A 100mH coil carries a current of 1 A. Energy stored in magnetic field is,0.05J,0.1J,1J,0.1J
+"A bar magnet and a horizontal ring is given. The bar magnet falls through the horizontal ring lengthwise, then acceleration will be :",less than g,more than g,g,Not predictable
+Transformers are used,in AC circuits only,in DC circuits only,in both DC and AC circuits,neither in DC nor in AC circuits
+"A uniform metal disk of radius R lies in xy-plane and rotates with uniform angular velocity ω about the z-axis. If a constant field B is parallel to the z axis, the total induced EMF between the center and the rim of the disk is equal to",1/2 ωBR^2,ωBR,1/2 ωBR,1/2 ωB^2R^2
+A transformer is designed to work from 220 volts AC mains to give a supply at 11 volts AC to run a device. The primary coil has 480 turns. The number of turns in the secondary coil should be,24,480,240,9600
+Lenz's law deals with the conservation of,energy,momentum,charge,current
+Transformer is used to,increase or decrease voltage of a.c circuit,convert ac into dc,convert dc into ac,increase or decrease voltage of d.c circuit
+E.m.f induced in a rod moving in a magnetic field B with a velocity V1 making an angle θ with B is,BVLsinθ,BVLcosθ,BVL^2,1/2 BVL^2

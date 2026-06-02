@@ -1,0 +1,19 @@
+question,answer,wrong1,wrong2,wrong3
+The dimension formula for angular momentum is,ML^2T^-1,ML^2T^2,M^0L^0T,M^0LT^-1
+External and internal diameter of a hollow cylinder are measured to be (4.23± 0.01)cm and (3.89± 0.01)cm respectively. The thickness of wall of cylinder is,(0.34± 0.001)cm,(0.17± 0.02)cm,(0.17± 0.01)cm,(0.34± 0.02)cm
+Dimension formula of magnetic flux is,ML^2T^-2A^-1,ML^3T^-3A^-1,ML^2T^-2K^-1,M^2L^3T^-3A^-2
+The errors in the measurement which arise due to unpredictable fluctuations bin temperature and voltage supply are,Random errors,Personal errors,Least count errors,Instrumental errors
+"A metal wire has mass(0.4± 0.002)g, radius(0.3± 0.001)mm and length(5± 0.02)cm. The maximum possible percentage error in the measurement of density will nearly be",1.6%,1.3%,1.4%,1.2%
+Plane angle and solid angle have,Units but no dimensions,Dimensions but no units,No units and no dimensions,Both units and dimension
+The dimensions [MLT^-2A^-2] belongs to the:,magnetic permeability,magnetic flux,self inductance,electric permittivity
+"If force[F], accleration[A] and time[T] are chosen as the fundamental physical quantities. Find the dimensions of energy.",[F][A][T^2],[F][A][T],[F][A][T^-1],[F][A^-1][T]
+If the length of rod A is 3.25±0.01CM & that of  B is  4.19±0.01 CM then the rod B is longer than eod A by,0.94± 0.02cm,0.94± 0.00cm,0.94± 0.01cm,0.94± 0.005cm
+,16%,(3/13)%,-10%,10%
+A screw gauge has least count of 0.01 mm & there are 50 divisions in its circular scale. The pitch of the screw gauge is,0.5mm,0.01mm,0.25mm,1mm
+The dimension of which are same,Work and momentum of force,Torque and force,Velocity and Velocity gradient,All
+"Dimension of Angstron(A), Micron(µ), Fermi(F) and Nanometer(nm) is the same. Which one of the following represent the correct arrangement of their magnitude in the decreasing order?","µ,nm,A,F","µ,A,nm,F","A,µ,F,nm","F,A,nm,µ"
+The dimension of E/B is same as that of,Velocity,Momentum,Force,Accleration
+SI unit of pressure is,Pascal,Dynes,cm of Hg,Atmospher
+The unit of Stefan's constant is,Wm^-2K^-4,Wm^-2K^-1,Wm^2K^-4,Wm^-2K^4
+"The equation of state of some gases can be expressed as (P+a/V^2)(V-b)=RT. Here P is the pressure, V is the volume, T is the absolute temperature and a,b,R are constants. The dimension of 'a' are",ML^5T^-2,ML^-1T^-2,M^0L^3T^0,M^0L^6T^0
+"A force is given by F= at + bt^2, where t nis time. What are the dimensions of a and b",MLT^-3 and MLT^-4,MLT^-3 and ML^2T^-4,MLT^-1 and MLT^0,MLT^-4 and MLT^1

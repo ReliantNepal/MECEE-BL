@@ -1,0 +1,36 @@
+question,answer,wrong1,wrong2,wrong3
+The production of emf by maintaining a difference of temperature between the junctions of dissimilar metals is,Seeback effect,Joule effect,Peltier effect,Thomson effect
+The neutral temperature of a thermocouple is 120°. Its electromotive force changes sign at 400K. The temperature of the cold junction will be,113°C,93°C,73°C,67°C
+Neutral temperature of a thermocouple is 320°C.The cold junction is at 10°C. The inversion temperature is,630°C,320°C,640°C,650°C
+Thermocouple thermometer is based on principal of,seebeck effect,peliter effect,joule's effect,Thomson's effect
+Amount of energy absorbed or evolved when 1A of current passes for one second through a junction of two metals is called,Peltier coefficient,Thermo emf,Thomson coefficient,Thermoelectric power
+"A battery is connected in a thermocouple, The two junctions wil:",be heated at one junction and cooled at other,be heated up,remain at the same temperature,be cooled
+Thompson effect is not shown by which element,lead,Antimony,Iron,tin
+Which of the following combination would give maximum e.m.f?,Sb and Bi,Ni and Cr,Fe and Bi,Cu and Fe
+The neutral temperature of a thermocouple is 300°C . What is the inversion temperature if the temperature of cold junction is 10°C?,590°C,610°C,310°C,290°C
+"The emf in a thermocouple changes sign at 600K. If the neutral temperature is 210°C, the temperature of cold junction is",93°C,180K,117K,90°C
+"The thermo emf 'e' in volts of a certain thermo-couple is found to vary with temperature θ of hot junction is kept at 0°C. e=40θ - θ²/20
+
+Then the neutral temperature of couple is :",400°C,100°C,200°C,800°C
+The temperature of the cold junction of a thermocouple is 0°C and the temperature of hot junction is T°C . The emf is E=16T-0.04T²µV. The inversion temperature Ti is,400°C,200°C,100°C,300°C
+"For a thermocouple, the temperature of cold junction (Tc), the neutral temperature (Tn) and the temperature of inversion (Ti) are 0°C,285°C and 570°C respectively. If the temperature of cold junction is raised to 10°C , then",Tn = 285°C and Ti = 560°C,Tn = 275°C and Ti = 570°C,Tn = 285 °C and Ti = 570°C,Tn =295°C and Ti = 580°C
+A thermo emf of a thermocouple is 50µV/K at room temperature. A galvanometer of resistance 50Ω and capable of detecting a current of order of 2µA is used. The smallest temperature difference that can be detected with this galvanometer is,2K,5K,10K,15K
+"A emf of 0.9V is generated when the temperature difference between hot and cold junctions of a thermocouple is 75K. Assuming that the cold junction is heated up by 15K , then to what extent the thermo emf will change?",20%,40%,60%,80%
+The emf of the battery in a thermocouple is doubled. The rate of heat generated at one of the two junctions will,be doubled,remains unchanged,becomes half,be four times
+2 grams of copper is deposited in a voltmeter in 30 minutes at 12 volt. What mass is deposited at 6 volt and for time of 45 minutes?,1.5gm,0.5gm,4gm,3gm
+A charge of 4.8 * 10^5 coul passes through an electrolyte solution of copper sulphate. The number of Cu++ ions liberated from the electrolyte is:,1.5 * 10^24,3 * 10^24,7.68 *10^-14,1.25* 10^13
+What is the amount of charge requried to convert 0.2 moles of Cu++ to Cu?,4*9650 C,4*96500 C,2*9650 C,2*96500 C
+"A Lechlanche cell supplies a current of 1 Amp for 1 hour. Atomic weight of Mn=55,of oxygen=16 of zinc =65 and ECE of hydrogen = 1.04*10^-5 g/coul. Then the mass of hydrogen liberated is",0.03744g,3.744g,1.217g,3.258g
+"A Lechlanche cell supplies a current of 1 Amp for 1 hour. Atomic weight of Mn=55,of oxygen=16 of zinc =65 and ECE of hydrogen = 1.04*10^-5 g/coul. Then the mass of zinc consumed is",1.217g,0.03744g,3.258g,0.1217g
+The ECE of silver is 1.118 * 10^-6 kg/coulomb.Its atomic weight is 108 and Avogadro's number is 6.02*10^23 per gm mole. The charge on one Ag ion is,1.6*10^-19 C,3.2 *10^-19 C,4.8 *10^-19 C,2.4*10^-19 C
+A certain charge liberates 0.8g of oxygen.The mass of silver liberated by the equal charge is,10.8g,108g,0.8g,108/0.8 g
+What is the volume of hydrogen liberated at NTP by the amount of charge which liberates 0.3175g of copper?,112cc,224cc,56cc,1120cc
+"When 1kg of hydrogen forms water, 34*10^6 calories of heat is liberated. If ECE of hydrogen is 1/9650000 kgC^-1, then the minimum voltage required for decomposition of water is",1.5V,0.75V,3.0V,6.0V
+The commercial alumunium (At wt. = 27) is generally obtained by electrolysis. What is the total charge required to deposit 9 grams of aluminium ?,96500 coulombs,65900 coulombs,32666 coulombs,289500 coulombs
+Silver and Zinc voltameters are connected in series and same current is passed through both of them for same time. If 2x kg of  silver is liberated then the amount of zinc liberated will be very near to,2x/3,2x,2x/5,x
+"A current of 10A, deposits 10.8 gram of silver in 900s. The mass of the copper deposited by 9A of current in 1200s will be [E Cu =31.5 and E Ag =108]",3.78 g,6.35g,7.56g,10.80g
+"Two electroplating cells, one of silver and another of aluminium are connected in series. The ratio of number of silver atoms to that of aluminium atoms deposited during time t will be",3:1,1:3,1:9,9:1
+"It is required to have a deposition at copper on surface of a surface of a plate having a total area of 250cm². Given that the density of copper is 8.9 g/cc and electrochemical equivalent of copper is 0.0003295 g/C , the thickness of copper deposited when 1A of current is allowed to pass through for 100 minutes is",0.000888cm,0.0888cm,0.000888m,0.00888cm
+"When a copper volatameter is connected with a battery of emf 12V, 2g of copper is deposited in 30 minutes. If the same voltameter is connected across a 6V battery , the mass of copper deposited in 45 minutes would be",1.5g,1g,2g,2.5g
+If Cu and Ag voltameter are connected in series and same amount of current is passed for same time whe mass of Ag deposited is x mg then mass of Cu deposited in mg will be,29x/108,108x/29,108/29x,29/108x
+"The faradays constant is 9.65*10^7 amp/sec/kg. When fused sodium chloride is electrolysed, the amount of sodium deposited in negative electrode when 16 ampere current is passed in 10 minute",2.3gm,0.23gm,0.11gm,23gm

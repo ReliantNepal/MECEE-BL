@@ -1,0 +1,27 @@
+question,answer,wrong1,wrong2,wrong3
+,a,b,c,d
+"Two bodies of mass M and m(M>n) are joined by a string, then centre of mass lies",Toward M,Between M and n,Toward m,Both A and B
+The centre of mass is independent of,Force of particle,Position vector,Relative separation of distance,Mass of particle
+"If the external force applied is zero, then which of the following is conserved?",Linear momentum,Angular momentum,Torque,Time period
+No force is required for a body moving with,Constant velocity,Constant speed on circular path,Variable acceleration,Constant acceleration
+"Two bodies of masses 4 kg and 5 kg are acted upon one after the other by the same force. If the acceleration of the heavier body is 2 m/s^2, the acceleration of the lighter body is",2.5 m/s^2,4 m/s^2,2 m/s^2,3.5 m/s^2
+"Whatever may be the direction of the two forces 6N and 2N acting on a body of mass 2 kg, the minimum acceleration of the body cannot be less than",2 m/s^2,4 m/s^2,2.5 m/s^2,3 m/s^2
+A 60 kg man pushes a 40 kg man by a force of 60 N. The 40 kg man has pushed the other man with a force of,60N,40N,0N,20N
+A rope of length L is pulled by a constant force F. What is the tension in the rope at a distance x from the end where force is applied,F(L-x)/L,F(L/x),F(L/L-x),Fx/L-x
+"A bullet from a gun is fired on a rectangular wooden block with velocity u. When bullet travels 24cm through the block along its length horizontally, velocity of bullet becomes u/3. Then it further penetrates into the block in the same direction before coming to rest exactly at the other end of the block. The total length of the block is",27 cm,24 cm,28 cm,30 cm
+"A shell of mass m is at rest initially. It explodes into three fragments having mass in the ratio 2:2:1. If the fragments having equal mass fly off along mutually perpendicular directions with speed v, the speed of the third(lighter) fragment is:",2√2v,v,4√2v,3√2v
+An electric lift with a maximum load of 2000 kg (lift + passengers) is moving up with a constant speed of 1.5 m/s. The frictional force opposing the motion is 3000N. The maximum power delivered by the motor to the lift in watts is: (g=10),34500,23000,20000,23500
+Two objects of mass 10 kg and 20 kg respectively are connected to the two ends of a rigid rod of length 10m with neglible mass. The distance of the centre of mass of the system from the 10 kg mass is,20/3 m,10/3 m,10 m,5 m
+A person sitting in an open car moving at constant velocity throws a ball vertically up into air. The ball falls,Exactly in the hand which threw it up,Outside the car,In the car ahead of the person,In the car to the side of the person
+"When a bus suddenly takes a turn, the passengers are thrown outwards because of",Inertia of motion,Acceleration of motion,Speed of motion,Both (b) and (c)
+"If a bullet of mass 5 gm moving with velocity 100 m/s, penetrates the wooden block upto 6 cm. Then the average force imposed by the bullet on the block is",417 N,8300  N,830 N,0
+A diwali rocket is ejecting 0.05 kg of gases per second at a velocity of 400 m/s. The accelerating force on the rocket is,20 N,20 dynes,22 dynes,1000 N
+"If force on a rocket having exhaust velocity of 300 m/s is 210 N, then rate of combustion of the fuel is",0.7 kg/s,1.4 kg/s,0.07 kg/s,10.7 kg/s
+"The time period of a simple pendulum measured inside a stationary lift is found to be T. If the lift starts accelerating upwards with an acceleration g/3, the time period is",T√3/2,T√3,T/√3,T/3
+Mass of a person sitting in a lift 50 kg. If lift is coming down with a constant acceleration of 10 m/s^2. Then the reading of spring balance will be (g=10m/s^2),0,1000 N,100 N,10 N
+Swimming is possible on account of,Third law of motion,First law of motion,Second law of motion,Newton's law of gravitation
+"A man is standing at a spring platform. Reading of spring balance is 60 kg wt. If man jumps outside platform, then reading of spring balance",First increase then decrease to zero,Decrease,Increase,Remains same
+A jet engine works on the principle of,Conservation of linmear momentum,Conservation of mass,Conservation of energy,Conservation of angular momentum
+"A block of mass M is pulled along a horizontal frictionless surface by a rope of mass m. If a force P is applied at the free end of the rope, the force exerted by the rope on the block will be",PM/M+m,P,Pm/M+m,Pm/M-m
+Towmassesof 5kg and 10 kg are connected to a pulley. What will be the acceleration of the system (g=acceleration due to gravity),g/3,g,g/2,g/4
+"A bullet of mass 0.1 kg is fired with a speed of 100 m/s, The mass of gun is 50 kg. The velocity of recoil is",0.2 ms,0.1 m/s,0.5 m/s,0.05 m/s

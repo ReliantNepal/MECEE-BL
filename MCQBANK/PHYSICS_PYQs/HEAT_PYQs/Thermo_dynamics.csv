@@ -1,0 +1,81 @@
+question,answer,wrong1,wrong2,wrong3
+In isothermal process which is constant?,Temperature,Pressure,Density,Heat
+In four stroke heat engine power is produced in:,Adiabatic expansion,Isothermal expansion,Isothermal compression,Adiabatic compression
+Which is incorrect ?,Adiabatic=heat and temperature constant,Isothermal=temperature constant,Isobaric= pressure constant,Isochoric = volume constant
+What is the coefficient of performance of a refrigerator working between the  room temperature(27°C) and ice point?,10,0,13,273
+The efficiency of Carnot engine working between freezing point and steam point is,26.8,54,58,100
+No change in entropy during the process of,Gas is heated isochorically,Gas is heated isobarically,gas is heated isothermally,No work is done
+The slope of P-V graph of adiabatic process and isothermal process gives,γ,γ²,1/γ,1/γ²
+"If 1500 cal of heat is supplied to system and 1000J of work done , what is increase in internal energy?",5000J,2000J,4300J,6000J
+"A cylinder contains 150cc of ideal gas at 27°C and 650mm pressure. On constant pressure, the volume of gas at 0°C is:",136.5 cc,130 cc,140 cc,150 cc
+A cylinder of 500m³ capacity contains He at 27°C and 1 atm pressure. If the temperature is decreased to -3°C and pressure to 0.5 atm the volume of gas is:,960m³,500m³,400m³,1000m³
+"At the same temperature, pressure and volume of two gases, which of the following quanitities is constant?",Total number of molecules,Average kinetic energy,Root mean square velocity,Mean free path
+The process in which pressure and volume changes but temperature remains constant is,isothermal,adiabatic,isobaric,isochoric
+A refrigerator has to transfer an average of 263J of heat per second from -10°C to 25°C. The average power consumed by the refrigerator is:,35W,10W,20W,40W
+What is the average power of refrigerator consumed when 263J of energy is transfer through -10°C to 25°C?,35 watt,10 watt,40 watt,50 watt
+"The temperature of source is 500K with source energy 200J, what is the temperature of sink with sink energy 100J ?",250K,500K,300K,125K
+175 calories of heat are required to raise the temperature of 5 mole of an ideal gas at a constant pressure from 20°C to 25°C. The amount of heat required to raise the temperature of same gas from 20°C to 25°C at constant volume will be:,125 cal,100cal,150 cal,175 cal
+The specific heat capacity of an ideal gas under isothermal condition is,infinity,0,8.31,1.4
+Which of the following is not correct ?,It is possible to cool a gas to absolute zero temperature,"In adiabatic condition, the system is allowed to undergo changes in thermal isolation from surroundings","In an isothermal condition, heat enters and leaves the system",Adiabatic process is accompanied by change in temperature and is quick
+"In case of adiabatic expansion
+
+i. Pressure decreases
+
+ii. Internal Energy decreases
+
+iii. There is transfer of heat
+
+choose the correct combination",i and ii are both correct,i is correct,ii is correct,None
+The efficiency of Carnot engine is 1/5. On reducing the temperature of sink by 45°C efficiency becomes 1/3. The initial temperature of the sink was,270K,310K,337K,540K
+"The efficiency of a carnot engine is 20%. On reducing the temperature of sink by 45°C, efficiency becomes 33.3%. The initial temperature of the sink was",270K,310K,337K,540K
+"If one mole of an ideal gas at STP is heated through 1K , the work done by the gas in heat unit will be",1.98 cal,8.31 cal,0.831 cal,83.1 cal
+One mole of an ideal gas with γ = 1.4 is adiabatically compressed so that its temperature rises from 27°C to 35°C. the change in internal energy of the gas is,166J,-166 J,-168J,168J
+"In a Carnot's engine, the temperature of the heat sink is 27°C and that of the source is 327°C. The  efficiency of the engine is",50%,70%,91%,95%
+One mole of a diatomic gas is heated at constant pressure. The fraction of heat energy supplied to the increase in internal energy of the gas will be,7/5,5/7,5/3,7/3
+Efficiency of Carnot engine working between 27°C and 127°C is,25%,50%,100%,75%
+A Carnot engine takes in 3000 kcal of heat from a reservoir at 627° C and gives it to a sink at 27°C.The work done by the engine is,8.4 x 10^6 J,4.2 x 10^6 J,16.8 x 10^6 J,0
+If a gas is allowed to expand adiabatically against external pressure:,there is decrease in internal energy,its temperature remains constant,pressure remains constant,there is increase in internal energy
+A gram-mole of an ideal gas expands isothermally at a temperature T from an initial volume V₁ to a final volume V₂ (V₂ > V₁). Then work done by the gas is,RT In(V₂/V₁),RT (V₂/V₁),YR (T₂-T)/(γ;-1),R (T₂-T)/(γ-1)
+"Two steam engine A and B, A working between temperature 650 K and 700K and another B working between temperature 300 K and 350 K. Then",A is less efficient than B,A is more efficient than B,A and B are equal efficient,Efficiency independent upto temperature
+A carnot engine takes 300 calories of heat from a source as 500K and rejects 150 calories of heat to the sink. the temperature of the sink is,250K,400K,150K,100K
+"If the value of γ is 3/2 and if the gas at NTP is suddenly compressed to reduce 1/4 of initial , the final pressure becomes",8 atm,1/8 atm,2 atm,1/2 atm
+The maximum efficiency of an engine operating between 30°C and 300°C is,47.1%,4.71%,90%,9%
+An engine working between 27°C and 127° C does a work of 2 KJ. Then the amount of heat in hottest zone is:,8KJ,2KJ,4KJ,6KJ
+A heat engine extracts 200J from the source & rejects 100J to the sink. If the source is at 500K temperature of the sink is,250K,200K,300K,450K
+When refrigerator with opened door is kept in a closed room then the temperature in the room:,rise,fall,remains same,depends upon the area of the room
+The temperatures of the reservoir and sink of an ideal heat engine are T₁ and T2 respectively; its efficiency is η. Now both T1 and T2 are increased by 100°C. The new efficiency of the engine will be,less than η,more than η,equal to η,exactly double of η
+During isothermal condition which of the following is true,Average kinetic energy remains constant,Process will be quickly changed,heat exchanged with surrounding,Work done will be zero
+Water on a pan during  in evaporation,Slightly decreases,slightly increases,remains unchanged,abruptly increases
+"A gas in a vessel expands with the decrease in internal energy, the process is",Adiabatic,Reversible,Irreversible,Isothermal
+When water is heated from 0°C to 4°C,Cp<Cv,Cp=cV,Cv<Cp,Cp-Cv=0
+Work done is maximum in,isobaric process,Isothermal process,Isochoric process,Adiabatic process
+"Two cylinder A and B filled with piston contain equal amount of an ideal diatomic gas at 300K. The piston A is free to move while that of B is held fixed . The same amount of heat is given to the gas in each cylinder. if the rise in temperature is  A is 30K, then rise in temperature of gas B is",42K,30K,18K,50K
+"The value of γ is 1.4, for this which is true",Cp=5R/2,Cv=7R/2,Cp=7R/2,Cv=3R/2
+An inventor claims to have made an engine which consumes 1 g of fuel per second (of calorific value 2 kilocal/g) and delivers 10KW of power. Mark the correct statement.,This is impossible,This is possible,The possibility of the invention is determined by design of engine,The possibility of the invention is determined by nature of fuel used
+Two identical containers A and B with frictionless pistons contain the same ideal gas at the same temperature and the same volume V. The mass of gas in A is mA and that in B is mB. The gas in each cylinder is now allowed to expand isothermally to the same final volume 2V. The change in pressure in A and B are found to be ΔP and 1.5 ΔP respectively. Then,3mA=2mB,4mA=9mB,2mA=3mB,9mA=4mB
+"Pressure'P' , Volume 'v' and temperature'T' of a certain material are related by P= αT²/v .Here α is a  constant. The work done by the material when temperature changes from To to 2To while pressure remains constant is",3αTo²,6αTo³,3αTo²/2,2αTo²
+The  specific heats of an ideal gas at constant pressure and constant volume are 525 J/Kg°C and 315J/Kg°C respectively. its density at NTP is,1.75 kg/m³,0.64 kg/m³,2.62kg/m³,1.20 kg/m³
+A certain mass of gas at 273K is expanded to 81 times its volume wider adiabatic condition. If γ=1.25 for the gas than its final temperature is,-182°C,0°C,-235°C,-91°C
+A gas of expands adiabatically from temperature T1 to a temperature T2 (T1>T2). The work done in this process is,Cv(T1-T2),zero,R(T2-T1),Cp(T1-T2)
+"Two cylinder A and B fitted with piston contain equal amount of an ideal diatomic gas at 300K. the piston of A is free to move, while that of B is held fixed. The same amount of heat is given to the gas in each cylinder. If the rise in temperature of the gas in A is 30K, then the rise in temperature of the gas in B is",42K,18K,30K,50K
+During the isothermal process______________ remains constant,Temperature,Internal Energy,Pressure,Total energy
+What is the fraction of total heat required to do the work during the isobaric process?,2/7,5/7,7/5,7/2
+A diesel engine is more efficient than a petrol engine because,the compression ratio is high,gas completely burns in the chamber,there is no sparking,diesel fuel is more efficient than petrol
+Bursting of tyre at mid- day obeys,adiabatic process,isothermal process,Isobaric process,Isochoric pressure
+"In order to test heart function, an elderly gentleman is asked to exercise briskly following which the heart beat is monitored closely. The work done by the man is 350 J and heat he has absorbed is 500), which law decides the change in internal energy  and what is it's value?",First law of Thermodynamics -150J,Third law of Thermodynamics -150J,First law of Thermodynamics -300J,Third law of Thermodynamics -300J
+Which statement explains adiabatic process?,An insulated system with no heat flow between the system and its surrounding,A process in which internal energy remain constant,a process in which there is a continuous flow of heat,A process with constant temperature and pressure
+A heat engine operates by extracting heat from a source at high temperature T1 and,converting some of it into work and rejecting the rest at same temperature,converting whole of it into work,Converting some of it to work and rejecting the rest at same temperature,Converting the rest at a temperature higher than T1
+For an ideal diatomic gas difference of Cp and Cv is 4600 unit. The value of molar specific heat at constant volume is,11500,3700,5300,9200
+Work done of thermodynamic process is 300J and change in internal energy is 100J. the heat supplied is,400J,120J,200J,300J
+The process that occurs insulating system,adiabatic,isothermal,isochoric,isoenthalpic
+At constant volume the change in Internal energy is equal to,Heat contained,Adiabatic,Isochoric,Isoenthalpic
+"At Carnot's engine whose sink is at temperature of 300K has efficiency of 40% by how much, the temperature of source be Increased so as to Increase efficiency to 60% ?",250K,300K,325K,275K
+"When an Ideal diatomic gas is heated at constant pressure, the fraction of the heat energy supplied which Increases the Internal energy of the gas is",5/7,2/5,3/5,3/7
+What happens in adiabatic process,the system is insulated from the surrounding,Volume remains constant,pressure remains constant,temperature remains constant
+"A carnot engine kept at a temperature at 800K and 400K, the output of cycle is 800J. Then the energy applied by the source",1600J,800J,1200J,1500J
+Seventy calories of heat es required to raise the temperature of 2 moles of an ideal gas at constant pressure from 30°C to 35°C. The amount of heat required to raise the temperature of the same gas through the same range at constant volume equal for,70 cal,30cal,50 cal,90 cal
+"In adiabatic process on a gas with γ=1.4, the pressure is increased by 0.5%. The volume of the gas decreased by",0.7%,0.36%,0.5%,1%
+In isothermal process,Temperature remains constant,Pressure remains constant,Thermal energy remains constant,Volume remains contant
+"When a gas undergo adiabatic expansion, its internal energy",decreses,increases,remains same,None
+Internal energy of the ideal gas depends op,Temperature only,Volume and temperature,Pressure and temperature,volume only
+Heat of neutralisation of NAOH and HCl is -57.34KJ/mol then heat of ionisation of water is..........,+57.34KJ/mol,-57.34KJ/mol,-114.68 KJ/mol,+114.68 KJ/mol

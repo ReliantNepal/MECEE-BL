@@ -1,0 +1,94 @@
+question,answer,wrong1,wrong2,wrong3
+A fan makes 10 revolutions in 3 second which is just switched on. Considering uniform acceleration the number of revolution made by fan in next 3 second is:,30,10,20,40
+The spokes are used in bicycle wheel to,Increases moment of inertia,Increases frictional force,Decreases frictional force,Increase angular momentum
+"A small mass of 10 gm, lies in a hemispherical bowl of radius 0.4 m at a height of 0.1 m from the bottom of the bowl. The mass will be in equilibrium if the bowl rotates at an angular speed of",\(\frac{10}{\sqrt{3}} rad/s\),\(10\sqrt{3} rad/s\),10 rad/s,\(\sqrt{20} rad/s\)
+A thin uniform rod of mass 'm' moves translationally with acceleration 'a' due to two antiparallel force of lever arm 'l'. One force is of magnitude F and acts at one extreme end. The length of the rod is,\(\frac{2(F+ma)l}{ma}\),\(l[1+\frac{F}{ma}]\),\(\frac{(F+ma)l}{2ma}\),\(\frac{mal}{ma+F}\)
+A wire of length I and mass 'm' is bent in the form of a rectangle ABCD with  AB\BC=2. The moment of inertia of this wire,\(7/162 ml^2\),\(11/252 ml^2\),\(8/203 ml^2\),\(5/136ml^2\)
+A billiard ball is hit by a cue at a height 'h' above the center. It acquires a linear velocity Vo. Mass of the ball is m and radius is r. The angular velocity wo acquired by the ball is:,\(\frac{5Voh}{2r^2}\),\(\frac{2Voh}{5r^2}\),\(\frac{2Vor^2}{5h}\),\(\frac{5Vor^2}{2h}\)
+"A ring, a dice, solid sphere, hollow sphere are dropped from the same inclined plane of same height then which one of the following reaches the ground first",solid sphere,ring,disc,hollow sphere.
+The moment of inertia of a body of mass M about a given axis is I. What is the radius of gyration?,\(\sqrt{I/M}\),I/M,IM,\(\sqrt{IM}\)
+The torque due to gravitational force on a body about its centre of mass is:,Zero,infinite,finite,can not be measured
+"Two forces of 2N and 4N attached at the ends of a 0.5 meter rod act vertically downwards. A third force will keep the system in equilibrium if applied at a point between the ends of the rod. The magnitude, direction and position of the third force will be:",6 N upward at 16.66 cm from 4N force.,6 N downwards at 33.33 cm from 2N force.,2N downwards at 33.33 cm from 2N force.,2N upward at 16.66 cm from 4N force.
+Two point masses of 1 kg and 2 kg separated by 0.5 m constitute a system. The distance of the centre of mass of the system from 1 kg mass is:,0.33 m,0.15 m,0.25 m,0.4 m
+A circular body of mass 2 kg of radius 1 m then of inertia about diameter is?,\(0.5 kg m^2\),\(4 kg m^2\),\(4 kg m^2\),\(1 kg m^2\)
+Moment of inertia doesn't depend upon,Angular velocity,Mass,Distribution of mass,Radius
+"If 'M' and 'r' are respectively the mass of electrons and radius of the orbit in which the electron revolves about the nucleus, the moment of inertia of electron will be:",\(Mr^2\),\(1/2 *Mr^2\),\(2/5 *Mr^2\),\(2/3 * Mr^2\)
+When a body rolls downs an inclined plane. The total potential energy of the body changes into:,Both rotational and translational K.E,Rotational K.E.,Translational K.E,None
+If no internal force is applied in a body the velocity of the centre of mass:,Remains constant,Zero,Increases,Decreases
+"The product of moment of inertia and angular acceleration gives,",Torque,Linear momentum,Angular momentum.,Force.
+A cylinder has mass 'M' a length 'l' and Radius 'R' then M.I. about own axis is:,\(MR^2/2\),\(MR^2\),\(MR^2/4\),\((R^2/4+l^2/12)\)
+"Two bodies of masses m1 and m2 move in circles of radii r1 and r2 respectively. If they complete the circles in equal time, the ratio of their angular speed  ω1/ω2 is",1,m1/m2,r1/r2,m1r1/m2r2
+A uniform heavy disc is rotating with a constant angular velocity about a vertical axis through its center. Some wax is dropped gently on the disc near to the edge. The angular velocity of the disc,Decreases,Becomes zero,Increases,Does not change
+"A uniform metal disc of radius R lies in XY - plane and rotates with uniform angular velocity ω about the Z-axis, the total induced EMF between the center and the rim of the disc is equal to;",\(1/2*ωBR^2\),ωBR,1/2 ωBR,\(1/2*ωB^2R\)
+Two masses of 1 kg and 2 kg are 9 m apart and make two body system. Their centre of mass from 1 kg mass will be at,6 m,4 m,3 m,2 m
+"A uniform disc is rotating at a constant speed about a vertical axis through its centre. Some wax is gently dropped on the disc, the angular velocity of the disc",decreases,doesn't change,increases,becomes zero
+A circular disc of mass m and radius r is rotating about its axis with uniform speed of v. What is its kinetic energy?,\(1/4*mv^2\),\(mv^2\),\(1/2*mv^2\),\(1/8*mv^2\)
+"When the size of the earth is reduced to half, mass remaining same, the time period of the earth rotation will be:",6 hours,24 hours,12 hours,48 hours
+"A rotating disc has ...............kinetic energy, if mass is M & velocity is V",\(MV^2/4\),\(MV^2\),\(1/2 MV^2\),\(3/4 MV^2\)
+A fly-wheel of mass 10 kg and radius 50 cm is rotating with constant angular speed of ω with its kinetic energy 20 Joule. The angular speed of flywheel is,4 rad/s,4 rad/s,2 rad/s,10 rad/s
+"The body applied with constant torque changes the angular momentum lo to final angular momentum 41, in 3 sec. then find torque",Io,3Io,4Io,2Io
+Kinetic energy of a body is given by \(1/2 mv^2\). Which one of the following expression is correct for the kinetic energy of the rigid body where I and ω represent the moment of intertia and angular velocity of the rigid body?,\((1/2)Iω^2\),\((1/2)I^2ω\),\((1/2)I^2ω^2\),\((1/2)I^2ω^2\)
+If a body starts from rest with angular acceleration α = \(6t^2\) .What is time taken to complete 10 revolution?,2.14,0,2.8,3.6
+If there is a change of angular momentum from 2 J to 4 J in 4 sec. Then the torque is,0.5J,0.25 J,1J,2J
+When torque acting upon a system is zero. Which of the following will be constant?,Angular momentum,Force,Linear momentum,Linear impulse
+A shell at rest explodes. The centre of mass of the fragments,remains at rest,Moves along the parabolic path,Moves along the straight line,Move along an elliptical path
+The moment of inertia of a disc of mass M and radius R about an axis which is tangent to the circumference of the disc and parallel to its diameter is:,\(5/4 MR^2\),\(3/2 MR^2\),\(4/5 MR^2\),\(2/3 MR^2\)
+A particle of mass m and radius of  gyration k is rotating with an angular acceleration α. The torque acting on it is,\(mk^2α\),\(mk^2/α\),\(mα/k^2\),\(1/4mk^2α^2\)
+The ratio of the angular speeds of minute hand and hour hand of a clock is,12:1,60:1,36:1,24:1
+The centre of gravity of a body,May lie whether outside or on the surface the body,Lies always outside the body,Lies inside the body,Lies on the surface of the body
+Radius of Gyration of an uniform rod about an axis through its middle is,\(L/12^{1/2}\),\(L/3^{1/2}\),\(L/8^{1/2}\),\(L/2^{1/2}\)
+"Let I1 and I2 be the moments of inertia of two bodies of identical geometrical shape, the first made of almunium and the second of iron",I1<I2,I1=I2,I1>I2,Information is insufficient to derive the relation between I1 and I2
+Three point masses each of mass m are placed at the corners of an 'equilateral triangle of side 1. The moment of inertia of system about an axis along of the triangle is,\(3/4ml^2\),\(3ml^2\),\(ml^2\),\(3/2ml^2\)
+"When an explosive shell travelling in a  parabolic path under the effect of gravity explodes, the centre of mass of the fragments will move",along the original parabolic path,Vertically upwards and then vertically down wards,Horizontally and then follow the parabolic path,along a hyperbolic path
+Ratio of the angular velocity of the earth about its axis and the hour hand of clock is,1:2,12:11,11:12,2:1
+"If the radius of the earth's orbit is made one fourth, the duration of year will
+become",1/16 times,1/2 times,1/4 times,1/8 times
+The moment of inertia of a circular ring of mass M and radius R about its diameter is,\(MR^2/2\),\(MR^2\),\(2/3 *MR^2\),\(3/2 *MR^2\)
+"The moment of inertia of a thin rod of mass M, length L, about an axis passing through a point L/4  from one end and perpendicular to length is",\(7/48 * ML^2\),\(ML^2/3\),\(ML^2/12\),\(31/48 * ML^2\)
+The moment of inertia of a solid sphere of mass M radius R about its diameter is,\(2/5 *MR^2\),\(2/3 *MR^2\),\(3/5 *MR^2\),\(7/5 *MR^2\)
+"The M.I of a solid cylinder of length 1, radius R about its geometrical axis is same as about equatorial axis, then the ratio of R and I will be",\(\frac {1 }{\sqrt{3}}\),\(\frac {1 }{2}\),3,\(\sqrt{3}\)
+"A uniform metallic disc of moment of inertia lo about its own axis is melted and a uniform ring of equal radius is then casted from it. Then, M.I of the ring about its diameter will be",Io,2Io,Io/2,Io/4
+A uniform metallic disc has its M.I Io about its diameter. Then its M.I about an axis through its rim perpendicular to the plane will be,6Io,4Io,3.2 * Io,5/4 * Io
+"The radii of two steel balls are R and 2R. Then, their moment of inertia about their diameters are in the ratio",1:32,1:4,1:8,1:16
+A circular portion of diameter R is cut out from the edge of a uniform disc of mass M and radius R. The M.I of the remaining portion of the disc about an axis passing through the centre O of the disc and perpendicular to its plane is,\(\frac{13}{32}MR^2\),\(\frac{15}{32}MR^2\),\(\frac{7}{16}MR^2\),\(\frac{3}{8}MR^2\)
+A uniform rod of mass M and length L is rotating with angular speed ωo with two beads of mass m on either side of the axis passing through its centre and perpendicular to its length. The beads slide outward as it rotates. What will be the final angular speed when the beads reach the ends?,\(\frac{M}{M+6m}ωo\),\(\frac{M}{M+2m}ωo\),\(\frac{M}{M+4m}ωo\),\(\frac{M}{M+12m}ωo\)
+"Three thin rods each of length L and mass M are placed along X, Y and Z-axis in such a way that one end of rod is at the origin. The moment of inertia of the system about Z-axis is",\(\frac{2}{3} ML^2\),\(\frac{ML^2}{3}\),\(ML^2\),\(\frac 1 6 ML^2\)
+"The M.I of two spheres of equal masses about their respective diameters are n same. If one of them is solid and other is hollow, then the ratio of their radii (solid to hollow), will be an axis through its rim the plane will be",\(\sqrt{5}:\sqrt{3}\),\(\sqrt{3}:\sqrt{5}\),5:3,3:5
+"Two circular discs of same mass and thickness are made from metals having densities d1 , and d2 respectively. The ratio of their moments of inertia about the central axis will be",d2:d1,d1:d2,d1.d2:1,1:d1.d2
+A wheel of moment of inertia \(5×10^3\)kg- \(m^2\) is making 20 rev/sec. The torque required to stop it in 10 sec is,\( 2л *10^{-2}N- m\),\( л *10^{-2}N- m\),\( 2л *10^{2}N- m\),\( 4л *10^{2}N- m\)
+"A thin hollow cylinder open at both ends,
+i. Slides without rotating
+ii. rolls without slipping with the same speed.
+The ratio of K.E in the two cases is:",1:2,1:1,2:1,4:1
+A solid sphere of mass M is rolling on a horizontal surface without sliding with velocity v. Its kinetic energy will be,\(\frac {7}{10} mv^2\),\(\frac 12 mv^2\),\(\frac 75 mv^2\),\(\frac 15 mv^2\)
+A solid sphere of mass M is rotating about its diameter and linear velocity of a point on its equator is v. Then its kinetic energy will be,\(\frac15 mv^2\),\(\frac12 mv^2\),\(\frac75 mv^2\),\(\frac{7}{10}mv^2\)
+A body rolling without sliding has its rotational kinetic energy equal to 40% of total energy. Then body should be,Hollow sphere,Circular disc,Solid sphere,Hollow cylinder
+A solid spherical ball rolls on a table. Ratio of rotational. K.E to the total K.Eis,2/7,5/7,1/2,7/10
+A ring of radius r and mass m rotates about its axis passing through its centre and perpendicular to its plane with angular velocity w. Its kinetic energy is:,\(1/2 mr^2ω^2\),\(mr^2ω\),\(1/4mr^2ω^2\),\(mr^2ω^2\)
+"A spherical ball rolls on a table without slipping, then the fraction of its total energy associated with rotation is:",2/7,2/5,3/5,5/7
+A thin uniform circular ring is rolling down an inclined plane of inclination 30° without slipping. Its linear acceleration along the inclined plane will be..,g/4,g/2,g/3,2g/3
+"Two bodies of moment of inertia I1 and I2 (I1 > 12) have equal angular momenta. If E1, E2 are their kinetic energies rotation, then",E1<E2,E1> E2,E1 = E2,cannot be said
+A square plate of side L has mass M. What is the moment of inertia about an axis passing through the point of intersection  of its diagonal and perpendicular to its plane?,\(\frac{ML^2}{6}\),\(\frac{ML^2}{12}\),\(\frac{ML^2}{24}\),\(\frac{ML^2}{3}\)
+A meter stick held vertically with its lower end hinged on a horizontal surface is allowed to fall. The velocity of its free end striking the surface is (g = 10m/s2),\(\sqrt{30} m/s\),\(\sqrt{10} m/s\),\(\sqrt{20} m/s\),5 m/s
+The least coefficient of friction for an inclined plane of inclination a with the horizontal in order that a solid cylinder will roll down without slipping is,\(\frac 13 tanα\),\(\frac 23 tanα\),\(\frac 25tanα\),\(\frac 43 tanα\)
+A wheel of mass 10kg has a moment of inertia 160kg\(-m^2\) about its own axis. The radius of gyration is:,4m,10m,5m,6m
+"The radius of gyration of a solid disc of mass 1kg and radius 50cm about an axis through centre
+and perpendicular to its face is",\(25\sqrt{2}cm\),25cm,50 cm,\(25\sqrt{6}cm\)
+"A uniform circular disc, 40g is rotating about its own vertical axis at 30 rpm. When 20g sand falls on its surface at distance 5cm from the centre of the disc, the rate of rotation decreases to 24 rpm. Then the radius of the disc should be:",10cm,5cm,5√2 cm,20cm
+"A particle performs uniform circular motion with an angular moment L. If the frequency of particle's motion is doubled and its kinetic energy is halved, the angular momentum becomes:",L/4,2L,4L,L/2
+A constant torque acting on a uniform circular wheel changes its angular momentum from Jo to 4Jo in 4 seconds. The magnitude of the torque is:,3/4 *Jo,4Jo,Jo,12Jo
+A flywheel of moment of inertia \(0.5kgm^2\) is rotating 300 rpm initially comes to rest in 10 seconds under constant retarding torque. Then the number of revolutions made by the wheel until rest is:,25,20,30,50
+A sphere of mass 2kg and radius 5cm is rotating at the rate of 300rpm. Then the torque required to stop it in 2π revolutions is:,\(2.5 x 10^{-2}N-m\),\(1.6 x 10^{-5}N-m\),\(1.6 x 10^{-4}N-m\),\(2.5 x 10^{-3}N-m\)
+"Two particles A and B initially at rest' move towards each other under a . mutual force of attraction. At the instant when velocity of A is v and that of B is 2v, the velocity of centre of mass of the system is:",zero,v,2v,3v
+"Two particles of masses m1 and m2 are at distance x. Then, their centre of mass lies at distance from m1.",\(\frac{m2}{m1+m2}x\),\(\frac{m1}{m2}x\),\(\frac{m1}{m1+m2}x\),\(\frac{m2}{m1}x\)
+"Out of two particles of masses m1 and m2, the particle m1 is moved through a distance d towards its centre of mass. To keep their centre of mass at same initial position, another particle m2 should be moved through a distance.",\((\frac{m1}{m2})d\),\((\frac{m1}{m1+m2})d\),\((\frac{m2}{m1})d\),\((\frac{m2}{m1+m2})d\)
+"Out of two particles of masses m1 and m2, the particle m1 is moved through a distance d towards their centre of mass. What is the displacement of centre of mass?",\((\frac{m1}{m1+m2})d\),\((\frac{m2}{m1+m2})d\),\((\frac{m1+m2}{m1})d\),None
+Two blocks of masses 5kg and 2kg are placed on a frictionless surface and connected by a spring. An external kick gives a velocity of 14 m/s to the heavier block in the direction of lighter one. Calculate the velocity gained by the centre of mass.,10 m/s,14 m/s,7 m/s,zero
+"A shell is fixed a gun with a muzzle velocity u m/s at an angle θ with the the shell explodes into two fragments P and Q of equal mass. If the speed of fragment P immediately after explosion becomes zero, where does the fragment Q hit the ground from the point of projection?",\(\frac 32 \frac{u^2sin2θ}{g}\),\(\frac{u^2sin2θ}{g}\),\(\frac{u^2sin2θ}{2g}\),\(\frac{u^2sin^2θ}{g}\)
+A circular plate of uniform thickness has a diameter of 56cm. A circular portion of diameter 42cm is removed from one edge as shown in the fig. The centre of mass of remaining from the centre of plate will be at,9 cm,5 cm,7 cm,11 cm
+Two masses of 1kg and 2kg are 9m apart and make a two body system. Their centre of mass from 1kg mass will be at,6m,4m,3m,2m
+"Let  \( \vec F\)be a force acting on a particle  having position vector\(\vec  r\). Let \(\vec τ\)be the torque of this force about the origin, then",\(\vec r. \vecτ= 0  \) and \(\vec F.\vecτ=0\),\(\vec r. \vecτ= 0  \) and \(\vec F.\vecτ≠0\),\(\vec r. \vecτ≠ 0  \) and \(\vec F.\vecτ=0\),\(\vec r. \vecτ≠ 0  \) and \(\vec F.\vecτ≠0\)
+If a gymnast on a rotating stool with his arms outstretched suddenly lower his arms,The moment of inertia decrease,The angular velocity decrease,The angular velocity remains constant,The angular momentum increase
+A particle is rolling in a platform with the velocity of centre of mass as √2m  \(sec^{-1}\). What is the velocity of particle on the rim at the same height of centre of mass?,2,0,\(2\sqrt{2}\),1
+Moment of Inertia depends on:,Axis of rotation,Torque,Angular acceleration,Angular velocity
+Centre of mass is not affected by:,internal force acted on particles,mass of individual,relative distance between particles,position of particles

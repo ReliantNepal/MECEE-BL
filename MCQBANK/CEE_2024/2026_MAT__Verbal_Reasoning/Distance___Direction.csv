@@ -1,0 +1,12 @@
+question,answer,wrong1,wrong2,wrong3
+A man walks 5km towards south and then turn to the right. After walking 3km he turns to the left and walk 5km. Now in which direction is he from the starting place ?,SW,WS,NE,NS
+"Q. Starting from the point X, Ram walked 15 m towards west. He turned left and walked 20m. He then turned left and walked 15 m. After this he turned to his right and walked 12m. How far and in which direction is now from point X ?","S, 32 m","S, 12 m","N, 32 m","N, 22 m"
+"A boy rode his bicycle Northward, then turned left and rode 1 km and agin tirned left and rode 2km. He found himself 1 km west of his starting point. How far did he ride northward initially?",2 km,1km,3 km,4 km
+"A girl is facing North, she turns 180 degree   anticlockwise direction and then 225 degree in the clock wise direction, which direction is she facung now ?","45, NE","45 , EN","45 , NW","45, SW"
+"Pema is facing north-west. She turns 90 degree in the clockwise direction and then 135 degree in the anticlockwise direction. Which directsion is she facing now ?
+
+​",West,East,North,South
+"Simran is facing towards west and turns through 45° clockwise, again 180° clockwise and then turns through 270° anti clockwise. In which direction is she facing now?",S-W,West,N-W,South
+A man walks 5 km toward south and then turns to the right. After walking 3 km he turns to the left and walks 5 km. Now in which direction is he from the starting place?,South-West,West,South,North-East
+"A rat run 20 step towards East and turns to right runs 10 step, and turns to right runs 9 step, and again turns to left runs 5 step and then turns to left runs 12 step and finally turns to left and runs 6 step. Now what direction is the rat facing?",North,West,East,South
+Sunita walks 24 km towards west. She turns right and walks another 24 km. She turns right and walks another 28 km. In which direction is she from her starting point?,North-East,North,East,North-West

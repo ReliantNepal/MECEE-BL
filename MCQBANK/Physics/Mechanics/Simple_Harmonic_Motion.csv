@@ -1,0 +1,71 @@
+question,answer,wrong1,wrong2,wrong3
+The graph plotted between acceleration and displacement in SHM will be a,straight line,Hyperbolic,parabolic.,Eclipse
+Two bobs are simultaneously executed in S.H.M. The resultant amplitude of system is maximum if they have phase difference of,2π,π/2,π,π/4
+The time period of simple pendulum is given by,\(T= 2π\sqrt{\frac{l}{g}}\),\(T= \frac{1}{2π}\sqrt{\frac{l}{g}}\),\(T= \frac{1}{2π}\sqrt{\frac{g}{l}}\),None
+The SHM of a particle is given by an equation\( y =3 sin ωt + 4 cos ωt\). The amplitude is a =,5,7,1,12
+Kinetic energy of a particle in SHM when its displacement is 1/3 of its amplitude is,\((1/2)mω^2r^2cos^2ωt\),\((1/6)mω^2r^2cos^2ωt\),\((1/18)mω^2r^2cos^2ωt\),\((1/3)mω^2r^2cos^2ωt\)
+"If the kinetic energy of a body executing SHM is 1/3 of the potential energy, the displacement of the body is x percent of the amplitude, x must be (nearly)",87,33,50,67
+The length of simple pendulum is given as 'I' then the value of g will be,\(4π^2l/T^2\),\(4π^2l/T\),\(2π^2l^2/T^2\),\(4π^2lT\)
+"In a body executing SHM, in the mean position",Both (a) and (b),No force acts on the body,The velocity of the body becomes size maximum,None
+"For a particle executing SHM, the KE is given by\(K= Kocos^2ωt\). The maximum value of PE is",Ko,0,Ko/2,2Ko
+"A simple pendulum has a time period T1 when on earth's surface, and T2 when taken to a height 'R' above the earth surface, (where R is the radius of the earth) then the value of T2/T1 is",2,4,\(\sqrt{2}\),1
+The time period of simple pendulum is double when,Length is increases by 4 times.,Length is increases by 2 times,Mass is increases by 2 times,Length is reduced to half.
+The pendulum stops due to,Air friction,Gravity,lack of energy,Its mass
+"In S.H.M, minimum particle velocity is at",Extreme position,Mean position,At a distance A/2,At a distance A/4
+"A hollow sphere is filled with water through a small hole in it. It is hung by a thin thread and made to oscillate. As the water slowly flows out of the hole at the bottom, the period of oscillation will",first increases and then decrease,first decrease and increases,continuously increases,continuously decrease
+A pendulum clock keeping correct time is taken to high altitudes,. its length should be decreased to keep correct time,It will keep correct time,its length should be increased to keep correct time.,it will not keep correct time even if its length is changed.
+"If the period of oscillation of mass M suspended from a spring is 1s, then the period of the oscillation of mass 4 m will be",2 sec,1/2 sec,1/4 sec,4 sec
+The differential equation of S.H.M. is given by \(\frac{d^2y}{dt^2}+100y=0\) .The frequency of motion is,10/2π,1,10,100/2π
+The time period of a simple pendulum is doubled when,the length is made four times,its length is doubled,mass of bob is doubled,the mass of bob and length of pendulum are doubled
+"A pendulum suspended from. the ceiling of a train has a period T when the train is at rest. When the train accelerates with a uniform acceleration a, the period of oscillation will:",decrease,increase,remains unaffected,becomes infinite
+The maximum acceleration of a executing S.H.M. is ao and maximum velocity is vo. The amplitude is given,\(vo^2/ao\),\(vo.ao\),\(ao^2/vo\),\(1/ao.vo\)
+The mass and diameter of a planet are twice those of earth. The period of oscillation of the pendulum on this planet will be (if it is a second pendulum on earth),\(2\sqrt{2} sec\),\(\frac{1}{\sqrt{2}} sec\),2 sec,1/2 sec
+The time period of seconds pendulum is 2 sec. The spherical bob which is empty from inside has a mass 50g. This is now replaced by another solid bob of same radius but having a different mass of 100g. The new time period will be,2 sec,4 sec,1 sec,8 sec
+The vertical extension in a light spring by weight of 1kg suspended from the wire is 9.8 cm. The period of oscillation is,2π/10 sec,20π sec,2π sec,200π sec
+A particle is vibrating simple harmonically with an amplitude 'a'. The displacement of the particle when its energy is half kinetic and half potential is,\(a/\sqrt{2}\),a/2,a/4,zero
+"A simple pendulum with a bob mass m swing with an angular amplitude of 40°. When its angular displacement is 20°, the tension in the string is:",greater than mgcos20°,mgcos20°,less than mgcos20°,mgcos40°
+The maximum velocity and maximum acceleration of a particle executing SHM are 4m/s and \(2m/s^2\). Then its time period of oscillation will be,4π sec,π/2 sec,2π sec,2/π sec
+A body is executing SHM with amplitude Ao. At what displacement from mean position its KE will be half its maximum value?,\(\frac{Ao}{\sqrt{2}}\),Ao/2,Ao/4,\(\sqrt{3}/2 * Ao\)
+A body is executing SHM with amplitude Ao. At what displacement from mean position its velocity is half its maximum value,\(\frac{\sqrt{3}}{2}Ao\),Ao/2,\(\frac{Ao}{\sqrt{2}}\),\(\frac{Ao}{4}\)
+"A spring has force constant k and a mass m is suspended from it. The spring is cut into two equal halves and the same mass is suspended from one of the halves. If the frequency of oscillations in the first case is n, then the frequency in the second. case will be:",\(\sqrt{2}n\),n,2n,\(n/\sqrt{2}\)
+"Two blocks of masses m1 = 2kg and m2= 8kg are connected by a spring of force constant k = 1000kg/m. If the blocks are caused to oscillate, the frequency 'f' of motion is (\(g = 10m/s^2\))",25/2π,\(25\sqrt{2}/π\),\(25/π\sqrt{2}\),2π/25
+A simple spring has length I and force  constant k. It is cut into two springs of length l1 and l2 such that l1 = n.l2. The force constant of spring length l1 is,k(n+1)/n,k(1+n),k,k/(n+1)
+"Starting from mean position, a particle in SHM takes time t, and t to cover first half and next half displacement in moving from mean to extreme position. Then",t1=t2/2,t1=t2,t1=2t2,\(t1=t2/\sqrt{2}\)
+A particle undergoes SHM having time period T. The time taken in completing 3/8  oscillation from mean position is.,(5/12)T,(3/8)T,(5/8)T,(7/12)T
+"In the above question, time taken for  3/8 Oscillation from extreme position is",T/3,T/2,T/4,5T/12
+"A body is dipped into the hole drilled through centre of the earth. Then time taken by the body to move from one end of the hole through R/2 (R = Radius of earth) is,",14 min,7 min,12 min,10.5 min
+The energy stored in a spring extended by 2cm is Uo. What is energy if it is extended by 10cm?,25Uo,5Uo,10Uo,50Uo
+The bob of a simple pendulum of length L is released at time t = 0 from a position of small angular displacement. Its linear displacement at time t is given by,\(X=acos\sqrt{\frac{g}{L}}*t\),\(X=asin2π\sqrt{\frac{L}{g}}*t\),\(X=acos2π\sqrt{\frac{g}{L}}*t\),\(X=asin\sqrt{\frac{g}{L}}*t\)
+"Two bodies M and N of equal masses are suspended from two separate massless springs of spring constants k and k2 respectively. If the two bodies oscillate vertically such that their maximum velocities are equal, the ratio of amplitude of vibration of M to that of N is:",\(\sqrt{k2/k1}\),k1/k2,\(\sqrt{k1/k2}\),\(k2/k1\)
+"A simple pendulum with a brass bob has a time period T. The bob is now immersed in a non-viscous liquid and oscillates in it. If the density of liquid is 1/10th that of brass, the time period of same pendulum in liquid will be:",\(\sqrt{10/9T}\),T,10/9T,\(\sqrt{(9/10)T}\)
+The kinetic energy of a block oscillating from a spring is independent of,its mass,nature of spring,displacement from mean position,amplitude of oscillation
+The time period of a simple pendulum increases by 0.1% when it is taken to peak of a mountain. If the radius of earth is 6400km then height of the peak is:,6.4km,4.8km,12.8km,3.2km.
+The time period of a simple pendulum increases by 0.01% when it is taken to 1 coalmine. If radius of earth is 6400km then depth of mine is,1.28km,0.64km,0.32km,0.48km
+"A body is executing SHM. When its displacement from the mean position are 4cm and 5cm, it has velocities \(10cms^{-1}\) and \(8cms^{-1}\) respectively. Its time period is",π s,3π/2 s,2π s,π/2 s
+"A simple pendulum has a bob made of solid sphere of steel. If we replace it with a hollow sphere of same mass and same material, the time period will",increase,decrease,remains same,becomes infinite
+"When a particle executing SHM is just midway from mean position to extreme position, then ratio of its KE and PE will be:",3:1,1:1,2:1,\(\sqrt{2}:1\)
+A particle of mass 10g is executing SHM with an amplitude 0.5m and time period π/5  second. The maximum value of the force acting on the particle is:,0.5N,25N,5N,2.5N
+"A ball of mass 5kg hangs from a spring and oscillates with a time period of 2л sec. If the ball is removed, the spring shortens by:",g metre,k/g metre,g/k metre,2π metre
+"A simple harmonic oscillator has displacement 0.02m and acceleration equal to \(2m/s^2\) at any time, the angular frequency of the oscillator is equal to:",\(10 rads^{-1}\),\(0.1  rads^{-1}\),\(100 rads^{-1}\),\(1 rads^{-1}\)
+"The time period of two individually oscillating springs are 3 seconds and x seconds. If they are joined in series, the resulting time period is 5 seconds. If they are joined in parallel, the resulting time period is y seconds. Find x & y.","4,2.4","4,5.6","2,4.4","6,8.2"
+A spring of force constant k is cut into two pieces in the ratio 1:2. What is the spring constant of the longer piece?,3k/2,k,k/3,2k/3
+A pendulum is raised to an angle of 4 degree and released. It,Undergoes SHM with initial phase 90°,Undergoes SHM with initial phase 4,Undergoes SHM with initial phase 0°,Does not undergo SHM
+If 'T' is time period of S.H.M.,acosωt = acos(t+T),acosωt > acosω(t+T),acosωt < acosω(t+T),acos(ωt+T) = acosωt
+If length of a pendulum is increased by  21% its time period increase by,10%,21%,11%,9.8%
+Two pendulum of length 1m and 1.21m respectively start swinging together with same amplitude. Find the number of swings executed by longer pendulum before they will again swing together,10,5,15,18
+"Two simple harmonic motion are given by x1 = asin (ωt) and x2 = bcos (ωt). The phase difference between them, in radians, is",π/2,π,π/4,Zero
+"In a spring, a body weighing 4 m kg is suspended and it oscillates with time period T1. If the body is replaced by a next body of mass 'm' kg, the time. period of oscillation is T2. Then find T1/T2",2,1,\(10^8 N\),\(\sqrt{2}\)
+The kinetic energy of a particle executing simple harmonic motion is maximum when its displacement is equal to,Zero,Amplitude,Amplitude/4,Amplitude/2
+The time period of a simple pendulum inside a satellite orbiting the earth is:,infinity,zero,1 sec,9.8 sec
+A hole is drilled through the centre of the earth and a stone is dropped into it. When the stone reaches at the centre of the earth its,acceleration will be zero,mass will be zero,velocity will be zero,KE will be zero
+The kinetic and potential energies of a particle executing simple harmonic motion with amplitude A will be equal when its displacement is,\(A/\sqrt{2}\),\(A\sqrt{2}\),\(A/2\),\(A\sqrt{2}/3\)
+"A hole is bored in the earth along its diameter. When a ball is dropped from one end, then",it exhibits SHM,it remains stationary,it moves and stops at the centre,it comes out from the other end
+"A 3kg block loaded on the string executes SHM as x = 2 cosx50t where x in meters and t in, sec. Its spring  constant is",7500 N/m,1N/m,2700 N/m,3400 N/m
+The length of a simple pendulum is increased by 44%. What is the percentage increase in it's period,20v,44%,10%,5%
+Maximum speed of a particle in SHM is Vmax. Then average speed of a particle in SHM is equal to,2Vmax/π,Vmax/2,Vmax/π,πVmax/2
+For a simple pendulum graph between \(T^2\) and I comes out to be,st. line,parabola,circle,ellipse
+The motion of a particle executing SHM is given by x = 0.01 sin 100 π (t + 0.005) where x is in meters and t in seconds. The time period of motion in second is,0.02,0.01,0.1,0.2
+"At what position during SHM, the maximum kinetic energy is suspected?",at the mean.,at the extreme,nearer to mean,at between extreme and mean
+A pendulum of mass 20 gm has amplitude 5 cm with time period 2 sec. The maximum velocity of bob is:,0.16 m/s,16 m/s,1.6 m/s,160 m/s
+In SHM the kinetic energy is minimum at;,Extreme position,Mean position,Midway between mean and extreme,At (1/4)th amplitude
+"The maximum velocity of a particle, executing simple harmonic motion with amplitude 7mm, is 4.4 m/s.The period of oscillation is:",0.01s,10s,100s,0.1s
