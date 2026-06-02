@@ -2033,85 +2033,41 @@
   .dbl-confirm-box p  { margin: 0 0 20px; color: var(--muted); font-size: 14px; line-height: 1.5; }
   .dbl-confirm-box .dc-row { display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; }
 
-  /* ===== MCQ BANK ===== */
-  .mcqb-tree { display: grid; gap: 10px; }
-  .mcqb-folder {
+  /* ===== MCQ BANK — card-based multi-level navigation ===== */
+
+  /* Subject grid (level 1) — reuses .subj-grid layout */
+  .mcqb-subj-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 14px;
+  }
+  .mcqb-subj-card {
     background: var(--bg);
     border: 1px solid var(--border);
-    border-radius: 12px;
+    border-radius: 16px;
     overflow: hidden;
-  }
-  .mcqb-folder > summary {
-    list-style: none;
+    box-shadow: var(--shadow-sm);
     cursor: pointer;
-    padding: 12px 16px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-weight: 700;
-    font-size: 14px;
-    background: var(--surface);
-    user-select: none;
-  }
-  .mcqb-folder > summary::-webkit-details-marker { display: none; }
-  .mcqb-folder > summary::after {
-    content: "▾";
-    margin-left: auto;
-    color: var(--muted);
-    font-size: 11px;
-    transition: transform .15s;
-  }
-  .mcqb-folder[open] > summary::after { transform: rotate(180deg); }
-  .mcqb-folder > summary:hover { background: var(--surface-2); }
-  .mcqb-folder-body { padding: 8px 12px 12px; }
-  .mcqb-sub-folder {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 9px;
-    overflow: hidden;
-    margin-bottom: 8px;
-  }
-  .mcqb-sub-folder > summary {
-    list-style: none;
-    cursor: pointer;
-    padding: 8px 12px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-weight: 600;
-    font-size: 13px;
-    user-select: none;
-  }
-  .mcqb-sub-folder > summary::-webkit-details-marker { display: none; }
-  .mcqb-sub-folder > summary::before {
-    content: "▸";
-    color: var(--muted);
-    font-size: 9px;
-    transition: transform .15s;
-  }
-  .mcqb-sub-folder[open] > summary::before { transform: rotate(90deg); }
-  .mcqb-sub-folder > summary:hover { background: var(--surface-2); }
-  .mcqb-files { padding: 4px 8px 8px 28px; display: grid; gap: 6px; }
-  .mcqb-file-btn {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 9px 12px;
-    cursor: pointer;
-    font-size: 13px;
+    transition: transform .15s, box-shadow .15s, border-color .15s;
+    text-align: left;
     font-family: inherit;
     color: var(--text);
-    text-align: left;
-    transition: all .15s;
-    font-weight: 500;
+    display: flex;
+    flex-direction: column;
   }
-  .mcqb-file-btn:hover { border-color: var(--accent); background: var(--surface-2); transform: translateX(2px); }
-  .mcqb-file-btn .icon { font-size: 16px; flex-shrink: 0; }
-  .mcqb-file-btn .name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .mcqb-file-btn .badge-q {
+  .mcqb-subj-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); border-color: var(--accent); }
+  .mcqb-subj-cover {
+    height: 80px;
+    display: flex;
+    align-items: flex-end;
+    padding: 12px 14px 10px;
+    position: relative;
+  }
+  .mcqb-subj-cover .emoji { font-size: 30px; line-height: 1; }
+  .mcqb-subj-body { padding: 12px 14px 14px; flex: 1; display: flex; flex-direction: column; gap: 8px; }
+  .mcqb-subj-name { font-size: 15px; font-weight: 700; letter-spacing: -.2px; line-height: 1.3; }
+  .mcqb-subj-pills { display: flex; gap: 6px; flex-wrap: wrap; }
+  .mcqb-subj-pill {
     background: var(--surface-2);
     border: 1px solid var(--border);
     border-radius: 999px;
@@ -2119,10 +2075,126 @@
     font-size: 10px;
     color: var(--muted);
     font-weight: 700;
+  }
+
+  /* Topic grid (level 2) — folders inside a subject */
+  .mcqb-topic-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .mcqb-topic-card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 13px;
+    padding: 16px;
+    cursor: pointer;
+    transition: transform .15s, box-shadow .15s, border-color .15s;
+    text-align: left;
+    font-family: inherit;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: var(--shadow-sm);
+  }
+  .mcqb-topic-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); border-color: var(--accent); }
+  .mcqb-topic-icon {
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    background: var(--surface-2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
     flex-shrink: 0;
   }
-  /* Top-level files (directly in folder with no subfolder) */
-  .mcqb-folder-body > .mcqb-files { padding-left: 4px; }
+  .mcqb-topic-info { flex: 1; min-width: 0; }
+  .mcqb-topic-name { font-size: 13px; font-weight: 700; margin-bottom: 3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .mcqb-topic-count { font-size: 11px; color: var(--muted); font-weight: 600; }
+
+  /* Quiz file cards (level 3) */
+  .mcqb-file-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 12px;
+  }
+  .mcqb-file-card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 13px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    box-shadow: var(--shadow-sm);
+    transition: transform .15s, box-shadow .15s, border-color .15s;
+  }
+  .mcqb-file-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); border-color: var(--accent); }
+  .mcqb-file-card-top { display: flex; align-items: flex-start; gap: 10px; }
+  .mcqb-file-icon {
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    background: var(--surface-2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .mcqb-file-name { font-size: 13px; font-weight: 700; line-height: 1.35; flex: 1; }
+  .mcqb-file-start {
+    width: 100%;
+    padding: 10px;
+    background: var(--accent);
+    color: var(--accent-text);
+    border: none;
+    border-radius: 9px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    transition: opacity .15s;
+  }
+  .mcqb-file-start:hover { opacity: .82; }
+
+  /* Breadcrumb nav for drill-down levels */
+  .mcqb-crumbs {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 18px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .mcqb-crumb-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 5px 12px;
+    border-radius: 999px;
+    cursor: pointer;
+    font-size: 12px;
+    font-family: inherit;
+    font-weight: 600;
+    transition: background .15s;
+  }
+  .mcqb-crumb-btn:hover { background: var(--surface-2); }
+  .mcqb-crumb-sep { color: var(--muted); font-size: 11px; }
+  .mcqb-crumb-current { font-weight: 700; color: var(--text); }
+
+  /* Section label above grids */
+  .mcqb-section-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--muted);
+    font-weight: 800;
+    margin: 18px 0 10px;
+  }
+  .mcqb-section-label:first-child { margin-top: 0; }
+
+  .mcqb-empty { text-align: center; padding: 40px 20px; color: var(--muted); font-size: 13px; }
+  .mcqb-loading { text-align: center; color: var(--muted); padding: 40px; font-size: 13px; }
+  .nav-btn.mcqb-active { background: var(--accent); color: var(--accent-text); border-color: var(--accent); }
 
   /* MCQ QUIZ MODAL */
   .mcqb-quiz-back {
@@ -2313,15 +2385,14 @@
     <div class="section">
       <div class="section-head">
         <div>
-          <h2>📝 MCQ Bank</h2>
-          <div class="sub">Browse past exam questions by category and test yourself.</div>
+          <h2 id="mcqbPageTitle">📝 MCQ Bank</h2>
+          <div class="sub" id="mcqbPageSub">Choose a subject to start practising.</div>
         </div>
       </div>
-      <div class="mcqb-search-wrap">
-        <input type="text" id="mcqbSearch" placeholder="Search topics or file names…" autocomplete="off" />
-        <button class="mcqb-search-clear" id="mcqbSearchClear" title="Clear">✕</button>
-      </div>
-      <div class="mcqb-tree" id="mcqbTree">
+      <!-- Breadcrumbs (hidden on home level) -->
+      <div class="mcqb-crumbs" id="mcqbCrumbs" style="display:none"></div>
+      <!-- Dynamic content area -->
+      <div id="mcqbContent">
         <div class="mcqb-loading">Loading MCQ Bank…</div>
       </div>
     </div>
@@ -6067,36 +6138,60 @@ document.addEventListener('keydown', e => {
    The user closes it manually (× or Esc) to see the new deck in the tree. */
 
 /* ===================================================================
-   MCQ BANK
-   Fetches the folder tree from /api/mcqbank/tree, renders a browsable
-   tree, and runs a self-test quiz from any CSV file the user picks.
-   CSV format:  question,answer,wrong1,wrong2,wrong3
+   MCQ BANK — card-based 3-level navigation
+   Level 1: Subject cards  (top-level folders)
+   Level 2: Topic cards    (sub-folders inside a subject)
+   Level 3: Quiz file cards (CSV files inside a topic)
+   Quiz: fullscreen modal, 2×2 choices, auto-advance
    =================================================================== */
 
 (function () {
   'use strict';
 
+  /* ---- subject metadata (emoji + gradient) ---- */
+  const SUBJ_META = {
+    physics:              { emoji: '⚛️',  grad: 'linear-gradient(135deg,#1a2980,#26d0ce)' },
+    chemistry:            { emoji: '🧪',  grad: 'linear-gradient(135deg,#f46b45,#eea849)' },
+    botany:               { emoji: '🌿',  grad: 'linear-gradient(135deg,#134e5e,#71b280)' },
+    zoology:              { emoji: '🦎',  grad: 'linear-gradient(135deg,#4e54c8,#8f94fb)' },
+    botany_pyqs:          { emoji: '📋',  grad: 'linear-gradient(135deg,#11998e,#38ef7d)' },
+    zoology_pyqs:         { emoji: '📋',  grad: 'linear-gradient(135deg,#4e54c8,#8f94fb)' },
+    chemistry_pyqs:       { emoji: '📋',  grad: 'linear-gradient(135deg,#f46b45,#eea849)' },
+    physics_pyqs:         { emoji: '📋',  grad: 'linear-gradient(135deg,#1a2980,#26d0ce)' },
+    cee_2024:             { emoji: '📝',  grad: 'linear-gradient(135deg,#6a11cb,#2575fc)' },
+    cee_2023_questions:   { emoji: '📝',  grad: 'linear-gradient(135deg,#7f00ff,#e100ff)' },
+    cee_2022_questions:   { emoji: '📝',  grad: 'linear-gradient(135deg,#ee0979,#ff6a00)' },
+    cee_2021_question:    { emoji: '📝',  grad: 'linear-gradient(135deg,#373b44,#4286f4)' },
+    model_exam:           { emoji: '🎯',  grad: 'linear-gradient(135deg,#dd2476,#ff512f)' },
+    paramedicals:         { emoji: '🏥',  grad: 'linear-gradient(135deg,#43e97b,#38f9d7)' },
+    qad5_0:               { emoji: '📚',  grad: 'linear-gradient(135deg,#f7971e,#ffd200)' },
+    pyqs2_o:              { emoji: '📋',  grad: 'linear-gradient(135deg,#a18cd1,#fbc2eb)' },
+  };
+
+  function subjMeta(name) {
+    const key = name.toLowerCase().replace(/[^a-z0-9]/g, '_');
+    return SUBJ_META[key] || { emoji: '📁', grad: 'linear-gradient(135deg,#434343,#000)' };
+  }
+
   /* ---- state ---- */
-  let mcqbTree = null;          // cached tree JSON from server
-  let mcqbVisible = false;      // is the MCQ Bank view active?
-  let quiz = {                  // active quiz state
-    questions: [],              // shuffled question objects
-    idx: 0,
-    correct: 0,
-    wrong: 0,
-    answered: false,
-    fileName: '',
-    originalQuestions: [],      // pre-shuffle copy for retry
+  let mcqbTree    = null;
+  let mcqbVisible = false;
+  // Breadcrumb stack: each entry is the node object at that level
+  let navStack    = [];   // [] = home, [node] = subject, [node, node] = topic
+  let quiz = {
+    questions: [], idx: 0, correct: 0, wrong: 0,
+    answered: false, fileName: '', originalQuestions: [],
   };
 
   /* ---- elements ---- */
-  const navBtn          = document.getElementById('mcqbankNavBtn');
-  const viewMcqb        = document.getElementById('view-mcqbank');
-  const viewHome        = document.getElementById('view-home');
-  const viewSubject     = document.getElementById('view-subject');
-  const treeEl          = document.getElementById('mcqbTree');
-  const searchInput     = document.getElementById('mcqbSearch');
-  const searchClear     = document.getElementById('mcqbSearchClear');
+  const navBtn      = document.getElementById('mcqbankNavBtn');
+  const viewMcqb    = document.getElementById('view-mcqbank');
+  const viewHome    = document.getElementById('view-home');
+  const viewSubject = document.getElementById('view-subject');
+  const contentEl   = document.getElementById('mcqbContent');
+  const crumbsEl    = document.getElementById('mcqbCrumbs');
+  const pageTitleEl = document.getElementById('mcqbPageTitle');
+  const pageSubEl   = document.getElementById('mcqbPageSub');
 
   const quizBack        = document.getElementById('mcqbQuizBack');
   const quizClose       = document.getElementById('mcqbQuizClose');
@@ -6108,7 +6203,6 @@ document.addEventListener('keydown', e => {
   const questionEl      = document.getElementById('mcqbQuestion');
   const choicesEl       = document.getElementById('mcqbChoices');
   const feedbackEl      = document.getElementById('mcqbFeedback');
-
   const qScreen         = document.getElementById('mcqbQuestionScreen');
   const rScreen         = document.getElementById('mcqbResultScreen');
   const scoreBig        = document.getElementById('mcqbScoreBig');
@@ -6131,182 +6225,215 @@ document.addEventListener('keydown', e => {
   }
 
   function prettifyName(name) {
-    return name.replace(/\.csv$/i, '').replace(/[_\-]/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+    return name.replace(/\.csv$/i, '').replace(/[_\-]+/g, ' ')
+               .replace(/\b\w/g, c => c.toUpperCase()).trim();
   }
 
-  /* Parse a CSV string into question objects.
-     Handles quoted fields and optional BOM. */
+  function countFiles(node) {
+    let n = (node.files || []).length;
+    for (const c of (node.children || [])) n += countFiles(c);
+    return n;
+  }
+
   function parseCsv(text) {
     const lines = text.trim().split(/\r?\n/);
     if (!lines.length) return [];
-    // skip header row
-    const dataLines = lines.slice(1);
     const questions = [];
-    for (const raw of dataLines) {
+    for (const raw of lines.slice(1)) {
       if (!raw.trim()) continue;
       const cols = splitCsvRow(raw);
       if (cols.length < 2) continue;
-      const q = cols[0].trim();
-      const answer = cols[1].trim();
-      const wrongs = cols.slice(2).map(c => c.trim()).filter(Boolean);
+      const q = cols[0].trim(), answer = cols[1].trim();
       if (!q || !answer) continue;
-      // Filter out single-letter placeholder values (A/B/C/D/E)
-      const cleanWrongs = wrongs.filter(w => w.length > 1 && !/^[A-E]$/.test(w));
-      if (cleanWrongs.length === 0) continue; // skip questions with no real distractors
-      questions.push({ q, answer, wrongs: cleanWrongs });
+      const wrongs = cols.slice(2).map(c => c.trim())
+                         .filter(w => w.length > 1 && !/^[A-E]$/.test(w));
+      if (!wrongs.length) continue;
+      questions.push({ q, answer, wrongs });
     }
     return questions;
   }
 
   function splitCsvRow(row) {
-    const result = [];
-    let cur = '';
-    let inQuote = false;
+    const res = []; let cur = '', inQ = false;
     for (let i = 0; i < row.length; i++) {
       const ch = row[i];
-      if (ch === '"') {
-        if (inQuote && row[i + 1] === '"') { cur += '"'; i++; }
-        else inQuote = !inQuote;
-      } else if (ch === ',' && !inQuote) {
-        result.push(cur); cur = '';
-      } else {
-        cur += ch;
-      }
+      if (ch === '"') { if (inQ && row[i+1] === '"') { cur += '"'; i++; } else inQ = !inQ; }
+      else if (ch === ',' && !inQ) { res.push(cur); cur = ''; }
+      else cur += ch;
     }
-    result.push(cur);
-    return result;
+    res.push(cur);
+    return res;
   }
 
-  /* ---- tree rendering ---- */
+  /* ---- view toggle ---- */
   function showView() {
     mcqbVisible = true;
     navBtn.classList.add('mcqb-active');
     viewHome.classList.remove('active');
     viewSubject.classList.remove('active');
     viewMcqb.classList.add('active');
-    if (!mcqbTree) loadTree();
+    if (!mcqbTree) loadTree(); else renderLevel();
   }
 
   function hideView() {
     mcqbVisible = false;
     navBtn.classList.remove('mcqb-active');
     viewMcqb.classList.remove('active');
-    // restore whichever view was previously active (home by default)
     if (typeof applyViewFromHash === 'function') applyViewFromHash();
   }
 
-  navBtn.addEventListener('click', () => {
-    if (mcqbVisible) hideView(); else showView();
-  });
+  navBtn.addEventListener('click', () => { if (mcqbVisible) hideView(); else showView(); });
 
+  /* ---- load tree ---- */
   async function loadTree() {
-    treeEl.innerHTML = '<div class="mcqb-loading">Loading MCQ Bank…</div>';
+    contentEl.innerHTML = '<div class="mcqb-loading">Loading MCQ Bank…</div>';
     try {
       const resp = await fetch('/api/mcqbank/tree');
       if (!resp.ok) throw new Error('HTTP ' + resp.status);
       mcqbTree = await resp.json();
-      renderTree(mcqbTree, '');
+      navStack = [];
+      renderLevel();
     } catch (e) {
-      treeEl.innerHTML = `<div class="mcqb-loading" style="color:var(--bad)">Failed to load MCQ Bank: ${e.message}</div>`;
+      contentEl.innerHTML = `<div class="mcqb-loading" style="color:var(--bad)">Failed to load: ${e.message}</div>`;
     }
   }
 
-  function renderTree(node, query) {
-    treeEl.innerHTML = '';
-    const q = query.toLowerCase().trim();
-    // Top-level children of the root node are the subject folders
-    const folders = node.children || [];
-    if (!folders.length && !(node.files || []).length) {
-      treeEl.innerHTML = '<div class="mcqb-loading">No MCQ files found.</div>';
+  /* ---- navigation ---- */
+  function navigate(node) {
+    navStack.push(node);
+    renderLevel();
+  }
+
+  function navigateTo(depth) {           // breadcrumb click: trim stack to depth
+    navStack = navStack.slice(0, depth);
+    renderLevel();
+  }
+
+  function renderLevel() {
+    const depth = navStack.length;
+    const node  = depth === 0 ? mcqbTree : navStack[depth - 1];
+
+    /* breadcrumbs */
+    if (depth === 0) {
+      crumbsEl.style.display = 'none';
+      pageTitleEl.textContent = '📝 MCQ Bank';
+      pageSubEl.textContent   = 'Choose a subject to start practising.';
+    } else {
+      crumbsEl.style.display = 'flex';
+      crumbsEl.innerHTML = '';
+      // Home crumb
+      const homeBtn = document.createElement('button');
+      homeBtn.className = 'mcqb-crumb-btn'; homeBtn.textContent = '📝 MCQ Bank';
+      homeBtn.addEventListener('click', () => navigateTo(0));
+      crumbsEl.appendChild(homeBtn);
+      // Intermediate crumbs
+      navStack.forEach((n, i) => {
+        const sep = document.createElement('span');
+        sep.className = 'mcqb-crumb-sep'; sep.textContent = '›';
+        crumbsEl.appendChild(sep);
+        if (i < navStack.length - 1) {
+          const btn = document.createElement('button');
+          btn.className = 'mcqb-crumb-btn'; btn.textContent = prettifyName(n.name);
+          btn.addEventListener('click', () => navigateTo(i + 1));
+          crumbsEl.appendChild(btn);
+        } else {
+          const cur = document.createElement('span');
+          cur.className = 'mcqb-crumb-current'; cur.textContent = prettifyName(n.name);
+          crumbsEl.appendChild(cur);
+        }
+      });
+      pageTitleEl.textContent = prettifyName(node.name);
+      const fc = countFiles(node);
+      pageSubEl.textContent = `${fc} question set${fc !== 1 ? 's' : ''}`;
+    }
+
+    contentEl.innerHTML = '';
+
+    /* Level 1 — subject cards */
+    if (depth === 0) {
+      if (!(mcqbTree.children || []).length) {
+        contentEl.innerHTML = '<div class="mcqb-empty">No subjects found.</div>'; return;
+      }
+      const grid = document.createElement('div');
+      grid.className = 'mcqb-subj-grid';
+      for (const child of mcqbTree.children) {
+        const meta = subjMeta(child.name);
+        const fc   = countFiles(child);
+        const card = document.createElement('button');
+        card.className = 'mcqb-subj-card';
+        card.type = 'button';
+        card.innerHTML = `
+          <div class="mcqb-subj-cover" style="background:${meta.grad}">
+            <span class="emoji">${meta.emoji}</span>
+          </div>
+          <div class="mcqb-subj-body">
+            <div class="mcqb-subj-name">${prettifyName(child.name)}</div>
+            <div class="mcqb-subj-pills">
+              <span class="mcqb-subj-pill">${fc} set${fc !== 1 ? 's' : ''}</span>
+              <span class="mcqb-subj-pill">${(child.children || []).length} topic${(child.children||[]).length !== 1 ? 's' : ''}</span>
+            </div>
+          </div>`;
+        card.addEventListener('click', () => navigate(child));
+        grid.appendChild(card);
+      }
+      contentEl.appendChild(grid);
       return;
     }
-    for (const folder of folders) {
-      const el = buildFolderEl(folder, q, /*depth*/0);
-      if (el) treeEl.appendChild(el);
-    }
-    // Root-level files (rare)
-    if ((node.files || []).length) {
-      const filesDiv = buildFilesEl(node.files, q);
-      if (filesDiv) treeEl.appendChild(filesDiv);
-    }
-    if (!treeEl.children.length) {
-      treeEl.innerHTML = '<div class="mcqb-loading">No matches found.</div>';
-    }
-  }
 
-  function matchesQuery(name, q) {
-    if (!q) return true;
-    return name.toLowerCase().includes(q);
-  }
+    /* Level 2+ — topic folder cards + direct quiz files */
+    const subFolders = node.children || [];
+    const directFiles = node.files || [];
 
-  function buildFolderEl(folder, q, depth) {
-    const hasMatch = subtreeMatches(folder, q);
-    if (q && !hasMatch) return null;
-
-    const tag = depth === 0 ? 'details' : 'details';
-    const cls = depth === 0 ? 'mcqb-folder' : 'mcqb-sub-folder';
-    const det = document.createElement(tag);
-    det.className = cls;
-    if (!q) det.open = false; else det.open = true;
-
-    const sum = document.createElement('summary');
-    sum.textContent = prettifyName(folder.name);
-    det.appendChild(sum);
-
-    // Subfolder body
-    const body = document.createElement('div');
-    body.className = depth === 0 ? 'mcqb-folder-body' : '';
-
-    // Nested subfolders
-    for (const child of (folder.children || [])) {
-      const childEl = buildFolderEl(child, q, depth + 1);
-      if (childEl) body.appendChild(childEl);
+    if (!subFolders.length && !directFiles.length) {
+      contentEl.innerHTML = '<div class="mcqb-empty">No questions found here.</div>'; return;
     }
 
-    // Files in this folder
-    const filesEl = buildFilesEl(folder.files || [], q);
-    if (filesEl) body.appendChild(filesEl);
-
-    det.appendChild(body);
-    return det;
-  }
-
-  function buildFilesEl(files, q) {
-    const matching = q ? files.filter(f => matchesQuery(f.name, q)) : files;
-    if (!matching.length) return null;
-    const div = document.createElement('div');
-    div.className = 'mcqb-files';
-    for (const file of matching) {
-      const btn = document.createElement('button');
-      btn.className = 'mcqb-file-btn';
-      btn.type = 'button';
-      btn.innerHTML = `<span class="icon">📄</span><span class="name">${prettifyName(file.name)}</span><span class="badge-q">Start quiz</span>`;
-      btn.addEventListener('click', () => startQuiz(file.path, prettifyName(file.name)));
-      div.appendChild(btn);
+    if (subFolders.length) {
+      const lbl = document.createElement('div');
+      lbl.className = 'mcqb-section-label'; lbl.textContent = 'Topics';
+      contentEl.appendChild(lbl);
+      const grid = document.createElement('div');
+      grid.className = 'mcqb-topic-grid';
+      for (const child of subFolders) {
+        const fc   = countFiles(child);
+        const card = document.createElement('button');
+        card.className = 'mcqb-topic-card'; card.type = 'button';
+        card.innerHTML = `
+          <div class="mcqb-topic-icon">📂</div>
+          <div class="mcqb-topic-info">
+            <div class="mcqb-topic-name">${prettifyName(child.name)}</div>
+            <div class="mcqb-topic-count">${fc} question set${fc !== 1 ? 's' : ''}</div>
+          </div>`;
+        card.addEventListener('click', () => navigate(child));
+        grid.appendChild(card);
+      }
+      contentEl.appendChild(grid);
     }
-    return div;
-  }
 
-  function subtreeMatches(folder, q) {
-    if (!q) return true;
-    if (matchesQuery(folder.name, q)) return true;
-    for (const f of (folder.files || [])) { if (matchesQuery(f.name, q)) return true; }
-    for (const c of (folder.children || [])) { if (subtreeMatches(c, q)) return true; }
-    return false;
+    if (directFiles.length) {
+      const lbl = document.createElement('div');
+      lbl.className = 'mcqb-section-label'; lbl.textContent = 'Question Sets';
+      contentEl.appendChild(lbl);
+      const grid = document.createElement('div');
+      grid.className = 'mcqb-file-grid';
+      for (const file of directFiles) {
+        const card = document.createElement('div');
+        card.className = 'mcqb-file-card';
+        const startBtn = document.createElement('button');
+        startBtn.className = 'mcqb-file-start'; startBtn.type = 'button';
+        startBtn.textContent = '▶ Start Quiz';
+        startBtn.addEventListener('click', () => startQuiz(file.path, prettifyName(file.name)));
+        card.innerHTML = `
+          <div class="mcqb-file-card-top">
+            <div class="mcqb-file-icon">📄</div>
+            <div class="mcqb-file-name">${prettifyName(file.name)}</div>
+          </div>`;
+        card.appendChild(startBtn);
+        grid.appendChild(card);
+      }
+      contentEl.appendChild(grid);
+    }
   }
-
-  /* ---- search ---- */
-  let searchTimer = null;
-  searchInput.addEventListener('input', () => {
-    clearTimeout(searchTimer);
-    searchTimer = setTimeout(() => {
-      if (mcqbTree) renderTree(mcqbTree, searchInput.value);
-    }, 220);
-  });
-  searchClear.addEventListener('click', () => {
-    searchInput.value = '';
-    if (mcqbTree) renderTree(mcqbTree, '');
-  });
 
   /* ---- quiz ---- */
   async function startQuiz(csvPath, displayName) {
@@ -6325,126 +6452,75 @@ document.addEventListener('keydown', e => {
   }
 
   function launchQuiz(questions) {
-    quiz.questions = questions;
-    quiz.idx = 0;
-    quiz.correct = 0;
-    quiz.wrong = 0;
-    quiz.answered = false;
+    quiz.questions = questions; quiz.idx = 0;
+    quiz.correct = 0; quiz.wrong = 0; quiz.answered = false;
     quizTitleEl.textContent = quiz.fileName;
     quizSubEl.textContent = `${questions.length} question${questions.length !== 1 ? 's' : ''}`;
-    qScreen.style.display = '';
-    rScreen.style.display = 'none';
+    qScreen.style.display = ''; rScreen.style.display = 'none';
     quizBack.classList.add('open');
     document.body.style.overflow = 'hidden';
     renderQuestion();
   }
 
   function renderQuestion() {
-    const q = quiz.questions[quiz.idx];
-    const total = quiz.questions.length;
+    const q = quiz.questions[quiz.idx], total = quiz.questions.length;
     quiz.answered = false;
-    feedbackEl.textContent = '';
-    feedbackEl.className = 'mcqb-feedback';
-
-    // Progress
-    const pct = (quiz.idx / total) * 100;
-    pbarFill.style.width = pct + '%';
+    feedbackEl.textContent = ''; feedbackEl.className = 'mcqb-feedback';
+    pbarFill.style.width = (quiz.idx / total * 100) + '%';
     progressEl.textContent = `${quiz.idx + 1} / ${total}`;
     scoreLive.textContent = `✓ ${quiz.correct}  ✗ ${quiz.wrong}`;
-
     questionEl.textContent = q.q;
-
-    // Build shuffled choices
     const choices = shuffle([q.answer, ...q.wrongs].filter(Boolean));
-    const letters = ['A', 'B', 'C', 'D'];
     choicesEl.innerHTML = '';
-    choices.forEach((text, i) => {
+    ['A','B','C','D'].forEach((letter, i) => {
+      if (!choices[i]) return;
       const btn = document.createElement('button');
-      btn.className = 'mcqb-choice';
-      btn.type = 'button';
-      btn.innerHTML = `<span class="letter">${letters[i]}</span><span>${text}</span>`;
-      btn.dataset.value = text;
+      btn.className = 'mcqb-choice'; btn.type = 'button';
+      btn.innerHTML = `<span class="letter">${letter}</span><span>${choices[i]}</span>`;
+      btn.dataset.value = choices[i];
       btn.addEventListener('click', () => handleAnswer(btn, q.answer));
       choicesEl.appendChild(btn);
     });
   }
 
-  function handleAnswer(btn, correctAnswer) {
+  function handleAnswer(btn, correct) {
     if (quiz.answered) return;
     quiz.answered = true;
-    const chosen = btn.dataset.value;
-    const isCorrect = chosen === correctAnswer;
-
-    // Highlight all choices
+    const isCorrect = btn.dataset.value === correct;
     choicesEl.querySelectorAll('.mcqb-choice').forEach(b => {
       b.disabled = true;
-      if (b.dataset.value === correctAnswer) b.classList.add('correct');
+      if (b.dataset.value === correct) b.classList.add('correct');
       else if (b === btn && !isCorrect) b.classList.add('wrong');
     });
-
-    if (isCorrect) {
-      quiz.correct++;
-      feedbackEl.textContent = '✓ Correct!';
-      feedbackEl.className = 'mcqb-feedback ok';
-    } else {
-      quiz.wrong++;
-      feedbackEl.textContent = `✗ Correct answer: ${correctAnswer}`;
-      feedbackEl.className = 'mcqb-feedback err';
-    }
-
+    if (isCorrect) { quiz.correct++; feedbackEl.textContent = '✓ Correct!'; feedbackEl.className = 'mcqb-feedback ok'; }
+    else           { quiz.wrong++;   feedbackEl.textContent = `✗ ${correct}`; feedbackEl.className = 'mcqb-feedback err'; }
     scoreLive.textContent = `✓ ${quiz.correct}  ✗ ${quiz.wrong}`;
-
-    // Auto-advance after a short pause so the user can see the feedback
     const isLast = quiz.idx >= quiz.questions.length - 1;
-    setTimeout(() => {
-      quiz.idx++;
-      if (isLast) showResult(); else renderQuestion();
-    }, isCorrect ? 700 : 1400);
+    setTimeout(() => { quiz.idx++; if (isLast) showResult(); else renderQuestion(); }, isCorrect ? 700 : 1400);
   }
 
   function showResult() {
     const total = quiz.questions.length;
-    const pct = Math.round((quiz.correct / total) * 100);
+    const pct   = Math.round(quiz.correct / total * 100);
     pbarFill.style.width = '100%';
-    qScreen.style.display = 'none';
-    rScreen.style.display = '';
-    scoreBig.textContent = pct + '%';
-    let label = pct >= 80 ? 'Excellent work!' : pct >= 60 ? 'Good effort!' : pct >= 40 ? 'Keep practising.' : 'Keep going — you\'ll get there!';
-    scoreLabel.textContent = label;
-    bdCorrect.textContent = quiz.correct;
-    bdWrong.textContent = quiz.wrong;
-    bdTotal.textContent = total;
+    qScreen.style.display = 'none'; rScreen.style.display = '';
+    scoreBig.textContent  = pct + '%';
+    scoreLabel.textContent = pct >= 80 ? 'Excellent work!' : pct >= 60 ? 'Good effort!' : pct >= 40 ? 'Keep practising.' : 'Keep going!';
+    bdCorrect.textContent = quiz.correct; bdWrong.textContent = quiz.wrong; bdTotal.textContent = total;
   }
 
-  function closeQuiz() {
-    quizBack.classList.remove('open');
-    document.body.style.overflow = '';
-  }
-
+  function closeQuiz() { quizBack.classList.remove('open'); document.body.style.overflow = ''; }
   quizClose.addEventListener('click', closeQuiz);
   quizBack.addEventListener('click', e => { if (e.target === quizBack) closeQuiz(); });
   resultCloseBtn.addEventListener('click', closeQuiz);
+  retryBtn.addEventListener('click', () => launchQuiz(quiz.originalQuestions.slice()));
+  retryShuffleBtn.addEventListener('click', () => launchQuiz(shuffle(quiz.originalQuestions)));
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && quizBack.classList.contains('open')) closeQuiz(); });
 
-  retryBtn.addEventListener('click', () => {
-    launchQuiz(quiz.originalQuestions.slice()); // same order
-  });
-  retryShuffleBtn.addEventListener('click', () => {
-    launchQuiz(shuffle(quiz.originalQuestions)); // new shuffle
-  });
-
-  document.addEventListener('keydown', e => {
-    if (e.key === 'Escape' && quizBack.classList.contains('open')) closeQuiz();
-  });
-
-  /* Patch applyViewFromHash so navigating via hash also hides MCQ Bank */
-  const _origApplyViewFromHash = applyViewFromHash;
+  const _orig = applyViewFromHash;
   window.applyViewFromHash = function () {
-    if (mcqbVisible) {
-      mcqbVisible = false;
-      navBtn.classList.remove('mcqb-active');
-      viewMcqb.classList.remove('active');
-    }
-    _origApplyViewFromHash();
+    if (mcqbVisible) { mcqbVisible = false; navBtn.classList.remove('mcqb-active'); viewMcqb.classList.remove('active'); }
+    _orig();
   };
 
 })();
