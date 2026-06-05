@@ -19,7 +19,7 @@
 <script src="mecee_keys.js"></script>
 <script defer src="wallpaper.js?v=2"></script>
 <script defer src="cursor.js"></script>
-<script defer src="contextmenu.js"></script>
+<script defer src="contextmenu.js?v=3"></script>
 <script defer src="sync.js"></script>
 <style>
   :root {
@@ -361,6 +361,7 @@
   .panel { display: none; animation: fadeIn .2s ease; }
   .panel.active { display: block; }
   @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+  @keyframes _dictToastIn { from { opacity: 0; transform: translateX(-50%) translateY(8px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
 
   /* TWO-COLUMN LAYOUT */
   .split {
@@ -1556,8 +1557,213 @@
     line-height: 1.5;
     display: none;
     animation: fadeIn .2s;
+    white-space: pre-wrap;
+    word-break: break-word;
   }
   .study .a.open { display: block; }
+
+  /* ===== Answer detail panel (right side) ===== */
+  /* ── Panel shell ── */
+  .ans-panel {
+    position: fixed;
+    top: 0; right: 0;
+    width: min(400px, 42vw);
+    height: 100vh;
+    background: var(--surface);
+    border-left: 1px solid var(--border);
+    z-index: 1002;
+    display: flex;
+    flex-direction: column;
+    transform: translateX(100%);
+    transition: transform .3s cubic-bezier(.4,0,.2,1);
+    box-shadow: -18px 0 56px rgba(0,0,0,.28);
+  }
+  .ans-panel.open { transform: translateX(0); }
+
+  /* ── Header ── */
+  .ans-panel-hdr {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 18px 18px 15px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+    background: var(--surface-2);
+  }
+  .ans-panel-hdr .icon {
+    font-size: 22px;
+    line-height: 1;
+    margin-top: 1px;
+    flex-shrink: 0;
+  }
+  .ans-panel-hdr .title {
+    flex: 1;
+    min-width: 0;
+    font-weight: 700;
+    font-size: 13px;
+    line-height: 1.4;
+    color: var(--text);
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    white-space: normal;
+  }
+  .ans-panel-hdr .subtitle {
+    font-size: 11px;
+    color: var(--muted);
+    font-weight: 500;
+    margin-top: 3px;
+  }
+  .ans-panel-hdr .close-btn {
+    background: var(--surface-3);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 12px;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    transition: all .15s;
+    margin-top: 1px;
+  }
+  .ans-panel-hdr .close-btn:hover { background: var(--bad); border-color: var(--bad); color: #fff; }
+
+  /* ── Scrollable body ── */
+  .ans-panel-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 18px 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+  .ans-panel-body::-webkit-scrollbar { width: 4px; }
+  .ans-panel-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  /* ── Section label ── */
+  .ans-section-lbl {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1.4px;
+    font-weight: 800;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+  .ans-section-lbl::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* ── Main answer box ── */
+  .ans-main-box {
+    border-left: 3px solid var(--accent);
+    border-radius: 0 10px 10px 0;
+    border-top: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 13px 15px;
+    font-size: 14px;
+    line-height: 1.7;
+    white-space: pre-wrap;
+    word-break: break-word;
+    color: var(--text);
+    background: var(--surface-2);
+  }
+
+  /* ── Term cards ── */
+  .ans-terms-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .ans-term-card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    transition: box-shadow .18s, border-color .18s, transform .18s;
+    position: relative;
+    overflow: hidden;
+  }
+  .ans-term-card:hover {
+    border-color: var(--accent);
+    box-shadow: 0 4px 18px rgba(0,0,0,.12);
+    transform: translateY(-1px);
+  }
+  /* Accent strip at top of each term card */
+  .ans-term-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent) 0%, transparent 100%);
+    opacity: .5;
+    border-radius: 12px 12px 0 0;
+  }
+  .ans-term-card .atc-top {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 7px;
+  }
+  .ans-term-card .atc-word {
+    font-size: 16px;
+    font-weight: 800;
+    letter-spacing: -.3px;
+    color: var(--text);
+    line-height: 1.2;
+  }
+  .ans-term-card .atc-pos {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .7px;
+    padding: 3px 9px;
+    border-radius: 999px;
+    line-height: 1.4;
+  }
+  /* POS colour variants */
+  .pos-noun { background: rgba(99,102,241,.16); color: #818cf8; }
+  .pos-verb { background: rgba(34,197,94,.15);  color: #4ade80; }
+  .pos-adj  { background: rgba(245,158,11,.16); color: #fbbf24; }
+  .pos-adv  { background: rgba(236,72,153,.16); color: #f472b6; }
+  .pos-other{ background: var(--surface-2); color: var(--muted); border: 1px solid var(--border); }
+  /* light-mode overrides so the colours still read */
+  [data-theme="light"] .pos-noun { background: rgba(99,102,241,.12); color: #4f46e5; }
+  [data-theme="light"] .pos-verb { background: rgba(22,163,74,.12);  color: #16a34a; }
+  [data-theme="light"] .pos-adj  { background: rgba(217,119,6,.12);  color: #b45309; }
+  [data-theme="light"] .pos-adv  { background: rgba(219,39,119,.12); color: #be185d; }
+  .ans-term-card .atc-def {
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--text);
+    opacity: .78;
+  }
+  /* When the panel is open the backdrop shrinks its right padding so the
+     flashcard card shifts left and sits BESIDE the panel, not behind it. */
+  .study-back {
+    transition: padding-right .3s cubic-bezier(.4,0,.2,1);
+  }
+  .study-back.has-panel {
+    padding-right: min(400px, 42vw);
+  }
+  @media (max-width: 820px) {
+    .ans-panel { width: 100vw; border-left: none; }
+    /* On mobile the panel overlays full-screen — no layout shift needed */
+    .study-back.has-panel { padding-right: 0; }
+  }
+  /* ===== End answer detail panel ===== */
+
   .study .choices {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -2885,6 +3091,20 @@
 </script>
 <script src="books.js"></script>
 <script src="syllabus.js"></script>
+
+<!-- Answer detail side panel — must be in DOM before the main script runs -->
+<div id="ansPanel" class="ans-panel" role="complementary" aria-label="Answer details">
+  <div class="ans-panel-hdr">
+    <span class="icon">📄</span>
+    <div style="flex:1;min-width:0">
+      <div class="title" id="ansPanelTitle">Answer Details</div>
+      <div class="subtitle" id="ansPanelSub"></div>
+    </div>
+    <button class="close-btn" id="ansPanelClose" title="Close (Esc)">✕</button>
+  </div>
+  <div class="ans-panel-body" id="ansPanelBody"></div>
+</div>
+
 <script>
 /* =========================================================================
    FLASHCARDS  (UI rebuilt — same backing logic)
@@ -5657,6 +5877,7 @@ function closeStudy() {
   /* Persist where we left off so the next open resumes cleanly. */
   if (studyDeck && studyIdx < studyQueue.length) saveStudySession();
   studyBack.classList.remove('open');
+  closeAnswerPanel();
   setSyncFabVisible(true);
   studyDeck = null;
 }
@@ -5804,6 +6025,7 @@ function showStudyCard() {
   document.getElementById('studyA').classList.remove('open');
   document.getElementById('studyChoices').innerHTML = '';
   document.getElementById('studyActions').innerHTML = '';
+  closeAnswerPanel();
 
   if (card.type === 'mcq') {
     const order = card.choices.map((_, i) => i);
@@ -5828,7 +6050,14 @@ function showStudyCard() {
           });
         }
         const a = document.getElementById('studyA');
-        if (card.a) { a.textContent = card.a; a.classList.add('open'); }
+        if (card.a) {
+          if (_shouldOpenPanel(card.a)) {
+            openAnswerPanel(card);
+          } else {
+            a.textContent = card.a;
+            a.classList.add('open');
+          }
+        }
         /* MCQs self-rate: the click IS the answer. Right → Good (extend),
            Wrong → Again (shorten + re-queue this session). In SRS mode we
            also auto-advance on correct since the user already knows it. */
@@ -5881,8 +6110,13 @@ function revealAnswer() {
   const card = studyDeck.cards[studyQueue[studyIdx]];
   if (!card) return;
   const a = document.getElementById('studyA');
-  a.textContent = card.a || '(no answer)';
-  a.classList.add('open');
+  if (_shouldOpenPanel(card.a)) {
+    /* Long / key-terms answer → panel only, card center stays clean */
+    openAnswerPanel(card);
+  } else {
+    a.textContent = card.a || '(no answer)';
+    a.classList.add('open');
+  }
   if (studyMode === 'srs') {
     renderRatingButtons(card);
   } else {
@@ -6058,7 +6292,18 @@ function applyEditDraft(draft) {
   /* Refresh the visible card without advancing the queue. */
   document.getElementById('studyQ').textContent = card.q;
   const aEl = document.getElementById('studyA');
-  if (aEl.classList.contains('open')) aEl.textContent = card.a || '(no answer)';
+  const answerWasVisible = aEl.classList.contains('open') || ansPanel.classList.contains('open');
+  if (answerWasVisible) {
+    if (_shouldOpenPanel(card.a)) {
+      aEl.textContent = '';
+      aEl.classList.remove('open');
+      openAnswerPanel(card);
+    } else {
+      closeAnswerPanel();
+      aEl.textContent = card.a || '(no answer)';
+      aEl.classList.add('open');
+    }
+  }
 }
 
 /* ---- Wire up: Edit button ---- */
@@ -6534,6 +6779,164 @@ document.addEventListener('keydown', e => {
 
 })();
 
+/* ===== Answer detail side panel =====
+   Opens automatically when the revealed answer has Key Terms or is long.
+   Shows the main answer + each key term as its own styled card. */
+
+function _fc_esc(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function _splitAnswer(text) {
+  const MARKER = '📖 Key Terms';
+  const idx = text.indexOf(MARKER);
+  if (idx === -1) return { main: text.trim(), terms: [] };
+  const main = text.slice(0, idx).trim();
+  const raw  = text.slice(idx + MARKER.length).trim();
+  const terms = raw.split('\n').map(l => l.trim()).filter(Boolean).map(line => {
+    let m = line.match(/^•\s+(.+?)\s+\(([^)]+)\):\s+(.+)$/);
+    if (m) return { word: m[1], pos: m[2], def: m[3] };
+    let m2 = line.match(/^•\s+(.+?):\s+(.+)$/);
+    if (m2) return { word: m2[1], pos: null, def: m2[2] };
+    return { word: line.replace(/^•\s*/, ''), pos: null, def: null };
+  });
+  return { main, terms };
+}
+
+function _shouldOpenPanel(cardA) {
+  if (!cardA) return false;
+  return cardA.includes('📖 Key Terms') || cardA.length > 450;
+}
+
+const ansPanel     = document.getElementById('ansPanel');
+const ansPanelBody = document.getElementById('ansPanelBody');
+const ansPanelTitle = document.getElementById('ansPanelTitle');
+const ansPanelSub   = document.getElementById('ansPanelSub');
+
+function openAnswerPanel(card) {
+  if (!_shouldOpenPanel(card.a)) { closeAnswerPanel(); return; }
+  const parts = _splitAnswer(card.a || '');
+
+  ansPanelTitle.textContent = card.q.length > 48 ? card.q.slice(0, 48) + '…' : card.q;
+  ansPanelSub.textContent   = parts.terms.length
+    ? parts.terms.length + ' key term' + (parts.terms.length !== 1 ? 's' : '')
+    : 'Full answer';
+
+  let html = '';
+
+  if (parts.main) {
+    html += `<div>
+      <div class="ans-section-lbl">Answer</div>
+      <div class="ans-main-box">${_fc_esc(parts.main)}</div>
+    </div>`;
+  }
+
+  if (parts.terms.length) {
+    function _posClass(pos) {
+      if (!pos) return 'pos-other';
+      const p = pos.toLowerCase();
+      if (p.includes('noun') || p.includes('pronoun')) return 'pos-noun';
+      if (p.includes('verb') || p.includes('auxiliary')) return 'pos-verb';
+      if (p.includes('adj')) return 'pos-adj';
+      if (p.includes('adv')) return 'pos-adv';
+      return 'pos-other';
+    }
+    const cards = parts.terms.map(t => `
+      <div class="ans-term-card">
+        <div class="atc-top">
+          <span class="atc-word">${_fc_esc(t.word)}</span>
+          ${t.pos ? `<span class="atc-pos ${_posClass(t.pos)}">${_fc_esc(t.pos)}</span>` : ''}
+        </div>
+        ${t.def ? `<div class="atc-def">${_fc_esc(t.def)}</div>` : ''}
+      </div>`).join('');
+    html += `<div>
+      <div class="ans-section-lbl">📖 Key Terms · ${parts.terms.length} term${parts.terms.length !== 1 ? 's' : ''}</div>
+      <div class="ans-terms-list">${cards}</div>
+    </div>`;
+  }
+
+  ansPanelBody.innerHTML = html;
+  ansPanel.classList.add('open');
+  studyBack.classList.add('has-panel');
+}
+
+function closeAnswerPanel() {
+  ansPanel.classList.remove('open');
+  studyBack.classList.remove('has-panel');
+}
+
+document.getElementById('ansPanelClose').addEventListener('click', closeAnswerPanel);
+
+/* ===== End answer detail side panel ===== */
+
+/* ===== Dictionary integration =====
+   Called by contextmenu.js when the user picks "Dictionary" while text is
+   selected. If the study modal is open and showing a non-MCQ card, we append
+   the looked-up term to that card's answer (Key Terms section) and return
+   true so contextmenu.js suppresses the popup. Otherwise return false and
+   contextmenu.js will show its own popup instead. */
+function _dictToast(msg) {
+  var t = document.createElement('div');
+  t.textContent = msg;
+  t.style.cssText = [
+    'position:fixed','bottom:28px','left:50%','transform:translateX(-50%)',
+    'background:var(--accent,#f5f5f5)','color:var(--accent-text,#0e0e0e)',
+    'padding:9px 20px','border-radius:999px','font-size:13px','font-weight:600',
+    'box-shadow:0 4px 16px rgba(0,0,0,.3)','z-index:100002',
+    'pointer-events:none','white-space:nowrap',
+    'max-width:calc(100vw - 40px)','text-align:center',
+    'animation:_dictToastIn .2s ease-out'
+  ].join(';');
+  document.body.appendChild(t);
+  setTimeout(function () {
+    t.style.transition = 'opacity .3s';
+    t.style.opacity = '0';
+    setTimeout(function () { t.remove(); }, 320);
+  }, 2600);
+}
+
+/* Returns true whenever the study modal is open and showing a card. Used by
+   contextmenu.js to decide whether to show the "Add to flashcard" button. */
+window.flashcardIsStudying = function () {
+  return !!(studyBack && studyBack.classList.contains('open') && studyDeck && studyIdx < studyQueue.length);
+};
+
+window.flashcardDictionaryAddToCard = function (word, originalText, apiData) {
+  if (!studyBack || !studyBack.classList.contains('open')) return false;
+  if (!studyDeck || studyIdx >= studyQueue.length) return false;
+  var cardIdxInDeck = studyQueue[studyIdx];
+  var card = studyDeck.cards[cardIdxInDeck];
+  if (!card) return false;
+
+  /* Build the term line */
+  var termLine = '• ' + word;
+  if (apiData && apiData[0] && Array.isArray(apiData[0].meanings) && apiData[0].meanings.length) {
+    var m = apiData[0].meanings[0];
+    if (m.partOfSpeech) termLine += ' (' + m.partOfSpeech + ')';
+    if (m.definitions && m.definitions[0] && m.definitions[0].definition) {
+      termLine += ': ' + m.definitions[0].definition;
+    }
+  } else {
+    termLine += ': (no definition found)';
+  }
+
+  /* Append to existing Key Terms block, or create one */
+  var existing = card.a || '';
+  var MARKER = '📖 Key Terms';
+  var newA;
+  if (existing.includes(MARKER)) {
+    newA = existing + '\n' + termLine;
+  } else {
+    newA = existing + '\n\n' + MARKER + '\n' + termLine;
+  }
+
+  var draft = { cardId: card.id, type: card.type, q: card.q, a: newA };
+  if (card.type === 'mcq') { draft.choices = card.choices; draft.correct = card.correct; }
+  applyEditDraft(draft);
+  _dictToast('📖 Added "' + word + '" to card');
+  return true;
+};
+
 /* ===== Init ===== */
 renderTagChip();
 renderStats();
@@ -6626,5 +7029,6 @@ window.onMeceeSyncApplied = function () {
   /* Render any saved errors from previous sessions on page load. */
   if (typeof renderErrorLog === 'function') renderErrorLog();
 </script>
+
 </body>
 </html>
