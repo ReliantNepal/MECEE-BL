@@ -586,6 +586,117 @@ def merge_snapshots(local: Dict[str, Any], remote: Dict[str, Any]) -> Dict[str, 
     }
 
 
+def _card_progress_score(card: Dict[str, Any]) -> tuple:
+    """Comparable score for how far along a card is in SRS.
+    Returns (reps, lastReview) — higher reps wins; lastReview breaks ties."""
+    srs = card.get("srs") if isinstance(card, dict) else None
+    if not srs:
+        return (0, "")
+    return (srs.get("reps") or 0, srs.get("lastReview") or "")
+
+
+def merge_deck_data(
+    local_deck: Dict[str, Any],
+    remote_deck: Dict[str, Any],
+    local_ts: int,
+    remote_ts: int,
+) -> Dict[str, Any]:
+    """Merge two deck objects at the card level.
+
+    Deck metadata (name, tags, etc.) comes from whichever side has the higher
+    updatedAt.  Cards are merged by ID: the union of both sides is kept, with
+    each card resolved to whichever version shows more SRS progress (higher
+    reps count; lastReview ISO string breaks ties).  Cards only present on one
+    side are kept as-is — this means a card deleted on one device is brought
+    back if the other device still has it (progress-preservation wins).
+    """
+    meta_winner = local_deck if local_ts >= remote_ts else remote_deck
+
+    def card_map(deck: Dict[str, Any]) -> Dict[str, Any]:
+        return {c["id"]: c for c in (deck.get("cards") or []) if c and c.get("id")}
+
+    lc_map = card_map(local_deck)
+    rc_map = card_map(remote_deck)
+
+    merged_by_id: Dict[str, Any] = {}
+    for cid in set(lc_map) | set(rc_map):
+        lc = lc_map.get(cid)
+        rc = rc_map.get(cid)
+        if lc is None:
+            merged_by_id[cid] = rc
+        elif rc is None:
+            merged_by_id[cid] = lc
+        else:
+            merged_by_id[cid] = lc if _card_progress_score(lc) >= _card_progress_score(rc) else rc
+
+    # Preserve card order from the metadata winner; append any extras at the end.
+    winner_order = [c["id"] for c in (meta_winner.get("cards") or []) if c and c.get("id")]
+    seen: set = set()
+    merged_cards = []
+    for cid in winner_order:
+        if cid in merged_by_id:
+            merged_cards.append(merged_by_id[cid])
+            seen.add(cid)
+    for cid, card in merged_by_id.items():
+        if cid not in seen:
+            merged_cards.append(card)
+
+    result = dict(meta_winner)
+    result["cards"] = merged_cards
+    return result
+
+
+def merge_snapshots_flashcards(
+    local: Dict[str, Any], remote: Dict[str, Any]
+) -> Dict[str, Any]:
+    """Snapshot merge for the flashcards category.
+
+    Identical to merge_snapshots for tombstones and decks only present on one
+    side.  For decks present on both sides (and not deleted), delegates to
+    merge_deck_data so individual card SRS progress from both devices is
+    preserved rather than overwriting one device's work with the other's.
+    """
+    li = (local or {}).get("items", {}) or {}
+    ri = (remote or {}).get("items", {}) or {}
+    out: Dict[str, Any] = {}
+
+    for key in set(li.keys()) | set(ri.keys()):
+        lv, rv = li.get(key), ri.get(key)
+        if lv is None:
+            out[key] = rv
+            continue
+        if rv is None:
+            out[key] = lv
+            continue
+
+        l_ts = _effective_ts(lv)
+        r_ts = _effective_ts(rv)
+        l_del = lv.get("deletedAt")
+        r_del = rv.get("deletedAt")
+
+        # If either side carries a tombstone fall back to generic LWW so
+        # deletes propagate correctly.
+        if l_del or r_del:
+            if l_ts > r_ts:
+                out[key] = lv
+            elif r_ts > l_ts:
+                out[key] = rv
+            else:
+                out[key] = lv if (l_del or 0) >= (r_del or 0) else rv
+        else:
+            # Both sides alive — merge at the card level.
+            merged_data = merge_deck_data(
+                lv.get("data") or {}, rv.get("data") or {}, l_ts, r_ts
+            )
+            out[key] = {
+                "data":      merged_data,
+                "updatedAt": max(l_ts, r_ts),
+                "deletedAt": None,
+            }
+
+    return {"schema": 1, "updatedAt": int(time.time() * 1000), "items": out}
+
+
 def count_changes(before: Dict[str, Any], after: Dict[str, Any]) -> int:
     """How many ids changed going from `before` to `after`. An id counts as
     changed if it is missing on one side, or its effective timestamp differs

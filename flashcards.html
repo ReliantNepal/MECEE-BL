@@ -3185,17 +3185,28 @@ function writeDecks(d) {
      additions / updates / deletes. This single chokepoint catches every
      mutation in the flashcards page — much less brittle than stamping at
      each call site. */
-  let prevIds = new Set();
+  let prevDecks = {};
   try {
     const prev = JSON.parse(localStorage.getItem(FC_KEY) || '{}');
-    (prev.decks || []).forEach(x => x && x.id && prevIds.add(x.id));
+    (prev.decks || []).forEach(x => { if (x && x.id) prevDecks[x.id] = x; });
   } catch (_) {}
   localStorage.setItem(FC_KEY, JSON.stringify(d));
-  const newIds = new Set((d.decks || []).map(x => x && x.id).filter(Boolean));
+  const newDecks = {};
+  (d.decks || []).forEach(x => { if (x && x.id) newDecks[x.id] = x; });
   try {
     if (window.MeceeSync) {
-      newIds.forEach(id => MeceeSync.stamp('flashcards', id, 'updated'));
-      prevIds.forEach(id => { if (!newIds.has(id)) MeceeSync.stamp('flashcards', id, 'deleted'); });
+      /* Only stamp decks that are new or whose data actually changed.
+         Stamping unchanged decks would give them a newer timestamp than a
+         device that modified the same deck but hasn't synced yet, causing
+         that device's changes to lose the last-write-wins merge. */
+      Object.keys(newDecks).forEach(id => {
+        if (!prevDecks[id] || JSON.stringify(prevDecks[id]) !== JSON.stringify(newDecks[id])) {
+          MeceeSync.stamp('flashcards', id, 'updated');
+        }
+      });
+      Object.keys(prevDecks).forEach(id => {
+        if (!newDecks[id]) MeceeSync.stamp('flashcards', id, 'deleted');
+      });
     }
   } catch (_) {}
 }

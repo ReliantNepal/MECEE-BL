@@ -1394,12 +1394,22 @@ class QuietHandler(http.server.SimpleHTTPRequestHandler):
                 remote = json.loads(remote_raw) if remote_raw else mecee_sync.EMPTY_SNAPSHOT
             except Exception:
                 remote = mecee_sync.EMPTY_SNAPSHOT
-            merged = mecee_sync.merge_snapshots(local, remote)
-            # Count what changed in each direction so the UI can show "up to date"
-            # when both sides agreed and nothing had to move. Cheap diff —
-            # snapshots stay small for these categories.
-            pushed = mecee_sync.count_changes(remote.get("items") or {}, merged.get("items") or {})
-            pulled = mecee_sync.count_changes(local.get("items") or {},  merged.get("items") or {})
+            if category == "flashcards":
+                # Card-level merge: preserves SRS progress from both devices
+                # rather than overwriting one side's work with the other's.
+                merged = mecee_sync.merge_snapshots_flashcards(local, remote)
+                # Timestamp-based count_changes can't see card-level mutations
+                # (two decks may have the same updatedAt but different card
+                # progress after merging), so use a data-level diff instead.
+                remote_items_json = json.dumps(remote.get("items") or {}, sort_keys=True)
+                merged_items_json = json.dumps(merged.get("items") or {}, sort_keys=True)
+                local_items_json  = json.dumps(local.get("items")  or {}, sort_keys=True)
+                pushed = 0 if merged_items_json == remote_items_json else 1
+                pulled = 0 if merged_items_json == local_items_json  else 1
+            else:
+                merged = mecee_sync.merge_snapshots(local, remote)
+                pushed = mecee_sync.count_changes(remote.get("items") or {}, merged.get("items") or {})
+                pulled = mecee_sync.count_changes(local.get("items") or {},  merged.get("items") or {})
             # Skip the network write if nothing changed in either direction —
             # saves an R2 PUT on a no-op sync.
             if pushed > 0:
