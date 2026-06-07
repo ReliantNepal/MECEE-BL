@@ -153,17 +153,30 @@
       Math.max(y, window.innerHeight - y)
     )) + 4; // +4px so the disc's edge fully clears the corner, no seam
 
+    /* Animating clip-path forces the browser to repaint the entire
+       full-viewport overlay on every frame — that's what made the grow
+       feel laggy/janky. Scaling a small circular div is compositor-only
+       (transform), so the GPU handles it with no repaint per frame —
+       buttery smooth even on weaker machines. The div is sized to its
+       final on-screen diameter and grown from scale(0) to scale(1),
+       centred on the click point via a negative margin offset. */
+    var d = endRadius * 2;
     var overlay = document.createElement('div');
     overlay.className = 'mecee-theme-ripple';
     overlay.style.background = target.bg;
-    overlay.style.clipPath = 'circle(0px at ' + x + 'px ' + y + 'px)';
-    overlay.style.webkitClipPath = 'circle(0px at ' + x + 'px ' + y + 'px)';
+    overlay.style.width = d + 'px';
+    overlay.style.height = d + 'px';
+    overlay.style.left = (x - endRadius) + 'px';
+    overlay.style.top = (y - endRadius) + 'px';
+    overlay.style.borderRadius = '50%';
+    overlay.style.transform = 'scale(0)';
+    overlay.style.transformOrigin = 'center';
     document.body.appendChild(overlay);
 
     var grow = overlay.animate(
       [
-        { clipPath: 'circle(0px at '          + x + 'px ' + y + 'px)' },
-        { clipPath: 'circle(' + endRadius + 'px at ' + x + 'px ' + y + 'px)' }
+        { transform: 'scale(0)' },
+        { transform: 'scale(1)' }
       ],
       { duration: 600, easing: 'cubic-bezier(.22,.61,.16,1)', fill: 'forwards' }
     );

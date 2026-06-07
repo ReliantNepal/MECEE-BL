@@ -592,20 +592,21 @@ html, body { margin: 0; padding: 0; }
 
 /* ============================================================
    Theme-change circular reveal
-   wallpaper.js spawns one of these, fills it with the *incoming*
-   theme's background colour, and grows it from the clicked point via
-   clip-path:circle(...) until it covers the screen — then swaps the
-   real theme underneath (now invisible, since the colours match) and
-   fades the disc away. Plain fixed overlay + Web Animations API, so it
-   renders identically across browsers without relying on an
-   experimental transition API.
+   wallpaper.js spawns one of these — a circle sized to its final
+   on-screen diameter and positioned over the clicked point — fills it
+   with the *incoming* theme's background colour, and grows it from
+   scale(0) to scale(1) until it covers the screen, then swaps the real
+   theme underneath (now invisible, since the colours match) and fades
+   the disc away. Animating `transform`/`opacity` (compositor-only
+   properties) instead of `clip-path` keeps this on the GPU with no
+   per-frame repaint of a full-viewport layer — that's what made the
+   very first version feel laggy.
    ============================================================ */
 .mecee-theme-ripple {
   position: fixed;
-  inset: 0;
   z-index: 99999;
   pointer-events: none;
-  will-change: clip-path, opacity;
+  will-change: transform, opacity;
 }
 
 /* ============================================================
