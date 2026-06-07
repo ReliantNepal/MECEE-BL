@@ -568,6 +568,122 @@
   .toast .t-text { font-size: 14px; }
   .toast .t-text b { display: block; font-size: 15px; margin-bottom: 2px; }
 
+  /* RANK INFO BUTTON + MODAL */
+  .rank-info-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    margin-left: 6px;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: var(--surface-2);
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1;
+    cursor: pointer;
+    vertical-align: middle;
+    transition: background .15s, color .15s;
+  }
+  .rank-info-btn:hover {
+    background: color-mix(in srgb, var(--accent) 16%, transparent);
+    color: var(--text);
+  }
+  .rank-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    z-index: 2000;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity .2s ease, visibility .2s ease;
+  }
+  .rank-modal-overlay.show {
+    opacity: 1;
+    visibility: visible;
+  }
+  .rank-modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 22px 24px;
+    width: 100%;
+    max-width: 420px;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.4);
+    transform: translateY(14px) scale(.97);
+    transition: transform .2s ease;
+  }
+  .rank-modal-overlay.show .rank-modal {
+    transform: translateY(0) scale(1);
+  }
+  .rank-modal-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+  .rank-modal-head h2 {
+    margin: 0;
+    font-size: 17px;
+    font-weight: 800;
+  }
+  .rank-modal-close {
+    width: 28px;
+    height: 28px;
+    border: none;
+    border-radius: 8px;
+    background: var(--surface-2);
+    color: var(--text);
+    font-size: 13px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background .15s;
+  }
+  .rank-modal-close:hover { background: var(--border); }
+  .rank-modal-intro {
+    font-size: 12.5px;
+    color: var(--muted);
+    line-height: 1.5;
+    margin-bottom: 16px;
+  }
+  .rank-modal-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .rank-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 9px 12px;
+    border-radius: 10px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+  }
+  .rank-row.current {
+    border-color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 10%, var(--bg));
+  }
+  .rank-row-emoji { font-size: 20px; line-height: 1; width: 26px; text-align: center; }
+  .rank-row-text {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+  }
+  .rank-row-name { font-size: 13px; font-weight: 700; }
+  .rank-row-name small { font-weight: 500; color: var(--muted); margin-left: 4px; }
+  .rank-row-range { font-size: 11px; color: var(--muted); margin-top: 1px; }
+
   /* RESET BUTTON */
   .actions {
     margin-top: 24px;
@@ -721,7 +837,9 @@
         </div>
         <div class="stat">
           <span class="val" id="streakLevel">Rookie</span>
-          <span class="lbl">🏅 Rank</span>
+          <span class="lbl">🏅 Rank
+            <button class="rank-info-btn" id="rankInfoBtn" type="button" title="About the ranking system" aria-label="About the ranking system">ⓘ</button>
+          </span>
         </div>
       </div>
     </div>
@@ -768,6 +886,18 @@
   <div class="toast" id="toast">
     <div class="t-emoji" id="toastEmoji">🏆</div>
     <div class="t-text"><b id="toastTitle">Achievement unlocked!</b><span id="toastDesc"></span></div>
+  </div>
+
+  <!-- RANK INFO MODAL -->
+  <div class="rank-modal-overlay" id="rankModalOverlay">
+    <div class="rank-modal" id="rankModal" role="dialog" aria-modal="true" aria-label="Ranking system details">
+      <div class="rank-modal-head">
+        <h2>🏅 Ranking System</h2>
+        <button class="rank-modal-close" id="rankModalClose" type="button" aria-label="Close">✕</button>
+      </div>
+      <p class="rank-modal-intro">Your rank is based on your overall syllabus completion %. Each named tier spans 10%, and is further split into five Roman-numeral sub-levels (I – V, 2% apart) — so your rank climbs roughly every 2% of progress, all the way from Rookie to Legend.</p>
+      <div class="rank-modal-list" id="rankModalList"></div>
+    </div>
   </div>
 
   <!-- MUSIC PLAYER WIDGET -->
@@ -910,6 +1040,56 @@ function buildBadges() {
   `).join('');
 }
 buildBadges();
+
+/* ========== RANK INFO MODAL ========== */
+let lastPct = 0;
+
+function buildRankRows(currentPct) {
+  const rows = [{ min: 0, max: 0, name: "Rookie", emoji: "🔰", sub: false }];
+  [...RANK_BANDS].reverse().forEach(([min, name, emoji]) => {
+    rows.push({ min, max: min + 10, name, emoji, sub: true });
+  });
+  rows.push({ min: 100, max: 100, name: "Legend", emoji: "👑", sub: false });
+
+  return rows.map(r => {
+    const isCurrent = r.sub
+      ? (currentPct >= r.min && currentPct < r.max) || (r.max === 100 && currentPct >= r.min)
+      : (r.min === 0 ? currentPct <= 0 : currentPct >= 100);
+    const range = r.sub ? `${r.min}–${r.max}%` : `${r.min}%`;
+    const subNote = r.sub ? ' <small>I – V</small>' : '';
+    return `
+      <div class="rank-row${isCurrent ? ' current' : ''}">
+        <span class="rank-row-emoji">${r.emoji}</span>
+        <div class="rank-row-text">
+          <span class="rank-row-name">${r.name}${subNote}</span>
+          <span class="rank-row-range">${range}</span>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+const rankInfoBtn      = document.getElementById('rankInfoBtn');
+const rankModalOverlay = document.getElementById('rankModalOverlay');
+const rankModalClose   = document.getElementById('rankModalClose');
+const rankModalList    = document.getElementById('rankModalList');
+
+function openRankModal() {
+  rankModalList.innerHTML = buildRankRows(lastPct);
+  rankModalOverlay.classList.add('show');
+  const current = rankModalList.querySelector('.rank-row.current');
+  if (current) current.scrollIntoView({ block: 'center' });
+}
+function closeRankModal() {
+  rankModalOverlay.classList.remove('show');
+}
+rankInfoBtn.addEventListener('click', openRankModal);
+rankModalClose.addEventListener('click', closeRankModal);
+rankModalOverlay.addEventListener('click', e => {
+  if (e.target === rankModalOverlay) closeRankModal();
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && rankModalOverlay.classList.contains('show')) closeRankModal();
+});
 
 function showToast(emoji, title, desc) {
   const t = document.getElementById('toast');
@@ -1175,6 +1355,7 @@ function refresh() {
   document.getElementById('expectedMarks').textContent = s.expected.toFixed(1);
   document.getElementById('topicsDone').textContent = `${s.totalDone}/${s.totalAll}`;
   document.getElementById('streakLevel').textContent = getRank(s.pct);
+  lastPct = s.pct;
   checkAchievements(s);
 }
 refresh();

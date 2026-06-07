@@ -32,7 +32,7 @@
    To force every client to drop its cached copies, bump CACHE_VERSION below —
    the activate handler deletes any cache whose name doesn't match. */
 
-const CACHE_VERSION = 'mecee-v55'; // bumped: extended Roman-numeral sub-levels down into the Starter band (0-10%) too, so "Starter IV 🌱" etc. now show from the very first %, matching the rest of the ladder
+const CACHE_VERSION = 'mecee-v57'; // bumped: enlarged the rank-info (i) button (15px -> 22px, given a visible surface-2 circle background) so it's easier to spot and tap
 
 const SHELL = [
   '/',
