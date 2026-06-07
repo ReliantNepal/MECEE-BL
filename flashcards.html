@@ -1343,6 +1343,7 @@
     gap: 14px;
   }
   .subj-tile {
+    position: relative;
     background: var(--bg);
     border: 1px solid var(--border);
     border-radius: 14px;
@@ -1380,6 +1381,52 @@
     font-weight: 600;
   }
   .subj-tile .subj-stats .pill.deck { color: var(--text); }
+
+  /* Red "due cards waiting" badge — sits in the corner of a subject tile,
+     pinging gently so it catches the eye without being obnoxious about it.
+     Count = number of DECKS (within that subject) that currently have at
+     least one due card, not the raw card count — keeps the number small
+     and meaningful ("3 decks need you" reads better than "47 cards"). */
+  .subj-due-badge {
+    position: absolute;
+    top: -7px;
+    right: -7px;
+    min-width: 22px;
+    height: 22px;
+    padding: 0 6px;
+    border-radius: 999px;
+    background: #e0383f;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 800;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 3px 10px rgba(224, 56, 63, .45);
+    z-index: 1;
+  }
+  .subj-due-badge span { position: relative; z-index: 1; }
+  /* The expanding-ring "ping" — a soft duplicate of the badge that grows
+     and fades on a loop, like a notification pulse. Respecting
+     reduced-motion below keeps this from being a distraction for anyone
+     who's asked the OS to cut down on movement. */
+  .subj-due-badge::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: #e0383f;
+    animation: subjDuePing 1.8s cubic-bezier(0,0,.2,1) infinite;
+  }
+  @keyframes subjDuePing {
+    0%   { transform: scale(1);    opacity: .55; }
+    75%  { transform: scale(1.9);  opacity: 0; }
+    100% { transform: scale(1.9);  opacity: 0; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .subj-due-badge::before { animation: none; display: none; }
+  }
 
   /* Back link on subject view */
   .crumbs {
@@ -4984,12 +5031,31 @@ function bucketDecks() {
   return { buckets, subjCount, untagged };
 }
 
+/* Counts, per subject, how many DECKS currently have ≥1 due card —
+   not raw card totals, since "3 decks need review" is a far more
+   actionable headline than "47 cards due" plastered on a tile. Reuses
+   deckDueCount() (the same SRS due-check the deck cards and the
+   floating due-nav already rely on), so this stays in lockstep with
+   what "due" means everywhere else in the app. */
+function subjectDueDeckCounts() {
+  const data = readDecks();
+  const counts = {};
+  data.decks.forEach(d => {
+    if (!d.tag) return;
+    if (deckDueCount(d).due > 0) {
+      counts[d.tag.subj] = (counts[d.tag.subj] || 0) + 1;
+    }
+  });
+  return counts;
+}
+
 /* Top-of-page view: a tile per subject with deck counts, plus an
    "Uncategorized" tile if any untagged decks exist. Clicking a tile drills
    into the subject view. */
 function renderHome() {
   const grid = document.getElementById('subjGrid');
   const { subjCount, untagged } = bucketDecks();
+  const dueCounts = subjectDueDeckCounts();
   const SYL = window.SYLLABUS || {};
 
   let html = '';
@@ -4998,8 +5064,13 @@ function renderHome() {
     /* Count chapters for the secondary stat. */
     let chapTotal = 0;
     Object.values(subjData.units || {}).forEach(u => { chapTotal += (u.chapters || []).length; });
+    const due = dueCounts[subj] || 0;
+    const badge = due > 0
+      ? `<div class="subj-due-badge" title="${due} deck${due === 1 ? '' : 's'} with cards due"><span>${due > 99 ? '99+' : due}</span></div>`
+      : '';
     html += `
       <button class="subj-tile" data-subj="${escapeHtml(subj)}" type="button">
+        ${badge}
         <div class="subj-emoji">${subjData.emoji || '📘'}</div>
         <div class="subj-name">${escapeHtml(subj)}</div>
         <div class="subj-stats">
@@ -5009,8 +5080,13 @@ function renderHome() {
       </button>`;
   });
   if (untagged.length) {
+    const untaggedDue = untagged.filter(d => deckDueCount(d).due > 0).length;
+    const untaggedBadge = untaggedDue > 0
+      ? `<div class="subj-due-badge" title="${untaggedDue} deck${untaggedDue === 1 ? '' : 's'} with cards due"><span>${untaggedDue > 99 ? '99+' : untaggedDue}</span></div>`
+      : '';
     html += `
       <button class="subj-tile" data-uncategorized="1" type="button">
+        ${untaggedBadge}
         <div class="subj-emoji">📦</div>
         <div class="subj-name">Uncategorized</div>
         <div class="subj-stats">

@@ -32,7 +32,7 @@
    To force every client to drop its cached copies, bump CACHE_VERSION below —
    the activate handler deletes any cache whose name doesn't match. */
 
-const CACHE_VERSION = 'mecee-v49'; // bumped: reworked the fetch strategy — .html/.js/.css now go network-first (cache only as an offline fallback), since cache-first on actively-edited code is exactly what caused the repeated "bumped the version, restarted, still seeing the old UI" headaches this session. Genuinely static assets (images, fonts, pdf.js, icons) stay cache-first with background revalidation for instant repeat loads
+const CACHE_VERSION = 'mecee-v50'; // bumped: flashcards home now shows a small red pinging badge on each subject tile — count = number of decks (within that subject) with ≥1 due card, reusing the same deckDueCount() SRS check the deck cards/due-nav already use
 
 const SHELL = [
   '/',
