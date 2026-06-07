@@ -54,14 +54,18 @@
 
   var currentValue = null;
   function setCursor(value) {
-    /* Always re-apply the inline cursor on composited layers, even when the
-       desired value hasn't changed — Chrome's compositor needs the inline
-       style rewritten to flush its cached cursor bitmap. */
-    forceInlineCursor(value);
+    /* This used to call forceInlineCursor() (a querySelectorAll over every
+       composited element, plus two style writes each) on EVERY call —
+       and render() runs on every mousemove, which fires dozens of times
+       per second. That's what made clicking/moving feel laggy: a DOM
+       sweep per pixel of motion. The compositor's cursor-bitmap cache
+       only actually needs flushing when the cursor image *changes* (e.g.
+       hand1 → hand2 on press), so gate the expensive sweep on that. */
     if (value === currentValue) return;
     currentValue = value;
     getStyleEl().textContent =
       '*, *::before, *::after { cursor: ' + value + ' !important; }';
+    forceInlineCursor(value);
   }
 
   /* Elements that get promoted to GPU compositor layers and therefore need

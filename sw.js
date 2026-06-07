@@ -19,7 +19,7 @@
    To force every client to drop its cached copies, bump CACHE_VERSION below —
    the activate handler deletes any cache whose name doesn't match. */
 
-const CACHE_VERSION = 'mecee-v41'; // bumped: the actual flat-black culprit was the .search STICKY WRAPPER painting background:var(--bg) (genuinely near-black in the 6 colour themes) — now tinted with the theme's accent so the strip blends into the ambient backdrop instead of reading as a leftover black bar
+const CACHE_VERSION = 'mecee-v43'; // bumped: (1) search-bar tint strengthened further — 16%/22% accent mixed into --surface-2 instead of near-black --bg/--surface; (2) fixed laggy cursor — setCursor() was running an expensive querySelectorAll DOM sweep on every mousemove (dozens/sec) even when the cursor image hadn't changed; now gated on actual value change
 
 const SHELL = [
   '/',

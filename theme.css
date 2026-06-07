@@ -592,7 +592,11 @@ html, body { margin: 0; padding: 0; }
 :root[data-theme="ocean"] .search,
 :root[data-theme="rose"] .search,
 :root[data-theme="coffee"] .search {
-  background: color-mix(in srgb, var(--accent) 4%, var(--bg));
+  /* 4% accent-into-bg was too subtle to read as anything but black —
+     bg itself is ~#0b0e14. Mixing into the lighter --surface-2 instead,
+     at a much stronger ratio, actually lifts the strip to a visibly
+     warm tone rather than a near-imperceptible nudge on near-black. */
+  background: color-mix(in srgb, var(--accent) 16%, var(--surface-2));
 }
 
 /* The tracker's search *input* reads `background: var(--surface)`, and in
@@ -607,8 +611,8 @@ html, body { margin: 0; padding: 0; }
 :root[data-theme="ocean"] .search input,
 :root[data-theme="rose"] .search input,
 :root[data-theme="coffee"] .search input {
-  background: color-mix(in srgb, var(--accent) 7%, var(--surface-2));
-  border-color: color-mix(in srgb, var(--accent) 18%, var(--border));
+  background: color-mix(in srgb, var(--accent) 22%, var(--surface-2));
+  border-color: color-mix(in srgb, var(--accent) 28%, var(--border));
 }
 :root[data-theme="midnight"] .search input:focus,
 :root[data-theme="forest"] .search input:focus,
