@@ -1,25 +1,38 @@
 /* Service worker for MECEE-BL Syllabus app.
-   Goal: make nav-between-pages feel instant by serving the UI shell straight
-   from cache, and bypass the network entirely for assets that haven't changed.
+   Goal: make nav-between-pages feel instant by serving static assets straight
+   from cache, while keeping actively-edited code (.html/.js/.css) honest by
+   always preferring the network for it.
 
    Strategy per request:
-     - /api/*           → never cached (sync, uploads — must be fresh).
-     - /sw.js           → never intercepted (the SW upgrading itself).
-     - *.pdf / *.mp3    → never SW-cached. These are large binaries already
-                          covered by Cache-Control: immutable at the HTTP layer.
-                          Cloning a 10–30 MB ReadableStream body to write to the
-                          Cache API while simultaneously returning it to the
-                          caller races the two stream readers and can corrupt the
-                          body, causing PDF.js to throw "Invalid PDF structure".
-     - precached shell  → cache-first, with a quiet background refresh
-                          (stale-while-revalidate) so the next visit is up
-                          to date without slowing down this one.
-     - everything else  → cache-first too, populated on first fetch.
+     - /api/*             → never cached (sync, uploads — must be fresh).
+     - /sw.js             → never intercepted (the SW upgrading itself).
+     - *.pdf / *.mp3      → never SW-cached. These are large binaries already
+                            covered by Cache-Control: immutable at the HTTP
+                            layer. Cloning a 10–30 MB ReadableStream body to
+                            write to the Cache API while simultaneously
+                            returning it to the caller races the two stream
+                            readers and can corrupt the body, causing PDF.js
+                            to throw "Invalid PDF structure".
+     - *.html/.js/.css    → network-first, cache only as an offline fallback.
+                            Cache-first on these meant every CSS/JS edit needed
+                            a CACHE_VERSION bump *and* a couple of reloads
+                            before it actually showed up — exactly the
+                            "I changed it, restarted, still seeing the old
+                            version" loop this project kept hitting. Network-
+                            first removes that lag entirely; the cache write
+                            on each successful fetch still gives offline mode
+                            something to fall back on.
+     - everything else    → cache-first with a quiet background refresh
+                            (stale-while-revalidate). These are genuinely
+                            static (images, fonts, icons, the vendored pdf.js
+                            bundle) — they only change when CACHE_VERSION
+                            bumps and drops the whole old cache, so cache-first
+                            is the right call for instant repeat loads.
 
    To force every client to drop its cached copies, bump CACHE_VERSION below —
    the activate handler deletes any cache whose name doesn't match. */
 
-const CACHE_VERSION = 'mecee-v48'; // bumped: extended the white-background treatment from the password field to the username field too — both now get plain white fill + dark text, with matching placeholder/focus-ring/autofill overrides so they're visually consistent
+const CACHE_VERSION = 'mecee-v49'; // bumped: reworked the fetch strategy — .html/.js/.css now go network-first (cache only as an offline fallback), since cache-first on actively-edited code is exactly what caused the repeated "bumped the version, restarted, still seeing the old UI" headaches this session. Genuinely static assets (images, fonts, pdf.js, icons) stay cache-first with background revalidation for instant repeat loads
 
 const SHELL = [
   '/',
@@ -105,15 +118,38 @@ self.addEventListener('fetch', event => {
   // set by the server).
   if (/\.(pdf|mp3)$/i.test(url.pathname)) return;
 
+  // Code & markup (.html/.js/.css) change constantly during active
+  // development — cache-first on these is what caused the repeated
+  // "bumped CACHE_VERSION, restarted, still seeing the old version"
+  // headaches (the cache would keep answering instantly with stale
+  // bytes while the background refetch raced in unseen). Go
+  // network-first for these: try the network, and only fall back to
+  // the cache if you're offline. Whatever comes back over the network
+  // also gets cached, so offline mode still has *something* to serve.
+  if (/\.(html|js|css)$/i.test(url.pathname) || url.pathname === '/') {
+    event.respondWith(
+      caches.open(CACHE_VERSION).then(cache =>
+        fetch(req).then(resp => {
+          if (resp && resp.status === 200 && resp.type === 'basic') {
+            cache.put(req, resp.clone()).catch(() => {});
+          }
+          return resp;
+        }).catch(() => cache.match(req))
+      )
+    );
+    return;
+  }
+
+  // Everything else (images, fonts, icons, the vendored pdf.js bundle,
+  // audio thumbnails, …) is genuinely static — it only changes when you
+  // replace the file outright, which a CACHE_VERSION bump already
+  // handles by dropping the whole old cache. Cache-first here is the
+  // right call: instant repeat loads, with a quiet background refresh
+  // so the cache stays warm.
   event.respondWith(
     caches.open(CACHE_VERSION).then(cache =>
       cache.match(req).then(cached => {
-        // Background refresh: re-fetch silently so the cache stays warm with
-        // the latest bytes, but we still answer this request from cache.
         const networkFetch = fetch(req).then(resp => {
-          // Only cache real successes. opaque (no-cors) responses have
-          // status=0; basic = same-origin; we restrict to basic+200 to avoid
-          // poisoning the cache with redirects or partial content.
           if (resp && resp.status === 200 && resp.type === 'basic') {
             cache.put(req, resp.clone()).catch(() => {});
           }
