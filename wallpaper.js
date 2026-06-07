@@ -19,81 +19,87 @@
     { id: 'coffee',   label: 'Coffee',   icon: '☕', bg: '#0e0905', surface: '#1e1308', text: '#f5e6cc', accent: '#b45309' },
   ];
 
-  /* ── Emoji ambient layer ─────────────────────────────────────────
-     Forest and Coffee themes get a subtle floating emoji background.
+  /* ── Ambient glow layer ──────────────────────────────────────────
+     Each colour theme gets a quiet, slow-drifting field of soft blurred
+     "glow" blobs tinted with its own accent palette — the same restrained
+     ambiance used in modern editor/app UIs (soft light pooling in the
+     corners of the viewport). Midnight additionally gets a faint pinpoint
+     starfield, and Coffee a barely-there grain texture, since those read
+     naturally for their respective moods. Nothing here is figurative —
+     it's pure light and colour, so it stays out of the way of content and
+     never looks like decoration glued onto a page.
      The layer is inserted as the first child of <body> so all page
      content (painted later in tree order) sits naturally on top. */
-  var EMOJI_LAYER = {
-    forest: {
-      emojis: ['🌲','🌿','🍃','🦋','🍄','🌱','🦉','🌲','🌿','🍃','🦋','🍄','🌲','🌱','🦉','🌿','🌲','🍃','🦋','🌱'],
-      opacity: 0.10
-    },
-    coffee: {
-      emojis: ['☕','📚','🫘','🍵','✏️','📖','🌙','☕','🫘','📚','🍵','✏️','☕','📖','🌙','🫘','☕','📚','🍵','✏️'],
-      opacity: 0.10
-    },
+  var AMBIENT = {
     midnight: {
-      emojis: ['✨','⭐','🌙','🌟','💫','🌠','🔭','✨','⭐','🌙','🌟','💫','✨','🌠','🔭','⭐','✨','🌙','💫','🌟'],
-      opacity: 0.12
+      blobs: [
+        { left: '10%', top: '14%', size: 420, color: 'rgba(91,141,239,0.16)',  duration: 46, delay: 0  },
+        { left: '82%', top: '60%', size: 480, color: 'rgba(124,160,242,0.10)', duration: 54, delay: -16 },
+        { left: '46%', top: '92%', size: 360, color: 'rgba(70,110,200,0.12)',  duration: 50, delay: -28 }
+      ],
+      stars: true
+    },
+    forest: {
+      blobs: [
+        { left: '14%', top: '18%', size: 440, color: 'rgba(79,157,110,0.14)',  duration: 48, delay: 0  },
+        { left: '80%', top: '64%', size: 400, color: 'rgba(126,194,152,0.10)', duration: 56, delay: -18 },
+        { left: '44%', top: '94%', size: 340, color: 'rgba(60,130,90,0.12)',   duration: 52, delay: -30 }
+      ]
     },
     sunset: {
-      emojis: ['🌅','☀️','🌤️','🌺','🌻','🦅','🌇','🌅','☀️','🌤️','🌺','🌻','🌅','🦅','🌇','☀️','🌅','🌺','🌤️','🌻'],
-      opacity: 0.10
+      blobs: [
+        { left: '18%', top: '72%', size: 480, color: 'rgba(217,122,63,0.16)',  duration: 50, delay: 0  },
+        { left: '76%', top: '22%', size: 400, color: 'rgba(228,165,113,0.10)', duration: 58, delay: -20 },
+        { left: '50%', top: '98%', size: 360, color: 'rgba(180,90,50,0.12)',   duration: 54, delay: -34 }
+      ]
     },
     ocean: {
-      emojis: ['🌊','🐚','🐠','🦈','🐬','🐋','⚓','🌊','🐚','🐠','🦈','🐬','🌊','⚓','🐋','🐚','🌊','🐠','🐬','🦈'],
-      opacity: 0.10
+      blobs: [
+        { left: '16%', top: '24%', size: 440, color: 'rgba(47,155,176,0.14)',  duration: 48, delay: 0  },
+        { left: '84%', top: '70%', size: 480, color: 'rgba(108,190,209,0.10)', duration: 58, delay: -22 },
+        { left: '48%', top: '96%', size: 340, color: 'rgba(30,110,140,0.12)',  duration: 52, delay: -32 }
+      ]
     },
     rose: {
-      emojis: ['🌸','🌹','🌺','💐','🦋','🌷','💕','🌸','🌹','🌺','💐','🦋','🌸','🌷','💕','🌹','🌸','🌺','🦋','💐'],
-      opacity: 0.10
+      blobs: [
+        { left: '14%', top: '20%', size: 420, color: 'rgba(194,84,138,0.14)',  duration: 48, delay: 0  },
+        { left: '82%', top: '66%', size: 460, color: 'rgba(214,139,174,0.10)', duration: 56, delay: -18 },
+        { left: '50%', top: '94%', size: 340, color: 'rgba(150,60,110,0.12)',  duration: 52, delay: -30 }
+      ]
+    },
+    coffee: {
+      blobs: [
+        { left: '18%', top: '76%', size: 460, color: 'rgba(168,116,63,0.14)',  duration: 50, delay: 0  },
+        { left: '80%', top: '20%', size: 400, color: 'rgba(205,161,115,0.09)', duration: 58, delay: -20 },
+        { left: '48%', top: '98%', size: 340, color: 'rgba(120,80,40,0.12)',   duration: 54, delay: -34 }
+      ],
+      grain: true
     }
   };
 
-  /* [left%, top%, fontSize_em, animDelay_s, animDuration_s] */
-  var EMOJI_POSITIONS = [
-    [8,  10, 1.8, 0,  20],
-    [22, 70, 1.4, 3,  18],
-    [40, 30, 2.0, 7,  24],
-    [60, 80, 1.6, 1,  22],
-    [80, 15, 1.4, 5,  16],
-    [93, 60, 2.2, 9,  26],
-    [15, 90, 1.6, 12, 20],
-    [50, 55, 1.2, 4,  18],
-    [72, 35, 1.8, 8,  22],
-    [30, 20, 1.4, 6,  24],
-    [88, 88, 2.0, 2,  20],
-    [4,  45, 1.6, 11, 26],
-    [45, 75, 1.4, 14, 18],
-    [68, 10, 2.2, 3,  22],
-    [25, 50, 1.8, 7,  20],
-    [55, 25, 1.2, 10, 24],
-    [82, 70, 1.6, 5,  18],
-    [10, 65, 2.0, 13, 26],
-    [75, 48, 1.4, 1,  20],
-    [38, 92, 1.8, 8,  22]
-  ];
-
   function updateEmojiLayer(id) {
-    var existing = document.getElementById('mecee-emoji-bg');
-    var config = EMOJI_LAYER[id];
+    var existing = document.getElementById('mecee-ambient-bg');
+    var config = AMBIENT[id];
     if (!config) {
       if (existing) existing.remove();
       return;
     }
     var layer = existing || document.createElement('div');
-    layer.id = 'mecee-emoji-bg';
-    layer.innerHTML = EMOJI_POSITIONS.map(function (pos, i) {
-      var emoji = config.emojis[i % config.emojis.length];
-      return '<span class="em" style="' +
-        'left:'              + pos[0] + '%;' +
-        'top:'               + pos[1] + '%;' +
-        'font-size:'         + pos[2] + 'em;' +
-        'animation-duration:'+ pos[4] + 's;' +
-        'animation-delay:-'  + pos[3] + 's;' +
-        'opacity:'           + config.opacity +
-      '">' + emoji + '</span>';
+    layer.id = 'mecee-ambient-bg';
+    var html = config.blobs.map(function (b) {
+      return '<span class="glow" style="' +
+        'left:'               + b.left + ';' +
+        'top:'                + b.top + ';' +
+        'width:'              + b.size + 'px;' +
+        'height:'             + b.size + 'px;' +
+        'background:radial-gradient(circle, ' + b.color + ' 0%, transparent 70%);' +
+        'animation-duration:' + b.duration + 's;' +
+        'animation-delay:'    + b.delay + 's' +
+      '"></span>';
     }).join('');
+    if (config.stars) html += '<span class="stars"></span>';
+    if (config.grain) html += '<span class="grain"></span>';
+    layer.innerHTML = html;
     if (!existing) {
       /* Insert before first child so all page content paints on top */
       document.body.insertBefore(layer, document.body.firstChild);

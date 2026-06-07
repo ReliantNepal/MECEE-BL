@@ -19,7 +19,7 @@
    To force every client to drop its cached copies, bump CACHE_VERSION below —
    the activate handler deletes any cache whose name doesn't match. */
 
-const CACHE_VERSION = 'mecee-v24'; // bumped: repair Ecology.pdf xref + per-page render fallback
+const CACHE_VERSION = 'mecee-v28'; // bumped: ambient depth wash moved off :root (was clobbered by inline bg shorthand) + accent-tinted shadows
 
 const SHELL = [
   '/',
