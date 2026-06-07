@@ -19,7 +19,7 @@
    To force every client to drop its cached copies, bump CACHE_VERSION below —
    the activate handler deletes any cache whose name doesn't match. */
 
-const CACHE_VERSION = 'mecee-v28'; // bumped: ambient depth wash moved off :root (was clobbered by inline bg shorthand) + accent-tinted shadows
+const CACHE_VERSION = 'mecee-v29'; // bumped: chat.html API-key field now uses autocomplete="new-password" so browsers stop offering to autofill the saved login password into it
 
 const SHELL = [
   '/',
