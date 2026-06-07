@@ -1992,20 +1992,33 @@ function removeThumbnail(book) {
 
 const THUMB_W = 120, THUMB_H = 160;
 
+/* Refined duotone palettes — each is a deep, slightly desaturated wash
+   paired with a soft accent used for the glow, ribbon and top dash below.
+   Chosen to feel like the app's own theme palette (quiet, premium) rather
+   than the punchier stock-gradient look the old set had. */
 const THUMB_STYLES = [
-  { name: 'Forest',   from: '#2e6b3a', to: '#0f2914' },
-  { name: 'Ocean',    from: '#1e3a8a', to: '#0c1632' },
-  { name: 'Ember',    from: '#a0522d', to: '#3a1a0c' },
-  { name: 'Violet',   from: '#5b21b6', to: '#1e0b3b' },
-  { name: 'Crimson',  from: '#991b1b', to: '#2a0808' },
-  { name: 'Teal',     from: '#0f766e', to: '#042f2e' },
-  { name: 'Rose',     from: '#9f1239', to: '#3b0a1c' },
-  { name: 'Slate',    from: '#334155', to: '#0f172a' },
-  { name: 'Gold',     from: '#92400e', to: '#1c1917' },
-  { name: 'Indigo',   from: '#3730a3', to: '#1e1b4b' },
-  { name: 'Midnight', from: '#1f2937', to: '#030712', accent: '#60a5fa' },
-  { name: 'Plum',     from: '#7c3aed', to: '#2e1065', accent: '#c4b5fd' },
+  { name: 'Forest',     from: '#1f4f33', to: '#0a1f15', accent: '#74cf9c' },
+  { name: 'Ocean',      from: '#163a5c', to: '#081521', accent: '#63b8da' },
+  { name: 'Terracotta', from: '#79422a', to: '#2a160c', accent: '#e3a878' },
+  { name: 'Violet',     from: '#473a7a', to: '#1c1530', accent: '#b6a4ee' },
+  { name: 'Crimson',    from: '#6c2832', to: '#260b10', accent: '#e6939e' },
+  { name: 'Teal',       from: '#1e5b56', to: '#082624', accent: '#80d6ca' },
+  { name: 'Rose',       from: '#6c2c4c', to: '#2a0f1c', accent: '#e6a1c0' },
+  { name: 'Slate',      from: '#324158', to: '#10151d', accent: '#a3bcd6' },
+  { name: 'Amber',      from: '#6c5328', to: '#241c0c', accent: '#e8c98e' },
+  { name: 'Indigo',     from: '#363a78', to: '#14152c', accent: '#aab0f4' },
+  { name: 'Midnight',   from: '#28324a', to: '#0a0e16', accent: '#85aaef' },
+  { name: 'Plum',       from: '#4d2f6e', to: '#1c1130', accent: '#caa6ec' },
 ];
+
+/* Hex → rgba string at a given alpha, used to tint the glow/ribbon/dash
+   from each style's accent without baking fixed colours into the canvas
+   drawing code. */
+function _thumbTint(hex, alpha) {
+  const m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex || '');
+  if (!m) return `rgba(255,255,255,${alpha})`;
+  return `rgba(${parseInt(m[1], 16)},${parseInt(m[2], 16)},${parseInt(m[3], 16)},${alpha})`;
+}
 
 function _thumbRoundRect(ctx, x, y, w, h, r) {
   ctx.beginPath();
@@ -2038,21 +2051,46 @@ function _thumbWrapText(ctx, text, cx, cy, maxW, lh) {
 function drawThumb(canvas, style, book) {
   const ctx = canvas.getContext('2d');
   const w = canvas.width, h = canvas.height;
+  const accent = style.accent || '#ffffff';
 
-  /* Background gradient */
+  /* Base duotone wash */
   const grad = ctx.createLinearGradient(w * 0.8, 0, 0, h);
   grad.addColorStop(0, style.from);
   grad.addColorStop(1, style.to);
   ctx.fillStyle = grad;
   ctx.fillRect(0, 0, w, h);
 
-  /* Diagonal texture */
+  /* Soft ambient glow pooling from the top-right corner — the same quiet
+     "light pooling" language used across the app's themes, so generated
+     covers feel native to the UI instead of like stock gradient swatches. */
+  const glow = ctx.createRadialGradient(w * 0.86, h * 0.10, 0, w * 0.86, h * 0.10, w * 0.95);
+  glow.addColorStop(0, _thumbTint(accent, 0.30));
+  glow.addColorStop(1, _thumbTint(accent, 0));
+  ctx.fillStyle = glow;
+  ctx.fillRect(0, 0, w, h);
+
+  /* A second, dimmer pool low on the spine side adds depth without
+     competing with the title block. */
+  const glow2 = ctx.createRadialGradient(w * 0.08, h * 0.92, 0, w * 0.08, h * 0.92, w * 0.7);
+  glow2.addColorStop(0, _thumbTint(accent, 0.14));
+  glow2.addColorStop(1, _thumbTint(accent, 0));
+  ctx.fillStyle = glow2;
+  ctx.fillRect(0, 0, w, h);
+
+  /* Quiet grain — a deterministic scatter of soft dots (same style always
+     renders identically) instead of the old diagonal hairline pattern,
+     which read as a cheap stock-texture overlay. */
   ctx.save();
-  ctx.globalAlpha = 0.06;
-  ctx.strokeStyle = '#fff';
-  ctx.lineWidth = 1;
-  for (let i = -h; i < w + h; i += 8) {
-    ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i + h, h); ctx.stroke();
+  ctx.fillStyle = 'rgba(255,255,255,.05)';
+  let seed = style.name.length * 137 + 11;
+  for (let i = 0; i < 22; i++) {
+    seed = (seed * 9301 + 49297) % 233280;
+    const x = (seed / 233280) * w;
+    seed = (seed * 9301 + 49297) % 233280;
+    const y = (seed / 233280) * h;
+    ctx.beginPath();
+    ctx.arc(x, y, 0.9, 0, Math.PI * 2);
+    ctx.fill();
   }
   ctx.restore();
 
@@ -2063,13 +2101,25 @@ function drawThumb(canvas, style, book) {
   ctx.fillStyle = spineG;
   ctx.fillRect(0, 0, 14, h);
 
-  /* Top band */
-  ctx.fillStyle = 'rgba(255,255,255,.35)';
-  ctx.fillRect(12, 0, w - 12, 3);
-  if (style.accent) {
-    ctx.fillStyle = style.accent;
-    ctx.fillRect(12, 3, 32, 3);
-  }
+  /* Corner ribbon — a small triangular flourish in the accent colour,
+     tucked into the bottom-left so it reads as an intentional design
+     mark rather than crowding the title. */
+  ctx.save();
+  ctx.beginPath();
+  ctx.moveTo(0, h);
+  ctx.lineTo(0, h - 40);
+  ctx.lineTo(40, h);
+  ctx.closePath();
+  ctx.fillStyle = _thumbTint(accent, 0.16);
+  ctx.fill();
+  ctx.restore();
+
+  /* Top hairline + accent dash (sits above the kind badge, like the
+     original top band, but thinner and quieter) */
+  ctx.fillStyle = 'rgba(255,255,255,.16)';
+  ctx.fillRect(14, 3, w - 14, 1);
+  ctx.fillStyle = accent;
+  ctx.fillRect(14, 0, 3, 6);
 
   /* Kind badge */
   const kind = (book && book.type === 'note') ? 'NOTE' : 'BOOK';
