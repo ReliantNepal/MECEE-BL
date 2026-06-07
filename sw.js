@@ -19,7 +19,7 @@
    To force every client to drop its cached copies, bump CACHE_VERSION below —
    the activate handler deletes any cache whose name doesn't match. */
 
-const CACHE_VERSION = 'mecee-v43'; // bumped: (1) search-bar tint strengthened further — 16%/22% accent mixed into --surface-2 instead of near-black --bg/--surface; (2) fixed laggy cursor — setCursor() was running an expensive querySelectorAll DOM sweep on every mousemove (dozens/sec) even when the cursor image hadn't changed; now gated on actual value change
+const CACHE_VERSION = 'mecee-v44'; // bumped: tinting the search bar kept looking "off" on the 6 colour themes no matter the ratio — made the wrapper + input fully transparent instead so the ambient backdrop shows through, keeping just a soft accent-tinted border so the field still reads as clickable
 
 const SHELL = [
   '/',

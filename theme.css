@@ -579,39 +579,28 @@ html, body { margin: 0; padding: 0; }
   scrollbar-color: color-mix(in srgb, var(--accent) 32%, transparent) transparent;
 }
 
-/* The actual flat-black culprit: the *sticky wrapper* `.search` paints
-   `background: var(--bg)`, and --bg in these six palettes is genuinely
-   near-black (midnight #0b0e14, sunset #110d0a, etc.) — so scrolling
-   content slides under a solid black strip. Tint it a touch with the
-   theme's accent so it blends into the ambient backdrop instead of
-   reading as a leftover dark bar. (The input override below handles
-   the box itself, which sits on top of this strip.) */
+/* Tinting the search bar (wrapper + input) kept reading as "still dark/
+   off" no matter how the colour was tuned — on these moody palettes any
+   solid fill stands out as a box. Going fully transparent instead lets
+   the ambient backdrop show straight through, so the bar simply sits on
+   the page rather than sitting in its own tinted slab. The input keeps
+   a soft accent-tinted border (and a subtle fill on focus) purely so it
+   still reads as a field you can click into. */
 :root[data-theme="midnight"] .search,
 :root[data-theme="forest"] .search,
 :root[data-theme="sunset"] .search,
 :root[data-theme="ocean"] .search,
 :root[data-theme="rose"] .search,
 :root[data-theme="coffee"] .search {
-  /* 4% accent-into-bg was too subtle to read as anything but black —
-     bg itself is ~#0b0e14. Mixing into the lighter --surface-2 instead,
-     at a much stronger ratio, actually lifts the strip to a visibly
-     warm tone rather than a near-imperceptible nudge on near-black. */
-  background: color-mix(in srgb, var(--accent) 16%, var(--surface-2));
+  background: transparent;
 }
-
-/* The tracker's search *input* reads `background: var(--surface)`, and in
-   these six palettes --surface sits only a hair above --bg (e.g.
-   midnight: #11151d on #0b0e14) — practically flat black, which looks
-   unfinished against the tinted ambient backdrop. Lift it with a touch
-   of the theme's accent colour instead, matching the warmth the rest
-   of the UI now has. */
 :root[data-theme="midnight"] .search input,
 :root[data-theme="forest"] .search input,
 :root[data-theme="sunset"] .search input,
 :root[data-theme="ocean"] .search input,
 :root[data-theme="rose"] .search input,
 :root[data-theme="coffee"] .search input {
-  background: color-mix(in srgb, var(--accent) 22%, var(--surface-2));
+  background: transparent;
   border-color: color-mix(in srgb, var(--accent) 28%, var(--border));
 }
 :root[data-theme="midnight"] .search input:focus,
@@ -620,7 +609,7 @@ html, body { margin: 0; padding: 0; }
 :root[data-theme="ocean"] .search input:focus,
 :root[data-theme="rose"] .search input:focus,
 :root[data-theme="coffee"] .search input:focus {
-  background: color-mix(in srgb, var(--accent) 11%, var(--surface-2));
+  background: color-mix(in srgb, var(--accent) 9%, transparent);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent);
 }
 
