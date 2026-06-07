@@ -19,7 +19,7 @@
    To force every client to drop its cached copies, bump CACHE_VERSION below —
    the activate handler deletes any cache whose name doesn't match. */
 
-const CACHE_VERSION = 'mecee-v44'; // bumped: tinting the search bar kept looking "off" on the 6 colour themes no matter the ratio — made the wrapper + input fully transparent instead so the ambient backdrop shows through, keeping just a soft accent-tinted border so the field still reads as clickable
+const CACHE_VERSION = 'mecee-v45'; // bumped: the transparent-search-bar change (mecee-v44) wasn't visible because theme.css carries Cache-Control: max-age=300 — the browser's HTTP cache kept handing back the same 5-minute-old bytes to the SW's "fresh" fetch even after the SW cache was invalidated. Bumped the stylesheet's ?v= query param too (theme.css?v=2 → ?v=3) so it's a brand-new URL the HTTP cache has never seen, guaranteeing a real network fetch
 
 const SHELL = [
   '/',
