@@ -19,7 +19,7 @@
    To force every client to drop its cached copies, bump CACHE_VERSION below —
    the activate handler deletes any cache whose name doesn't match. */
 
-const CACHE_VERSION = 'mecee-v47'; // bumped: login.html password field now gets a plain white background + dark text (deliberately breaking from the themed surface colour, per request) — placeholder, focus ring, autofill override, and the show/hide toggle button were all re-tuned to stay legible against white in every theme
+const CACHE_VERSION = 'mecee-v48'; // bumped: extended the white-background treatment from the password field to the username field too — both now get plain white fill + dark text, with matching placeholder/focus-ring/autofill overrides so they're visually consistent
 
 const SHELL = [
   '/',

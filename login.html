@@ -239,23 +239,30 @@
     opacity: 0.6;
   }
 
-  /* Password field gets a plain white background with dark text — a
-     deliberate departure from the themed surface colour, requested so
-     it stands out as the field you're typing into. Override its
-     placeholder, focus ring, and the autofill UA-style fight too, so
-     all three states stay consistent with the white fill. */
+  /* Username + password fields get a plain white background with dark
+     text — a deliberate departure from the themed surface colour,
+     requested so they stand out as the fields you're typing into.
+     Override placeholder, focus ring, and the autofill UA-style fight
+     too, so all three states stay consistent with the white fill. */
+  #username,
   #password {
     background: #ffffff;
     color: #161616;
   }
+  #username::placeholder,
   #password::placeholder {
     color: #8a8a8a;
     opacity: 1;
   }
+  #username:focus,
   #password:focus {
     border-color: var(--accent);
     box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 20%, transparent);
   }
+  #username:-webkit-autofill,
+  #username:-webkit-autofill:hover,
+  #username:-webkit-autofill:focus,
+  #username:-webkit-autofill:active,
   #password:-webkit-autofill,
   #password:-webkit-autofill:hover,
   #password:-webkit-autofill:focus,
