@@ -159,7 +159,20 @@
         '<div class="wp-apikey-section">' +
           '<div class="wp-apikey-label">🔑 ChatGPT / OpenAI API Key</div>' +
           '<div class="wp-apikey-row">' +
-            '<input type="password" class="wp-apikey-input" id="wpApiKeyInput" placeholder="sk-proj-…" autocomplete="off" spellcheck="false" />' +
+            /* Not type="password": this modal is injected on every page, and
+               Chrome/Edge use the mere presence of a password-type field as
+               the signal "this page is a login form" — once that fires, they
+               offer (and sometimes auto-populate) the user's saved MECEE
+               login password into it, and can sweep nearby text fields (e.g.
+               a page's search bar) into the same suggestion. No
+               `autocomplete` value reliably opts a password-type field out
+               of this. A plain text input masked with -webkit-text-security
+               (see .wp-apikey-input in theme.css) keeps the on-screen dot
+               masking while staying off the password manager's radar
+               entirely — and since this is the last password-type field in
+               the app outside login.html, removing it stops the heuristic
+               from firing anywhere else too. */
+            '<input type="text" class="wp-apikey-input mecee-masked-input" id="wpApiKeyInput" placeholder="sk-proj-…" autocomplete="off" name="mecee-wallpaper-key" spellcheck="false" />' +
             '<button type="button" class="wp-apikey-save" id="wpApiKeySave">Save</button>' +
           '</div>' +
           '<div class="wp-apikey-status info" id="wpApiKeyStatus">Loading…</div>' +

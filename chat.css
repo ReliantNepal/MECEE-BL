@@ -407,17 +407,9 @@ textarea.input:focus { border-color: var(--text); }
   font-size: 14px;
   outline: none;
 }
-/* Masks a plain text input's value visually (dots, like type="password")
-   without making it type="password" — that type flags the whole page as a
-   credential form to Chrome/Edge, which then offers to autofill the user's
-   saved MECEE login password into it. -webkit-text-security keeps the
-   on-screen masking while staying completely off the password manager's
-   radar. (Firefox lacks support and just shows plain text — acceptable
-   degradation for a field that's locally stored anyway.) */
-.mecee-masked-input {
-  -webkit-text-security: disc;
-  text-security: disc;
-}
+/* .mecee-masked-input (the dot-masking for this field) now lives in
+   theme.css, since the wallpaper modal injects an identical field on
+   every page and needed the same rule globally. */
 .modal textarea { resize: vertical; min-height: 80px; }
 .modal .warn {
   background: rgba(248,113,113,0.08);

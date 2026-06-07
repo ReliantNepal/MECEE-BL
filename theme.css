@@ -813,6 +813,20 @@ html, body { margin: 0; padding: 0; }
   transition: border-color .15s;
 }
 .wp-apikey-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(147,51,234,.15); }
+
+/* Masks a plain text input's value visually (dots, like type="password")
+   without making it type="password" — that type flags the whole page as a
+   credential form to Chrome/Edge, which then offer to autofill the user's
+   saved MECEE login password into it. -webkit-text-security keeps the
+   on-screen masking while staying off the password manager's radar
+   entirely. Lives here (loaded on every page) since the wallpaper modal's
+   API-key field is injected on every page. (Firefox lacks support for this
+   property and just shows plain text — acceptable degradation for a value
+   that's only ever stored locally anyway.) */
+.mecee-masked-input {
+  -webkit-text-security: disc;
+  text-security: disc;
+}
 .wp-apikey-save {
   background: var(--accent);
   color: var(--accent-text, #fff);
