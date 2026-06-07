@@ -579,7 +579,23 @@ html, body { margin: 0; padding: 0; }
   scrollbar-color: color-mix(in srgb, var(--accent) 32%, transparent) transparent;
 }
 
-/* The tracker's search bar reads `background: var(--surface)`, and in
+/* The actual flat-black culprit: the *sticky wrapper* `.search` paints
+   `background: var(--bg)`, and --bg in these six palettes is genuinely
+   near-black (midnight #0b0e14, sunset #110d0a, etc.) — so scrolling
+   content slides under a solid black strip. Tint it a touch with the
+   theme's accent so it blends into the ambient backdrop instead of
+   reading as a leftover dark bar. (The input override below handles
+   the box itself, which sits on top of this strip.) */
+:root[data-theme="midnight"] .search,
+:root[data-theme="forest"] .search,
+:root[data-theme="sunset"] .search,
+:root[data-theme="ocean"] .search,
+:root[data-theme="rose"] .search,
+:root[data-theme="coffee"] .search {
+  background: color-mix(in srgb, var(--accent) 4%, var(--bg));
+}
+
+/* The tracker's search *input* reads `background: var(--surface)`, and in
    these six palettes --surface sits only a hair above --bg (e.g.
    midnight: #11151d on #0b0e14) — practically flat black, which looks
    unfinished against the tinted ambient backdrop. Lift it with a touch

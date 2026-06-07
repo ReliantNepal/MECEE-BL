@@ -19,7 +19,7 @@
    To force every client to drop its cached copies, bump CACHE_VERSION below —
    the activate handler deletes any cache whose name doesn't match. */
 
-const CACHE_VERSION = 'mecee-v40'; // bumped: tracker search bar background was flat near-black on the 6 colour themes (--surface sits a hair above --bg) — now tinted with a touch of the theme's accent colour so it matches the rest of the polished UI
+const CACHE_VERSION = 'mecee-v41'; // bumped: the actual flat-black culprit was the .search STICKY WRAPPER painting background:var(--bg) (genuinely near-black in the 6 colour themes) — now tinted with the theme's accent so the strip blends into the ambient backdrop instead of reading as a leftover black bar
 
 const SHELL = [
   '/',
