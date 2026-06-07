@@ -136,6 +136,30 @@
      several setups — this overlay approach is what actually renders.)
      Falls back to an instant switch when the user prefers reduced
      motion — no loss of function, just no flourish. */
+  /* The picker usually runs inside a sub-page iframe, but the floating
+     widgets it should hide (player, notebook, sync FAB) live in the
+     parent shell document — same-origin, so window.parent.document is
+     reachable. Toggles a class on <body> in both the local document
+     (covers the rare case the picker is opened from the shell itself)
+     and the parent shell, wrapped in try/catch since cross-frame
+     access can throw under exotic embedding setups. */
+  function fabHostBodies() {
+    var hosts = [];
+    if (document.body) hosts.push(document.body);
+    try {
+      if (window.parent && window.parent !== window && window.parent.document && window.parent.document.body) {
+        hosts.push(window.parent.document.body);
+      }
+    } catch (e) {}
+    return hosts;
+  }
+
+  function setFabsHidden(hidden) {
+    fabHostBodies().forEach(function (body) {
+      body.classList.toggle('mecee-fabs-hidden', hidden);
+    });
+  }
+
   function applyThemeAnimated(id, originX, originY) {
     if (id === currentTheme()) return;
 
@@ -160,6 +184,16 @@
        buttery smooth even on weaker machines. The div is sized to its
        final on-screen diameter and grown from scale(0) to scale(1),
        centred on the click point via a negative margin offset. */
+    /* The floating widgets (music player, notebook, sync — all live in
+       the shell document, while this picker usually runs inside a
+       sub-page iframe) would otherwise just abruptly snap to the new
+       theme's colours mid-grow, which looks out of place against the
+       smooth disc. Fade + shrink them out as the disc grows, then
+       fade them back in once the new theme is already revealed
+       underneath — same-origin, so reaching into the parent shell's
+       document is safe. */
+    setFabsHidden(true);
+
     var d = endRadius * 2;
     var overlay = document.createElement('div');
     overlay.className = 'mecee-theme-ripple';
@@ -187,6 +221,7 @@
          fade the disc out. Two rAFs ensure the new theme has actually
          painted before we start revealing it. */
       applyTheme(id);
+      setFabsHidden(false);
       requestAnimationFrame(function () {
         requestAnimationFrame(function () {
           var fade = overlay.animate(

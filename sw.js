@@ -19,7 +19,7 @@
    To force every client to drop its cached copies, bump CACHE_VERSION below —
    the activate handler deletes any cache whose name doesn't match. */
 
-const CACHE_VERSION = 'mecee-v38'; // bumped: theme-reveal animation felt laggy because it animated clip-path (forces full-viewport repaint every frame) — switched to scaling a small circle via transform (compositor-only, GPU-smooth)
+const CACHE_VERSION = 'mecee-v39'; // bumped: theme-reveal now also fades/shrinks the floating widgets (player, notebook, sync FAB) out of view while the disc grows, then back in once the new theme is revealed — they no longer abruptly snap to the new colours mid-animation
 
 const SHELL = [
   '/',

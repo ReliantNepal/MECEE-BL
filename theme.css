@@ -609,6 +609,24 @@ html, body { margin: 0; padding: 0; }
   will-change: transform, opacity;
 }
 
+/* While the reveal disc is growing, wallpaper.js adds this class to the
+   shell's <body> so the floating widgets (music player, notebook FAB,
+   sync FAB) shrink + fade out of the way instead of abruptly snapping
+   to the new theme's colours mid-animation — then fade back in once
+   the disc has already covered the screen with the new theme. */
+.player-widget,
+.notes-launcher,
+.mecee-sync-launcher {
+  transition: opacity .25s ease, transform .25s ease;
+}
+.mecee-fabs-hidden .player-widget,
+.mecee-fabs-hidden .notes-launcher,
+.mecee-fabs-hidden .mecee-sync-launcher {
+  opacity: 0;
+  transform: scale(.6);
+  pointer-events: none;
+}
+
 /* ============================================================
    Wallpaper picker modal  (injected by wallpaper.js)
    ============================================================ */
