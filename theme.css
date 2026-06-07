@@ -579,6 +579,31 @@ html, body { margin: 0; padding: 0; }
   scrollbar-color: color-mix(in srgb, var(--accent) 32%, transparent) transparent;
 }
 
+/* The tracker's search bar reads `background: var(--surface)`, and in
+   these six palettes --surface sits only a hair above --bg (e.g.
+   midnight: #11151d on #0b0e14) — practically flat black, which looks
+   unfinished against the tinted ambient backdrop. Lift it with a touch
+   of the theme's accent colour instead, matching the warmth the rest
+   of the UI now has. */
+:root[data-theme="midnight"] .search input,
+:root[data-theme="forest"] .search input,
+:root[data-theme="sunset"] .search input,
+:root[data-theme="ocean"] .search input,
+:root[data-theme="rose"] .search input,
+:root[data-theme="coffee"] .search input {
+  background: color-mix(in srgb, var(--accent) 7%, var(--surface-2));
+  border-color: color-mix(in srgb, var(--accent) 18%, var(--border));
+}
+:root[data-theme="midnight"] .search input:focus,
+:root[data-theme="forest"] .search input:focus,
+:root[data-theme="sunset"] .search input:focus,
+:root[data-theme="ocean"] .search input:focus,
+:root[data-theme="rose"] .search input:focus,
+:root[data-theme="coffee"] .search input:focus {
+  background: color-mix(in srgb, var(--accent) 11%, var(--surface-2));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent);
+}
+
 :root[data-theme="midnight"] :focus-visible,
 :root[data-theme="forest"] :focus-visible,
 :root[data-theme="sunset"] :focus-visible,

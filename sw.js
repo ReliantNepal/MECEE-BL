@@ -19,7 +19,7 @@
    To force every client to drop its cached copies, bump CACHE_VERSION below —
    the activate handler deletes any cache whose name doesn't match. */
 
-const CACHE_VERSION = 'mecee-v39'; // bumped: theme-reveal now also fades/shrinks the floating widgets (player, notebook, sync FAB) out of view while the disc grows, then back in once the new theme is revealed — they no longer abruptly snap to the new colours mid-animation
+const CACHE_VERSION = 'mecee-v40'; // bumped: tracker search bar background was flat near-black on the 6 colour themes (--surface sits a hair above --bg) — now tinted with a touch of the theme's accent colour so it matches the rest of the polished UI
 
 const SHELL = [
   '/',
