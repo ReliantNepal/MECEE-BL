@@ -1992,6 +1992,15 @@ function removeThumbnail(book) {
 
 const THUMB_W = 120, THUMB_H = 160;
 
+/* Cover cards render at up to several hundred CSS px wide (grid columns go
+   down to minmax(180px, 1fr)) and HiDPI screens multiply that again — but
+   the saved thumbnail bitmap was being rasterized at the picker-preview's
+   120×160 physical pixels, so the shelf stretched a small bitmap way past
+   its native resolution. 3× gives a 360×480 bitmap, sharp up to ~360 CSS px
+   wide on 1x displays or ~180 CSS px on 2x — comfortably covers the grid's
+   range without bloating localStorage with an oversized data URL. */
+const THUMB_SAVE_SCALE = 3;
+
 /* Refined duotone palettes — each is a deep, slightly desaturated wash
    paired with a soft accent used for the glow, ribbon and top dash below.
    Chosen to feel like the app's own theme palette (quiet, premium) rather
@@ -2048,9 +2057,19 @@ function _thumbWrapText(ctx, text, cx, cy, maxW, lh) {
   lines.forEach((l, i) => ctx.fillText(l, cx, startY + i * lh));
 }
 
-function drawThumb(canvas, style, book) {
+/* `scale` rasterizes the canvas at THUMB_W*scale × THUMB_H*scale physical
+   pixels while every drawing call below stays in the same THUMB_W×THUMB_H
+   logical coordinate space (via ctx.scale) — so picker previews can stay
+   small and fast (scale=1) while the bitmap actually saved as a book's
+   thumbnail is rasterized sharp (scale=THUMB_SAVE_SCALE) and won't blur
+   when the shelf displays it at a much larger CSS size. */
+function drawThumb(canvas, style, book, scale) {
+  scale = scale || 1;
+  const w = THUMB_W, h = THUMB_H;
+  canvas.width  = w * scale;
+  canvas.height = h * scale;
   const ctx = canvas.getContext('2d');
-  const w = canvas.width, h = canvas.height;
+  ctx.scale(scale, scale);
   const accent = style.accent || '#ffffff';
 
   /* Base duotone wash */
@@ -2201,13 +2220,20 @@ function openThumbPicker(book) {
     opt.className = 'thumb-option';
     opt.title = style.name;
     const canvas = document.createElement('canvas');
-    canvas.width = THUMB_W;
-    canvas.height = THUMB_H;
-    drawThumb(canvas, style, book);
+    drawThumb(canvas, style, book, 1);   // small + fast — this is just the picker preview
     opt.appendChild(canvas);
     opt.addEventListener('click', () => {
+      /* The bitmap actually saved as the cover is rasterized at
+         THUMB_SAVE_SCALE×, on a separate offscreen canvas — the picker
+         preview above is deliberately low-res for speed, but saving that
+         same small bitmap as the book's permanent thumbnail is what made
+         covers look blurry once the shelf displayed them at full card size
+         (and worse again on HiDPI screens). Re-render at higher resolution
+         here so the saved cover stays crisp. */
+      const hi = document.createElement('canvas');
+      drawThumb(hi, style, book, THUMB_SAVE_SCALE);
       const thumbs = readThumbnails();
-      thumbs[thumbKey(book)] = canvas.toDataURL('image/jpeg', 0.88);
+      thumbs[thumbKey(book)] = hi.toDataURL('image/jpeg', 0.92);
       writeThumbnails(thumbs);
       renderShelf();
       closeThumbPicker();

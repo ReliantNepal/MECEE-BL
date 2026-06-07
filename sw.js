@@ -19,7 +19,7 @@
    To force every client to drop its cached copies, bump CACHE_VERSION below —
    the activate handler deletes any cache whose name doesn't match. */
 
-const CACHE_VERSION = 'mecee-v30'; // bumped: redesigned generated book/note cover thumbnails — refined duotone palettes + ambient glow/grain/ribbon styling
+const CACHE_VERSION = 'mecee-v31'; // bumped: fix blurry custom thumbnails — saved cover bitmap is now rasterized at 3x (360x480) instead of the picker preview's 120x160
 
 const SHELL = [
   '/',
