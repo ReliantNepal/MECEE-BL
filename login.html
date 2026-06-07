@@ -43,31 +43,91 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Soft off-centre glows behind the card — same --bg underneath, just
+     two faint radial washes so the page doesn't feel like a flat empty
+     rectangle. Pure CSS, no images, no extra DOM weight. */
+  body::before,
+  body::after {
+    content: "";
+    position: fixed;
+    width: 60vmax;
+    height: 60vmax;
+    border-radius: 50%;
+    filter: blur(90px);
+    opacity: 0.16;
+    pointer-events: none;
+    z-index: 0;
+  }
+  body::before {
+    top: -22vmax;
+    left: -18vmax;
+    background: var(--accent);
+  }
+  body::after {
+    bottom: -26vmax;
+    right: -20vmax;
+    background: var(--accent);
+    opacity: 0.10;
+  }
+
+  @keyframes loginRise {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
   }
 
   .login-wrap {
     width: 100%;
     max-width: 400px;
     padding: 24px;
+    position: relative;
+    z-index: 1;
+    animation: loginRise 0.5s cubic-bezier(.22,.61,.16,1) both;
   }
 
   .login-card {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 36px 32px 32px;
+    border-radius: 18px;
+    padding: 38px 32px 32px;
     box-shadow: 0 24px 64px rgba(0, 0, 0, 0.35);
+    position: relative;
+    overflow: hidden;
+  }
+  /* Slim accent bar across the top edge — the one spot of colour on an
+     otherwise neutral card, gives it a "product" feel rather than a
+     generic form. */
+  .login-card::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg,
+      transparent,
+      var(--accent),
+      transparent);
+    opacity: 0.7;
   }
 
   .login-logo {
     text-align: center;
-    margin-bottom: 28px;
+    margin-bottom: 30px;
   }
   .login-logo-icon {
-    font-size: 40px;
+    width: 56px;
+    height: 56px;
+    margin: 0 auto 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
     line-height: 1;
-    display: block;
-    margin-bottom: 10px;
+    border-radius: 16px;
+    background: color-mix(in srgb, var(--accent) 12%, var(--surface-2));
+    border: 1px solid color-mix(in srgb, var(--accent) 22%, var(--border));
   }
   .login-logo h1 {
     font-size: 20px;
@@ -93,9 +153,24 @@
     letter-spacing: 0.5px;
     margin-bottom: 6px;
   }
+  /* Wrapper anchors the leading icon (and, for password, the trailing
+     show/hide toggle) to the input row without disturbing its layout. */
+  .login-input-row {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  .login-input-row .field-icon {
+    position: absolute;
+    left: 14px;
+    font-size: 15px;
+    opacity: 0.4;
+    pointer-events: none;
+    line-height: 1;
+  }
   .login-field input {
     width: 100%;
-    padding: 11px 14px;
+    padding: 11px 14px 11px 40px;
     background: var(--surface-2);
     border: 1px solid var(--border);
     border-radius: 9px;
@@ -103,10 +178,31 @@
     color: var(--text);
     font-family: inherit;
     outline: none;
-    transition: border-color 0.15s;
+    transition: border-color 0.15s, box-shadow 0.15s;
   }
   .login-field input:focus {
     border-color: var(--accent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 16%, transparent);
+  }
+  .login-toggle-pass {
+    position: absolute;
+    right: 6px;
+    width: 30px;
+    height: 30px;
+    border-radius: 7px;
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s, color 0.15s;
+  }
+  .login-toggle-pass:hover {
+    background: var(--surface);
+    color: var(--text);
   }
   /* Chrome/Edge/Safari force their own background + text colour on
      autofilled fields via `:-webkit-autofill` (a pale yellow/white box
@@ -167,11 +263,26 @@
     font-family: inherit;
     cursor: pointer;
     letter-spacing: 0.2px;
-    transition: opacity 0.15s;
+    transition: opacity 0.15s, transform 0.15s, box-shadow 0.15s;
+    box-shadow: 0 6px 20px color-mix(in srgb, var(--accent) 28%, transparent);
   }
-  .login-btn:hover { opacity: 0.88; }
-  .login-btn:active { opacity: 0.75; }
-  .login-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+  .login-btn:hover  { opacity: 0.92; transform: translateY(-1px); }
+  .login-btn:active { opacity: 0.8; transform: translateY(0); }
+  .login-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+
+  .login-footer {
+    text-align: center;
+    margin-top: 22px;
+    font-size: 11.5px;
+    color: var(--muted);
+    opacity: 0.7;
+    letter-spacing: 0.2px;
+  }
 
   .login-error {
     display: none;
@@ -209,26 +320,33 @@
     <form id="loginForm" autocomplete="on" novalidate>
       <div class="login-field">
         <label for="username">Username</label>
-        <input
-          type="text"
-          id="username"
-          name="username"
-          placeholder="Enter username"
-          autocomplete="username"
-          spellcheck="false"
-          autofocus
-        />
+        <div class="login-input-row">
+          <span class="field-icon" aria-hidden="true">👤</span>
+          <input
+            type="text"
+            id="username"
+            name="username"
+            placeholder="Enter username"
+            autocomplete="username"
+            spellcheck="false"
+            autofocus
+          />
+        </div>
       </div>
 
       <div class="login-field">
         <label for="password">Password</label>
-        <input
-          type="password"
-          id="password"
-          name="password"
-          placeholder="Enter password"
-          autocomplete="current-password"
-        />
+        <div class="login-input-row">
+          <span class="field-icon" aria-hidden="true">🔒</span>
+          <input
+            type="password"
+            id="password"
+            name="password"
+            placeholder="Enter password"
+            autocomplete="current-password"
+          />
+          <button type="button" class="login-toggle-pass" id="togglePass" title="Show password" aria-label="Show password">👁</button>
+        </div>
       </div>
 
       <label class="login-remember">
@@ -240,6 +358,8 @@
 
       <div class="login-error" id="loginError">Incorrect username or password.</div>
     </form>
+
+    <p class="login-footer">MECEE-BL · Personal study tracker</p>
   </div>
 </div>
 
@@ -259,13 +379,23 @@
     location.replace(DEST);
   }
 
-  const form      = document.getElementById('loginForm');
-  const userInput = document.getElementById('username');
-  const passInput = document.getElementById('password');
-  const remember  = document.getElementById('rememberMe');
-  const btn       = document.getElementById('loginBtn');
-  const errorBox  = document.getElementById('loginError');
-  const card      = document.getElementById('loginCard');
+  const form       = document.getElementById('loginForm');
+  const userInput  = document.getElementById('username');
+  const passInput  = document.getElementById('password');
+  const remember   = document.getElementById('rememberMe');
+  const btn        = document.getElementById('loginBtn');
+  const errorBox   = document.getElementById('loginError');
+  const card       = document.getElementById('loginCard');
+  const togglePass = document.getElementById('togglePass');
+
+  togglePass.addEventListener('click', () => {
+    const showing = passInput.type === 'text';
+    passInput.type = showing ? 'password' : 'text';
+    togglePass.textContent = showing ? '👁' : '🙈';
+    togglePass.title = showing ? 'Show password' : 'Hide password';
+    togglePass.setAttribute('aria-label', togglePass.title);
+    passInput.focus();
+  });
 
   form.addEventListener('submit', e => {
     e.preventDefault();
