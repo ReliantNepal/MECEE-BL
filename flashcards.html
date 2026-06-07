@@ -2740,7 +2740,7 @@
             </div>
             <div style="flex:1;min-width:140px">
               <label>Deck name</label>
-              <input type="text" id="genDeckName" placeholder="auto" />
+              <input type="text" id="genDeckName" placeholder="auto" autocomplete="off" />
             </div>
             <button class="btn secondary" id="genClearBtn" type="button" title="Clear bookmark selection + range">🗑 Clear</button>
             <button class="btn" id="genGoBtn">✨ Generate</button>
@@ -2800,7 +2800,7 @@
             </div>
             <div style="flex:1;min-width:160px">
               <label>Deck name</label>
-              <input type="text" id="notesDeckName" placeholder="auto" />
+              <input type="text" id="notesDeckName" placeholder="auto" autocomplete="off" />
             </div>
             <button class="btn secondary" id="notesClearBtn" type="button" title="Deselect note + clear loaded pages">🗑 Clear</button>
             <button class="btn" id="notesGoBtn" disabled>✨ Generate</button>
@@ -2854,7 +2854,7 @@
         </div>
         <div style="flex:1;min-width:160px">
           <label>Deck name</label>
-          <input type="text" id="imgDeckName" placeholder="My image deck" />
+          <input type="text" id="imgDeckName" placeholder="My image deck" autocomplete="off" />
         </div>
         <button class="btn secondary" id="imgClearBtn" type="button" title="Remove all uploaded images">🗑 Clear</button>
         <button class="btn" id="imgGoBtn" disabled>✨ Generate</button>
@@ -2877,7 +2877,7 @@
       <div class="field-row">
         <div>
           <label>Deck name</label>
-          <input type="text" id="csvDeckName" placeholder="My CSV deck" />
+          <input type="text" id="csvDeckName" placeholder="My CSV deck" autocomplete="off" />
         </div>
         <div>
           <label>Or pick a file</label>
@@ -2951,7 +2951,7 @@
       </div>
     </div>
     <div class="edit-toolbar">
-      <input type="text" class="deck-title-input" id="editDeckName" placeholder="Deck name" />
+      <input type="text" class="deck-title-input" id="editDeckName" placeholder="Deck name" autocomplete="off" />
       <button class="btn secondary" id="editWallpaper" type="button">🎨 Wallpaper</button>
       <button class="btn secondary" id="editAddFlash" type="button">+ Flash card</button>
       <button class="btn secondary" id="editAddMcq" type="button">+ MCQ</button>
@@ -5412,7 +5412,7 @@ function cardEditRowHtml(c, i, extraCls) {
     const rows = choices.map((ch, ci) => `
       <div class="mcq-row${ci === correctIdx ? ' is-correct' : ''}">
         <input type="radio" name="correct-${c.id}" data-correct="${ci}" ${ci === correctIdx ? 'checked' : ''} title="Mark as correct" />
-        <input type="text" data-choice="${ci}" value="${escapeHtml(ch)}" placeholder="Choice ${ci + 1}${ci === 0 ? ' (correct by convention if not set)' : ''}" />
+        <input type="text" data-choice="${ci}" value="${escapeHtml(ch)}" placeholder="Choice ${ci + 1}${ci === 0 ? ' (correct by convention if not set)' : ''}" autocomplete="off" />
       </div>`).join('');
     return `
       <div class="card-edit${cls}" data-cid="${c.id}">

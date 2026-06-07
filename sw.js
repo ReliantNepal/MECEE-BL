@@ -19,7 +19,7 @@
    To force every client to drop its cached copies, bump CACHE_VERSION below —
    the activate handler deletes any cache whose name doesn't match. */
 
-const CACHE_VERSION = 'mecee-v34'; // bumped: found + fixed the SECOND type="password" field — wallpaper.js's settings-modal API-key input is injected on every page, so it was re-triggering the "credential form" autofill heuristic everywhere even after the chat.html fix. login.html is now the only password-type field left in the app
+const CACHE_VERSION = 'mecee-v35'; // bumped: added autocomplete="off" to every type="text" input outside login.html (flashcards deck-name/choice fields were missing it)
 
 const SHELL = [
   '/',
