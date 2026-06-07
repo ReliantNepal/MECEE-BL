@@ -204,6 +204,15 @@
     background: var(--surface);
     color: var(--text);
   }
+  /* Sits on the white password field now — keep it in dark neutrals so
+     it reads clearly regardless of the active theme's own colours. */
+  #togglePass {
+    color: #8a8a8a;
+  }
+  #togglePass:hover {
+    background: #ececec;
+    color: #161616;
+  }
   /* Chrome/Edge/Safari force their own background + text colour on
      autofilled fields via `:-webkit-autofill` (a pale yellow/white box
      with black text, `!important`-ed in the UA stylesheet) — it ignores
@@ -228,6 +237,34 @@
   .login-field input::placeholder {
     color: var(--muted);
     opacity: 0.6;
+  }
+
+  /* Password field gets a plain white background with dark text — a
+     deliberate departure from the themed surface colour, requested so
+     it stands out as the field you're typing into. Override its
+     placeholder, focus ring, and the autofill UA-style fight too, so
+     all three states stay consistent with the white fill. */
+  #password {
+    background: #ffffff;
+    color: #161616;
+  }
+  #password::placeholder {
+    color: #8a8a8a;
+    opacity: 1;
+  }
+  #password:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 20%, transparent);
+  }
+  #password:-webkit-autofill,
+  #password:-webkit-autofill:hover,
+  #password:-webkit-autofill:focus,
+  #password:-webkit-autofill:active {
+    -webkit-text-fill-color: #161616;
+    caret-color: #161616;
+    -webkit-box-shadow: 0 0 0 1000px #ffffff inset;
+    box-shadow: 0 0 0 1000px #ffffff inset;
+    transition: background-color 9999s ease-in-out 0s, -webkit-text-fill-color 9999s ease-in-out 0s;
   }
 
   .login-remember {

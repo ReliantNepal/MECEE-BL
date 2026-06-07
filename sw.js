@@ -19,7 +19,7 @@
    To force every client to drop its cached copies, bump CACHE_VERSION below —
    the activate handler deletes any cache whose name doesn't match. */
 
-const CACHE_VERSION = 'mecee-v46'; // bumped: redesigned login.html — added a styled brand-icon badge, leading user/lock field icons + a show/hide password toggle, a slim accent top-bar on the card, soft ambient glows behind it, a subtle rise-in animation, and a footer line. Same --bg/--surface palette and dark/light variables, just a more polished arrangement
+const CACHE_VERSION = 'mecee-v47'; // bumped: login.html password field now gets a plain white background + dark text (deliberately breaking from the themed surface colour, per request) — placeholder, focus ring, autofill override, and the show/hide toggle button were all re-tuned to stay legible against white in every theme
 
 const SHELL = [
   '/',
