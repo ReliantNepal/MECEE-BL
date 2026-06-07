@@ -810,22 +810,32 @@ const ACHIEVEMENTS = [
   { id: "ten_topics",   emoji: "🔥", name: "On Fire",           desc: "Complete 10 topics",                check: s => s.totalDone >= 10 },
   { id: "fifty_topics", emoji: "🚀", name: "Lift-off",          desc: "Complete 50 topics",                check: s => s.totalDone >= 50 },
   { id: "century",      emoji: "💯", name: "Century Club",      desc: "Complete 100 topics",               check: s => s.totalDone >= 100 },
+  { id: "quarter_c",    emoji: "🌀", name: "Quarter Century",   desc: "Complete 25 topics",                check: s => s.totalDone >= 25 },
+  { id: "three_q_c",    emoji: "🏆", name: "Three-Quarter Century", desc: "Complete 75 topics",            check: s => s.totalDone >= 75 },
+  { id: "getting_started", emoji: "🌱", name: "Getting Started", desc: "Reach 10% overall",                check: s => s.pct >= 10 },
   { id: "quarter",      emoji: "🎯", name: "Quarter Master",    desc: "Reach 25% overall",                 check: s => s.pct >= 25 },
   { id: "half",         emoji: "🥈", name: "Half-way Hero",     desc: "Reach 50% overall",                 check: s => s.pct >= 50 },
   { id: "three_q",      emoji: "🥇", name: "Three-Quarter Titan", desc: "Reach 75% overall",               check: s => s.pct >= 75 },
+  { id: "almost_there", emoji: "🏁", name: "Almost There",      desc: "Reach 90% overall",                 check: s => s.pct >= 90 },
   { id: "full",         emoji: "👑", name: "Syllabus Slayer",   desc: "Reach 100% overall",                check: s => s.pct >= 100 },
   { id: "physics_done", emoji: "⚛️", name: "Physics Pioneer",   desc: "Finish all of Physics",             check: s => s.subjectPct.Physics === 100 },
   { id: "chem_done",    emoji: "🧪", name: "Chemistry Champion",desc: "Finish all of Chemistry",           check: s => s.subjectPct.Chemistry === 100 },
   { id: "zoo_done",     emoji: "🦋", name: "Zoology Master",    desc: "Finish all of Zoology",             check: s => s.subjectPct.Zoology === 100 },
   { id: "bot_done",     emoji: "🌿", name: "Botany Boss",       desc: "Finish all of Botany",              check: s => s.subjectPct.Botany === 100 },
   { id: "mat_done",     emoji: "🧠", name: "MAT Magician",      desc: "Finish all of MAT",                 check: s => s.subjectPct.MAT === 100 },
+  { id: "double_done",  emoji: "✌️", name: "Double Done",       desc: "Finish two subjects completely",    check: s => Object.values(s.subjectPct).filter(p => p === 100).length >= 2 },
+  { id: "triple_crown", emoji: "🎩", name: "Triple Crown",      desc: "Finish three subjects completely",  check: s => Object.values(s.subjectPct).filter(p => p === 100).length >= 3 },
+  { id: "well_rounded", emoji: "⚖️", name: "Well Rounded",      desc: "Reach 50% in every subject",        check: s => Object.values(s.subjectPct).every(p => p >= 50) },
   { id: "first_unit",   emoji: "⚡", name: "Speed Run",         desc: "Complete one full unit",            check: s => s.unitsDone >= 1 },
   { id: "five_units",   emoji: "🎖️", name: "Veteran",           desc: "Complete 5 full units",             check: s => s.unitsDone >= 5 },
   { id: "ten_units",    emoji: "🏅", name: "Decorated",         desc: "Complete 10 full units",            check: s => s.unitsDone >= 10 },
+  { id: "fifteen_units", emoji: "🌪️", name: "Unstoppable",      desc: "Complete 15 full units",            check: s => s.unitsDone >= 15 },
+  { id: "twenty_units", emoji: "🏃", name: "Marathoner",        desc: "Complete 20 full units",            check: s => s.unitsDone >= 20 },
   { id: "polymath",     emoji: "📚", name: "Polymath",          desc: "Tick a topic in every subject",     check: s => s.subjectsTouched === 5 },
   { id: "pass_likely",  emoji: "🎓", name: "Pass Probable",     desc: "Expected marks ≥ 100",              check: s => s.expected >= 100 },
   { id: "merit",        emoji: "🌟", name: "Merit Material",    desc: "Expected marks ≥ 150",              check: s => s.expected >= 150 },
-  { id: "elite",        emoji: "💎", name: "Top Tier",          desc: "Expected marks ≥ 180",              check: s => s.expected >= 180 }
+  { id: "elite",        emoji: "💎", name: "Top Tier",          desc: "Expected marks ≥ 180",              check: s => s.expected >= 180 },
+  { id: "perfect_score", emoji: "🔱", name: "Perfect Potential", desc: "Expected marks = 200 (max possible)", check: s => s.expected >= 200 }
 ];
 
 function computeExpectedMarks() {
@@ -860,13 +870,32 @@ function fullStats() {
   return { totalDone, totalAll, unitsDone, subjectsTouched, pct, subjectPct, expected };
 }
 
+/* Each 10%-wide rank band is split into 5 sub-levels (I–V, 2% apart) so
+   progress feels like a game ladder — e.g. "Scholar III 🎓" at 44%,
+   stepping up to "Scholar IV" at 46%, then "Strategist I" at 50%. */
+const RANK_NUMERALS = ["I", "II", "III", "IV", "V"];
+const RANK_BANDS = [
+  [90, "Topper",     "🏆"],
+  [80, "Mastermind", "🧠"],
+  [70, "Achiever",   "🏅"],
+  [60, "Specialist", "🔬"],
+  [50, "Strategist", "🧩"],
+  [40, "Scholar",    "🎓"],
+  [30, "Diligent",   "📝"],
+  [20, "Student",    "🎒"],
+  [10, "Bookworm",   "📖"],
+  [0,  "Starter",    "🌱"],
+];
+
 function getRank(pct) {
   if (pct >= 100) return "Legend 👑";
-  if (pct >= 80)  return "Elite 💎";
-  if (pct >= 60)  return "Pro 🌟";
-  if (pct >= 40)  return "Adept 🔥";
-  if (pct >= 20)  return "Apprentice ⚡";
-  if (pct > 0)    return "Starter 🌱";
+  if (pct <= 0) return "Rookie";
+  for (const [min, name, emoji] of RANK_BANDS) {
+    if (pct >= min) {
+      const sub = RANK_NUMERALS[Math.min(4, Math.floor((pct - min) / 2))];
+      return `${name} ${sub} ${emoji}`;
+    }
+  }
   return "Rookie";
 }
 

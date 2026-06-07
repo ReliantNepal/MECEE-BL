@@ -32,7 +32,7 @@
    To force every client to drop its cached copies, bump CACHE_VERSION below —
    the activate handler deletes any cache whose name doesn't match. */
 
-const CACHE_VERSION = 'mecee-v50'; // bumped: flashcards home now shows a small red pinging badge on each subject tile — count = number of decks (within that subject) with ≥1 due card, reusing the same deckDueCount() SRS check the deck cards/due-nav already use
+const CACHE_VERSION = 'mecee-v55'; // bumped: extended Roman-numeral sub-levels down into the Starter band (0-10%) too, so "Starter IV 🌱" etc. now show from the very first %, matching the rest of the ladder
 
 const SHELL = [
   '/',
