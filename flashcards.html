@@ -5933,6 +5933,8 @@ studyBack.addEventListener('click', e => { if (e.target === studyBack) closeStud
 document.addEventListener('keydown', e => {
   if (!studyBack.classList.contains('open')) return;
   if (document.getElementById('confirmBack').classList.contains('open')) return;
+  if (document.getElementById('editCardBack').classList.contains('open')) return;
+  if (document.getElementById('editBack').classList.contains('open')) return;
   if (e.key === 'Escape') closeStudy();
   if (e.key === ' ' || e.key === 'Enter') {
     const a = document.getElementById('studyA');
