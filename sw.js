@@ -19,7 +19,7 @@
    To force every client to drop its cached copies, bump CACHE_VERSION below —
    the activate handler deletes any cache whose name doesn't match. */
 
-const CACHE_VERSION = 'mecee-v35'; // bumped: added autocomplete="off" to every type="text" input outside login.html (flashcards deck-name/choice fields were missing it)
+const CACHE_VERSION = 'mecee-v36'; // bumped: theme switching now does a circular reveal animation (View Transitions API) expanding from the clicked theme tile, with graceful fallback to an instant switch where unsupported
 
 const SHELL = [
   '/',

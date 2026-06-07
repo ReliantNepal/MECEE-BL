@@ -123,6 +123,48 @@
     window.dispatchEvent(new CustomEvent('mecee:themeChange', { detail: id }));
   }
 
+  /* ── Circular reveal on theme change ─────────────────────────────
+     Wraps the actual theme swap in a View Transition: the browser
+     snapshots the before/after states, and we animate the new one in
+     through an expanding circle clipped from the point the user clicked
+     — the classic "ripple that repaints the whole screen" effect. Falls
+     back to an instant switch on browsers without View Transitions
+     support (Firefox, older Safari) or when the user prefers reduced
+     motion — there's no loss of function either way, just no flourish. */
+  function applyThemeAnimated(id, originX, originY) {
+    if (id === currentTheme()) return;
+
+    var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!document.startViewTransition || reduced) {
+      applyTheme(id);
+      return;
+    }
+
+    var x = (typeof originX === 'number') ? originX : window.innerWidth / 2;
+    var y = (typeof originY === 'number') ? originY : window.innerHeight / 2;
+    var endRadius = Math.hypot(
+      Math.max(x, window.innerWidth - x),
+      Math.max(y, window.innerHeight - y)
+    );
+
+    var transition = document.startViewTransition(function () { applyTheme(id); });
+    transition.ready.then(function () {
+      document.documentElement.animate(
+        {
+          clipPath: [
+            'circle(0px at '   + x + 'px ' + y + 'px)',
+            'circle(' + Math.ceil(endRadius) + 'px at ' + x + 'px ' + y + 'px)'
+          ]
+        },
+        {
+          duration: 650,
+          easing: 'cubic-bezier(.2,.6,.2,1)',
+          pseudoElement: '::view-transition-new(root)'
+        }
+      );
+    }).catch(function () {});
+  }
+
   function refreshBtnTitle(id) {
     var t = THEMES.find(function (t) { return t.id === id; });
     var label = t ? (t.icon + ' ' + t.label) : '⚙️';
@@ -222,9 +264,13 @@
           '</div>' +
         '</div>' +
         '<div class="wp-tile-label">' + t.icon + ' ' + t.label + '<i class="wp-tile-check">✓</i></div>';
-      tile.addEventListener('click', function () {
-        applyTheme(t.id);
+      tile.addEventListener('click', function (e) {
+        /* Capture the click point before the modal closes (and the tile
+           potentially moves/unmounts) so the reveal originates from
+           exactly where the user tapped. */
+        var ox = e.clientX, oy = e.clientY;
         closePicker();
+        applyThemeAnimated(t.id, ox, oy);
       });
       grid.appendChild(tile);
     });

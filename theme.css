@@ -591,6 +591,24 @@ html, body { margin: 0; padding: 0; }
 }
 
 /* ============================================================
+   Theme-change circular reveal  (View Transitions API)
+   wallpaper.js wraps the theme swap in document.startViewTransition()
+   and animates ::view-transition-new(root) through an expanding
+   clip-path circle from the click point. By default the API cross-fades
+   the old/new snapshots — that fights our circle wipe and looks muddy,
+   so both pseudo-elements have their built-in animation switched off
+   and stacked so the incoming (new-theme) snapshot, clipped to the
+   growing circle, simply paints over the outgoing one.
+   ============================================================ */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+::view-transition-old(root) { z-index: 1; }
+::view-transition-new(root) { z-index: 2; }
+
+/* ============================================================
    Wallpaper picker modal  (injected by wallpaper.js)
    ============================================================ */
 .wp-modal {
