@@ -124,45 +124,66 @@
   }
 
   /* ── Circular reveal on theme change ─────────────────────────────
-     Wraps the actual theme swap in a View Transition: the browser
-     snapshots the before/after states, and we animate the new one in
-     through an expanding circle clipped from the point the user clicked
-     — the classic "ripple that repaints the whole screen" effect. Falls
-     back to an instant switch on browsers without View Transitions
-     support (Firefox, older Safari) or when the user prefers reduced
-     motion — there's no loss of function either way, just no flourish. */
+     Grows a solid disc — filled with the *incoming* theme's background
+     colour — out from the point the user clicked until it covers the
+     farthest corner of the screen, then swaps the theme underneath
+     (invisibly, since the disc already matches) and lifts away. A
+     plain fixed overlay animated with the standard Web Animations API
+     (clip-path + Element.animate) — no experimental browser API
+     dependency, so it works the same everywhere. (We tried the View
+     Transitions API first, but animating its pseudo-elements is still
+     version-gated across browsers and produced no visible effect on
+     several setups — this overlay approach is what actually renders.)
+     Falls back to an instant switch when the user prefers reduced
+     motion — no loss of function, just no flourish. */
   function applyThemeAnimated(id, originX, originY) {
     if (id === currentTheme()) return;
 
     var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (!document.startViewTransition || reduced) {
+    var target = THEMES.find(function (t) { return t.id === id; });
+    if (reduced || !target || typeof Element === 'undefined' || !Element.prototype.animate) {
       applyTheme(id);
       return;
     }
 
     var x = (typeof originX === 'number') ? originX : window.innerWidth / 2;
     var y = (typeof originY === 'number') ? originY : window.innerHeight / 2;
-    var endRadius = Math.hypot(
+    var endRadius = Math.ceil(Math.hypot(
       Math.max(x, window.innerWidth - x),
       Math.max(y, window.innerHeight - y)
+    )) + 4; // +4px so the disc's edge fully clears the corner, no seam
+
+    var overlay = document.createElement('div');
+    overlay.className = 'mecee-theme-ripple';
+    overlay.style.background = target.bg;
+    overlay.style.clipPath = 'circle(0px at ' + x + 'px ' + y + 'px)';
+    overlay.style.webkitClipPath = 'circle(0px at ' + x + 'px ' + y + 'px)';
+    document.body.appendChild(overlay);
+
+    var grow = overlay.animate(
+      [
+        { clipPath: 'circle(0px at '          + x + 'px ' + y + 'px)' },
+        { clipPath: 'circle(' + endRadius + 'px at ' + x + 'px ' + y + 'px)' }
+      ],
+      { duration: 600, easing: 'cubic-bezier(.22,.61,.16,1)', fill: 'forwards' }
     );
 
-    var transition = document.startViewTransition(function () { applyTheme(id); });
-    transition.ready.then(function () {
-      document.documentElement.animate(
-        {
-          clipPath: [
-            'circle(0px at '   + x + 'px ' + y + 'px)',
-            'circle(' + Math.ceil(endRadius) + 'px at ' + x + 'px ' + y + 'px)'
-          ]
-        },
-        {
-          duration: 650,
-          easing: 'cubic-bezier(.2,.6,.2,1)',
-          pseudoElement: '::view-transition-new(root)'
-        }
-      );
-    }).catch(function () {});
+    grow.onfinish = function () {
+      /* The disc now fully covers the viewport in the new theme's bg
+         colour — swap the real theme underneath while it's hidden, then
+         fade the disc out. Two rAFs ensure the new theme has actually
+         painted before we start revealing it. */
+      applyTheme(id);
+      requestAnimationFrame(function () {
+        requestAnimationFrame(function () {
+          var fade = overlay.animate(
+            [{ opacity: 1 }, { opacity: 0 }],
+            { duration: 220, easing: 'ease-out', fill: 'forwards' }
+          );
+          fade.onfinish = function () { overlay.remove(); };
+        });
+      });
+    };
   }
 
   function refreshBtnTitle(id) {

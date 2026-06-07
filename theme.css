@@ -591,22 +591,22 @@ html, body { margin: 0; padding: 0; }
 }
 
 /* ============================================================
-   Theme-change circular reveal  (View Transitions API)
-   wallpaper.js wraps the theme swap in document.startViewTransition()
-   and animates ::view-transition-new(root) through an expanding
-   clip-path circle from the click point. By default the API cross-fades
-   the old/new snapshots — that fights our circle wipe and looks muddy,
-   so both pseudo-elements have their built-in animation switched off
-   and stacked so the incoming (new-theme) snapshot, clipped to the
-   growing circle, simply paints over the outgoing one.
+   Theme-change circular reveal
+   wallpaper.js spawns one of these, fills it with the *incoming*
+   theme's background colour, and grows it from the clicked point via
+   clip-path:circle(...) until it covers the screen — then swaps the
+   real theme underneath (now invisible, since the colours match) and
+   fades the disc away. Plain fixed overlay + Web Animations API, so it
+   renders identically across browsers without relying on an
+   experimental transition API.
    ============================================================ */
-::view-transition-old(root),
-::view-transition-new(root) {
-  animation: none;
-  mix-blend-mode: normal;
+.mecee-theme-ripple {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  pointer-events: none;
+  will-change: clip-path, opacity;
 }
-::view-transition-old(root) { z-index: 1; }
-::view-transition-new(root) { z-index: 2; }
 
 /* ============================================================
    Wallpaper picker modal  (injected by wallpaper.js)

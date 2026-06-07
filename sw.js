@@ -19,7 +19,7 @@
    To force every client to drop its cached copies, bump CACHE_VERSION below —
    the activate handler deletes any cache whose name doesn't match. */
 
-const CACHE_VERSION = 'mecee-v36'; // bumped: theme switching now does a circular reveal animation (View Transitions API) expanding from the clicked theme tile, with graceful fallback to an instant switch where unsupported
+const CACHE_VERSION = 'mecee-v37'; // bumped: replaced the View-Transitions-based theme reveal (didn't render on several setups — pseudo-element animation support is too version-gated) with a plain overlay + Web Animations API circle-grow, which renders identically everywhere
 
 const SHELL = [
   '/',
