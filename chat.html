@@ -97,7 +97,16 @@
     <div class="modal">
       <h2>⚙️ Settings</h2>
       <label>OpenAI API Key</label>
-      <input type="password" id="apiKeyInput" placeholder="sk-..." autocomplete="new-password" />
+      <!-- Deliberately NOT type="password": as long as a page has any
+           password-type field, Chrome/Edge treat the whole page as a
+           credential form and offer to autofill the user's saved MECEE
+           login password into it (and sometimes sweep nearby text fields,
+           like the tracker's search bar, into the same heuristic — no
+           `autocomplete` value reliably opts a password-type field out of
+           this). Using a plain text input and masking it with
+           -webkit-text-security removes it from the password manager's
+           radar entirely while still hiding the key on screen. -->
+      <input type="text" id="apiKeyInput" class="mecee-masked-input" placeholder="sk-..." autocomplete="off" name="mecee-openai-key" spellcheck="false" />
       <div class="warn">⚠ Stored only in your browser's localStorage. Don't share this device or screenshare while open.</div>
 
       <label>Model</label>

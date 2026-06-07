@@ -19,7 +19,7 @@
    To force every client to drop its cached copies, bump CACHE_VERSION below —
    the activate handler deletes any cache whose name doesn't match. */
 
-const CACHE_VERSION = 'mecee-v32'; // bumped: override browser's `:-webkit-autofill` UA styling (pale yellow box, ignores theme) on login + chat API-key fields so it follows the active theme
+const CACHE_VERSION = 'mecee-v33'; // bumped: stop Chrome from autofilling the saved login password into the chat API-key field / tracker search bar — switched the key field off type="password" (CSS-masked text input instead), which removes the page-wide "this is a credential form" heuristic that was sweeping nearby fields in too
 
 const SHELL = [
   '/',
