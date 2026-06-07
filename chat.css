@@ -407,6 +407,24 @@ textarea.input:focus { border-color: var(--text); }
   font-size: 14px;
   outline: none;
 }
+/* Browsers paint autofilled inputs with their own `!important`-ed
+   background/text colour (a pale yellow box with black text in Chrome),
+   ignoring page CSS — including the masked API-key field here, which can
+   get flagged as a credential field. The only override that wins is a
+   huge inset box-shadow in the theme surface colour plus
+   -webkit-text-fill-color; the long transition delay stops the UA colour
+   flashing before it applies. Reads CSS variables, so it tracks whatever
+   theme is active. */
+.modal input:-webkit-autofill,
+.modal input:-webkit-autofill:hover,
+.modal input:-webkit-autofill:focus,
+.modal input:-webkit-autofill:active {
+  -webkit-text-fill-color: var(--text);
+  caret-color: var(--text);
+  -webkit-box-shadow: 0 0 0 1000px var(--surface) inset;
+  box-shadow: 0 0 0 1000px var(--surface) inset;
+  transition: background-color 9999s ease-in-out 0s, -webkit-text-fill-color 9999s ease-in-out 0s;
+}
 .modal textarea { resize: vertical; min-height: 80px; }
 .modal .warn {
   background: rgba(248,113,113,0.08);

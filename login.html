@@ -108,6 +108,27 @@
   .login-field input:focus {
     border-color: var(--accent);
   }
+  /* Chrome/Edge/Safari force their own background + text colour on
+     autofilled fields via `:-webkit-autofill` (a pale yellow/white box
+     with black text, `!important`-ed in the UA stylesheet) — it ignores
+     page CSS entirely and looks jarring against every theme but Light.
+     The only override that actually works is painting a huge inset
+     box-shadow in the theme's surface colour over the UA background
+     (background-color itself can't win against `!important`), combined
+     with `-webkit-text-fill-color` to recolour the text. The absurdly
+     long transition delay prevents the UA's yellow from flashing before
+     our override applies on autofill. This re-applies automatically on
+     every theme switch because it all reads CSS variables. */
+  .login-field input:-webkit-autofill,
+  .login-field input:-webkit-autofill:hover,
+  .login-field input:-webkit-autofill:focus,
+  .login-field input:-webkit-autofill:active {
+    -webkit-text-fill-color: var(--text);
+    caret-color: var(--text);
+    -webkit-box-shadow: 0 0 0 1000px var(--surface-2) inset;
+    box-shadow: 0 0 0 1000px var(--surface-2) inset;
+    transition: background-color 9999s ease-in-out 0s, -webkit-text-fill-color 9999s ease-in-out 0s;
+  }
   .login-field input::placeholder {
     color: var(--muted);
     opacity: 0.6;
