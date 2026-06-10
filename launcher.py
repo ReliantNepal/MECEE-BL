@@ -15,6 +15,7 @@ Usage:
     python launcher.py            # opens index.html
     python launcher.py library    # opens index.html#library (Library page)
 """
+import csv
 import email.utils
 import gzip
 import http.server
@@ -330,6 +331,8 @@ class QuietHandler(http.server.SimpleHTTPRequestHandler):
             return self._api_mcqbank_tree()
         if parsed.path == "/api/mcqbank/csv":
             return self._api_mcqbank_csv(parsed)
+        if parsed.path == "/api/mcqbank/explain":
+            return self._api_mcqbank_explain_get(parsed)
         if parsed.path.lower().endswith(self._BLOCKED_EXT):
             return self._json(403, {"error": "forbidden"})
         if self._serve_static_compressed(parsed):
@@ -593,6 +596,12 @@ class QuietHandler(http.server.SimpleHTTPRequestHandler):
             return self._api_playlists_rescan()
         if parsed.path == "/api/upload-music":
             return self._api_upload_music(parsed)
+        if parsed.path == "/api/mcqbank/csv":
+            return self._api_mcqbank_csv_save()
+        if parsed.path == "/api/mcqbank/explain":
+            return self._api_mcqbank_explain_save()
+        if parsed.path == "/api/mcqbank/weakness":
+            return self._api_mcqbank_weakness_save()
         self._json(404, {"error": "not found"})
 
     def _api_playlists_rescan(self):
@@ -713,17 +722,27 @@ class QuietHandler(http.server.SimpleHTTPRequestHandler):
         except Exception as e:
             self._json(500, {"error": str(e)})
 
+    def _resolve_mcq_path(self, rel: str, must_be_csv: bool = True):
+        """Resolve a relative MCQBANK path safely. Returns the absolute path,
+        or None if the path is invalid/forbidden."""
+        rel = (rel or "").lstrip("/")
+        if not rel or ".." in rel.replace("\\", "/").split("/"):
+            return None
+        full = os.path.normpath(os.path.join(self.MCQBANK_DIR, rel.replace("/", os.sep)))
+        if not full.startswith(os.path.normpath(self.MCQBANK_DIR) + os.sep):
+            return None
+        if must_be_csv and not full.lower().endswith(".csv"):
+            return None
+        return full
+
     def _api_mcqbank_csv(self, parsed) -> None:
         """Serve a CSV file from the MCQBANK directory.
         ?path= must be a relative path with no .. traversal."""
         params = dict(urllib.parse.parse_qsl(parsed.query))
-        rel = params.get("path", "").lstrip("/")
-        if not rel or ".." in rel.replace("\\", "/").split("/"):
+        full = self._resolve_mcq_path(params.get("path", ""))
+        if not full:
             return self._json(400, {"error": "invalid path"})
-        full = os.path.normpath(os.path.join(self.MCQBANK_DIR, rel.replace("/", os.sep)))
-        if not full.startswith(os.path.normpath(self.MCQBANK_DIR) + os.sep):
-            return self._json(403, {"error": "forbidden"})
-        if not os.path.isfile(full) or not full.lower().endswith(".csv"):
+        if not os.path.isfile(full):
             return self._json(404, {"error": "file not found"})
         try:
             with open(full, "r", encoding="utf-8-sig", errors="replace") as f:
@@ -738,6 +757,160 @@ class QuietHandler(http.server.SimpleHTTPRequestHandler):
                 self.wfile.write(body)
             except (BrokenPipeError, ConnectionResetError):
                 pass
+        except Exception as e:
+            self._json(500, {"error": str(e)})
+
+    def _api_mcqbank_csv_save(self) -> None:
+        """Overwrite a CSV file in the MCQBANK directory.
+        Body: {"path": "<rel path>", "content": "<full csv text>"}"""
+        try:
+            length = int(self.headers.get("Content-Length", "0") or "0")
+            body = json.loads(self.rfile.read(length).decode("utf-8") or "{}")
+        except Exception as e:
+            return self._json(400, {"error": f"bad request body: {e}"})
+
+        full = self._resolve_mcq_path(body.get("path", ""))
+        if not full:
+            return self._json(400, {"error": "invalid path"})
+        if not os.path.isfile(full):
+            return self._json(404, {"error": "file not found"})
+        content = body.get("content")
+        if not isinstance(content, str):
+            return self._json(400, {"error": "content must be a string"})
+        try:
+            with open(full, "w", encoding="utf-8", newline="") as f:
+                f.write(content)
+            self._json(200, {"ok": True})
+        except Exception as e:
+            self._json(500, {"error": str(e)})
+
+    def _explain_sidecar_path(self, full_csv_path: str) -> str:
+        return full_csv_path + ".explain.json"
+
+    def _api_mcqbank_explain_get(self, parsed) -> None:
+        """Return saved AI-Explainer explanations for a CSV file as
+        {"<question text>": "<explanation>", ...}. Empty object if none saved."""
+        params = dict(urllib.parse.parse_qsl(parsed.query))
+        full = self._resolve_mcq_path(params.get("path", ""))
+        if not full:
+            return self._json(400, {"error": "invalid path"})
+        side = self._explain_sidecar_path(full)
+        if not os.path.isfile(side):
+            return self._json(200, {})
+        try:
+            with open(side, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            self._json(200, data if isinstance(data, dict) else {})
+        except Exception as e:
+            self._json(500, {"error": str(e)})
+
+    def _api_mcqbank_explain_save(self) -> None:
+        """Merge-save AI-Explainer explanations for a CSV file.
+        Body: {"path": "<rel csv path>", "explanations": {"<q>": "<text>", ...}}"""
+        try:
+            length = int(self.headers.get("Content-Length", "0") or "0")
+            body = json.loads(self.rfile.read(length).decode("utf-8") or "{}")
+        except Exception as e:
+            return self._json(400, {"error": f"bad request body: {e}"})
+
+        full = self._resolve_mcq_path(body.get("path", ""))
+        if not full:
+            return self._json(400, {"error": "invalid path"})
+        if not os.path.isfile(full):
+            return self._json(404, {"error": "file not found"})
+        new_explanations = body.get("explanations")
+        if not isinstance(new_explanations, dict):
+            return self._json(400, {"error": "explanations must be an object"})
+
+        side = self._explain_sidecar_path(full)
+        existing = {}
+        if os.path.isfile(side):
+            try:
+                with open(side, "r", encoding="utf-8") as f:
+                    loaded = json.load(f)
+                if isinstance(loaded, dict):
+                    existing = loaded
+            except Exception:
+                pass
+        existing.update(new_explanations)
+        try:
+            with open(side, "w", encoding="utf-8") as f:
+                json.dump(existing, f, ensure_ascii=False, indent=2)
+            self._json(200, {"ok": True, "count": len(existing)})
+        except Exception as e:
+            self._json(500, {"error": str(e)})
+
+    @staticmethod
+    def _csv_field(val) -> str:
+        s = "" if val is None else str(val)
+        if any(c in s for c in (',', '"', '\r', '\n')):
+            return '"' + s.replace('"', '""') + '"'
+        return s
+
+    def _api_mcqbank_weakness_save(self) -> None:
+        """Append a wrongly-answered question to a per-deck "weakness" CSV
+        living alongside the original file, e.g.
+        MCQBANK/Botany/Cell/Practice Weakness (Cell Basics).csv
+        Body: {"path": "<rel original csv path>", "q": "...", "answer": "...", "wrongs": [...]}
+        Dedupes by question text."""
+        try:
+            length = int(self.headers.get("Content-Length", "0") or "0")
+            body = json.loads(self.rfile.read(length).decode("utf-8") or "{}")
+        except Exception as e:
+            return self._json(400, {"error": f"bad request body: {e}"})
+
+        orig_full = self._resolve_mcq_path(body.get("path", ""))
+        if not orig_full:
+            return self._json(400, {"error": "invalid path"})
+        if not os.path.isfile(orig_full):
+            return self._json(404, {"error": "file not found"})
+
+        q = (body.get("q") or "").strip()
+        answer = (body.get("answer") or "").strip()
+        wrongs = body.get("wrongs") or []
+        if not q or not answer or not isinstance(wrongs, list):
+            return self._json(400, {"error": "q, answer and wrongs are required"})
+
+        orig_dir, orig_name = os.path.split(orig_full)
+        stem = os.path.splitext(orig_name)[0]
+        # Avoid "Practice Weakness (Practice Weakness (X))" if run on a weakness deck itself.
+        m = re.match(r"^Practice Weakness \((.+)\)$", stem)
+        if m:
+            stem = m.group(1)
+        weak_name = f"Practice Weakness ({stem}).csv"
+        weak_full = os.path.join(orig_dir, weak_name)
+        weak_rel = os.path.relpath(weak_full, self.MCQBANK_DIR).replace(os.sep, "/")
+
+        header = "question,answer,wrong1,wrong2,wrong3"
+        existing_questions = set()
+        if os.path.isfile(weak_full):
+            try:
+                with open(weak_full, "r", encoding="utf-8-sig", errors="replace") as f:
+                    reader = csv.reader(f)
+                    rows = list(reader)
+                if rows:
+                    header_line = ",".join(rows[0])
+                    if header_line.strip():
+                        header = header_line
+                    for row in rows[1:]:
+                        if row:
+                            existing_questions.add(row[0].strip())
+            except Exception as e:
+                return self._json(500, {"error": str(e)})
+
+        if q in existing_questions:
+            return self._json(200, {"ok": True, "duplicate": True, "path": weak_rel})
+
+        row_fields = [q, answer] + [str(w).strip() for w in wrongs if str(w).strip()]
+        row_line = ",".join(self._csv_field(f) for f in row_fields)
+
+        try:
+            is_new = not os.path.isfile(weak_full)
+            with open(weak_full, "a", encoding="utf-8", newline="") as f:
+                if is_new:
+                    f.write(header + "\r\n")
+                f.write(row_line + "\r\n")
+            self._json(200, {"ok": True, "duplicate": False, "path": weak_rel})
         except Exception as e:
             self._json(500, {"error": str(e)})
 

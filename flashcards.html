@@ -374,6 +374,24 @@
   /* BOOKMARK CARDS — scrollbar inherits the global slim/transparent style
      from theme.css; no per-element override here. */
   .bm-list { display: grid; gap: 8px; max-height: 460px; overflow: auto; padding-right: 4px; }
+
+  /* MCQ Bank import tree (Create deck → MCQ Bank tab) */
+  .mcqi-folder > summary {
+    cursor: pointer; list-style: none; font-weight: 600; font-size: 13px;
+    padding: 6px 4px; border-radius: 6px; user-select: none;
+  }
+  .mcqi-folder > summary::-webkit-details-marker { display: none; }
+  .mcqi-folder > summary::before { content: '▶ '; font-size: 10px; color: var(--muted); }
+  .mcqi-folder[open] > summary::before { content: '▼ '; }
+  .mcqi-folder > summary:hover { background: var(--surface-2); }
+  .mcqi-folder .mcqi-folder, .mcqi-folder .mcqi-file { margin-left: 16px; }
+  .mcqi-file {
+    display: flex; align-items: center; gap: 8px; padding: 5px 4px;
+    font-size: 13px; border-radius: 6px; cursor: pointer;
+  }
+  .mcqi-file:hover { background: var(--surface-2); }
+  .mcqi-file input { margin: 0; }
+  .mcqi-file.weak { color: var(--accent); }
   .bm-card {
     display: grid;
     grid-template-columns: 36px 1fr auto;
@@ -795,6 +813,136 @@
     font-size: 12px;
     line-height: 1;
   }
+  .img-thumb img { cursor: zoom-in; }
+  .img-thumb.deselected { opacity: 0.38; }
+  .img-thumb.deselected::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,.35);
+    pointer-events: none;
+  }
+  .thumb-check {
+    position: absolute;
+    bottom: 4px; left: 4px;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: var(--good);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    line-height: 1;
+  }
+  .img-thumb.deselected .thumb-check {
+    background: var(--surface-3);
+    color: var(--muted);
+  }
+
+  /* Notes fullscreen lightbox */
+  .notes-lbox {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.96);
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 3000;
+  }
+  .notes-lbox.open { display: flex; animation: fadeIn .12s; }
+  .notes-lbox-close {
+    position: absolute;
+    top: 14px; right: 16px;
+    background: rgba(255,255,255,.12);
+    color: #fff;
+    border: 0;
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+  }
+  .notes-lbox-close:hover { background: rgba(255,255,255,.25); }
+  .notes-lbox-img-wrap {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 16px 68px;
+    overflow: hidden;
+    position: relative;
+    min-height: 0;
+  }
+  .notes-lbox-img-wrap img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    border-radius: 6px;
+    user-select: none;
+    display: block;
+  }
+  .notes-lbox-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255,255,255,.12);
+    border: 0;
+    color: #fff;
+    font-size: 26px;
+    width: 48px; height: 48px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background .15s;
+    line-height: 1;
+  }
+  .notes-lbox-arrow:hover:not(:disabled) { background: rgba(255,255,255,.28); }
+  .notes-lbox-arrow:disabled { opacity: 0.18; cursor: default; }
+  .notes-lbox-arrow.nlb-prev { left: 10px; }
+  .notes-lbox-arrow.nlb-next { right: 10px; }
+  .notes-lbox-bar {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 14px 20px;
+    background: rgba(0,0,0,.55);
+    flex-wrap: wrap;
+  }
+  .notes-lbox-counter {
+    color: rgba(255,255,255,.6);
+    font-size: 13px;
+    min-width: 70px;
+    text-align: center;
+  }
+  .nlb-btn {
+    background: rgba(255,255,255,.1);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,.18);
+    padding: 7px 18px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-family: inherit;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background .15s;
+  }
+  .nlb-btn:hover { background: rgba(255,255,255,.22); }
+  .nlb-btn.is-selected { background: rgba(80,180,80,.3); border-color: #66bb6a; color: #88dd88; }
+  .nlb-btn.is-deselected { background: rgba(255,255,255,.05); border-color: rgba(255,255,255,.12); color: rgba(255,255,255,.55); }
+  .nlb-btn.is-remove { background: rgba(200,50,50,.25); border-color: #ef5350; color: #ff8a80; }
+  .nlb-btn.is-remove:hover { background: rgba(200,50,50,.45); }
 
   /* DECK GRID */
   .deck-grid {
@@ -1183,6 +1331,92 @@
   .deck-menu button:hover { background: var(--surface-2); }
   .deck-menu button.danger { color: var(--bad); }
   .deck-menu hr { margin: 4px 6px; border: 0; border-top: 1px solid var(--border); }
+
+  /* AI Condensation history cards */
+  .ch-card {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .ch-card.ch-del  { border-left: 3px solid var(--bad); }
+  .ch-card.ch-mod  { border-left: 3px solid #f59e0b; }
+  .ch-card.ch-add  { border-left: 3px solid var(--good); }
+  .ch-tag {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 2px 7px;
+    border-radius: 999px;
+    margin-bottom: 2px;
+  }
+  .ch-tag.del { background: rgba(239,83,80,.15); color: var(--bad); }
+  .ch-tag.mod { background: rgba(245,158,11,.15); color: #f59e0b; }
+  .ch-tag.add { background: rgba(102,187,106,.15); color: var(--good); }
+  .ch-q  { font-weight: 600; color: var(--text); line-height: 1.4; }
+  .ch-a  { color: var(--muted); line-height: 1.4; }
+  .ch-reason { font-style: italic; color: var(--muted); font-size: 11px; }
+  .ch-diff { display: flex; flex-direction: column; gap: 4px; }
+  .ch-diff .old { color: var(--bad); text-decoration: line-through; opacity: .7; }
+  .ch-diff .new { color: var(--good); }
+  .ch-restore {
+    align-self: flex-end;
+    background: var(--surface-3);
+    color: var(--text);
+    border: 1px solid var(--border);
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    cursor: pointer;
+    font-family: inherit;
+    font-weight: 600;
+  }
+  .ch-restore:hover { background: var(--surface); }
+  .ch-restore:disabled { opacity: .4; cursor: default; }
+  .cond-stat-chip {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  /* Batch progress grid */
+  #condenseBatchGrid { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 10px; min-height: 22px; }
+  .cond-batch-dot {
+    width: 20px; height: 20px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 700; transition: background .25s, color .25s;
+  }
+  .cond-batch-dot.pending  { background: var(--surface-3); color: var(--muted); }
+  .cond-batch-dot.running  { background: rgba(99,179,237,.25); color: var(--accent); animation: batchPulse .9s ease-in-out infinite; }
+  .cond-batch-dot.done     { background: rgba(102,187,106,.25); color: var(--good); }
+  .cond-batch-dot.error    { background: rgba(239,83,80,.2); color: var(--bad); }
+  @keyframes batchPulse { 0%,100% { opacity:.6; } 50% { opacity:1; } }
+  .cond-progress-wrap { margin-top: 14px; }
+  .cond-progress-bar-track {
+    height: 8px; border-radius: 999px; background: var(--surface-3); overflow: hidden; margin-top: 6px;
+  }
+  .cond-progress-bar-fill {
+    height: 100%; border-radius: 999px;
+    background: linear-gradient(90deg, var(--accent), var(--good));
+    transition: width .4s ease;
+  }
+  .cond-progress-labels { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); margin-top: 4px; }
+  /* MCQ choices in history */
+  .ch-choices { display: flex; flex-direction: column; gap: 2px; margin: 2px 0; }
+  .ch-choice { font-size: 11px; padding: 2px 6px; border-radius: 5px; }
+  .ch-choice.correct { background: rgba(102,187,106,.18); color: var(--good); font-weight: 700; }
+  .ch-choice.wrong   { color: var(--muted); }
 
   /* Card editor — same modal style, internal layout below */
   .edit-toolbar {
@@ -2490,6 +2724,76 @@
     display: flex; align-items: center; justify-content: center;
   }
   .mcqb-quiz .close:hover { color: var(--text); background: var(--surface-3); }
+  .mcqb-quiz .del-current {
+    position: absolute;
+    top: 14px; right: 56px;
+    background: var(--surface-2);
+    color: var(--muted);
+    border: 1px solid var(--border);
+    height: 32px;
+    padding: 0 12px;
+    border-radius: 16px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .mcqb-quiz .del-current:hover { color: var(--bad); border-color: var(--bad); background: var(--surface-3); }
+  .mcqb-quiz .del-current:disabled { opacity: .4; cursor: not-allowed; }
+  .mcqb-quiz .edit-current-btn {
+    position: absolute;
+    top: 14px;
+    right: 232px;
+    background: var(--surface-2);
+    color: var(--muted);
+    border: 1px solid var(--border);
+    height: 32px;
+    padding: 0 12px;
+    border-radius: 16px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: inherit;
+    transition: color .15s, border-color .15s, background .15s;
+  }
+  .mcqb-quiz .edit-current-btn:hover { color: var(--accent); border-color: var(--accent); background: var(--surface-3); }
+  .mcqb-quiz .edit-current-btn:disabled { opacity: .38; cursor: not-allowed; }
+  .mcqb-explain {
+    margin-top: 14px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--text);
+  }
+  .mcqb-explain b { color: var(--accent); }
+  .study-explain {
+    margin-top: 12px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--text);
+    text-align: left;
+  }
+  .study-explain b { color: var(--accent); }
+  .study-explain .se-related { margin-top: 8px; font-size: 12px; color: var(--muted); }
+  .study-explain .se-mnemonic { margin-top: 8px; font-size: 12px; color: var(--text); background: var(--surface-3); border-radius: 8px; padding: 8px 10px; }
+  @media (max-width: 720px) {
+    .mcqb-quiz .edit-current-btn { right: 56px; top: 56px; }
+    .mcqb-quiz .del-current#mcqbQuizDelete { top: 14px; }
+    .mcqb-quiz .del-current#mcqbQuizBackBtn { top: 56px; right: 142px; }
+    .mcqb-quiz-header { margin-top: 10px; }
+  }
   .mcqb-quiz-header { margin-bottom: 18px; }
   .mcqb-quiz-title { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
   .mcqb-quiz-sub { font-size: 12px; color: var(--muted); }
@@ -2543,6 +2847,16 @@
   }
   .mcqb-feedback.ok { color: var(--good); }
   .mcqb-feedback.err { color: var(--bad); }
+  .mcqb-weak-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 4px;
+    margin-bottom: 4px;
+  }
+  .mcqb-weak-actions .btn { font-size: 13px; padding: 8px 16px; }
+  .mcqb-weak-actions .btn:disabled { opacity: .6; cursor: default; }
   /* Result screen */
   .mcqb-result {
     text-align: center;
@@ -2655,6 +2969,9 @@
   <div class="mcqb-quiz-back" id="mcqbQuizBack" role="dialog" aria-modal="true">
     <div class="mcqb-quiz">
       <button class="close" id="mcqbQuizClose" title="Close (Esc)">✕</button>
+      <button class="del-current" id="mcqbQuizDelete" title="Delete this question from the bank">🗑 Delete</button>
+      <button class="del-current" id="mcqbQuizBackBtn" style="right: 142px" title="Go back to the previous question" disabled>↶ Back</button>
+      <button class="edit-current-btn" id="mcqbQuizEdit" title="Edit this question">✏️ Edit</button>
       <div class="mcqb-quiz-header">
         <div class="mcqb-quiz-title" id="mcqbQuizTitle">Quiz</div>
         <div class="mcqb-quiz-sub" id="mcqbQuizSub"></div>
@@ -2670,6 +2987,11 @@
         <div class="mcqb-question" id="mcqbQuestion"></div>
         <div class="mcqb-choices" id="mcqbChoices"></div>
         <div class="mcqb-feedback" id="mcqbFeedback"></div>
+        <div class="mcqb-explain" id="mcqbExplain" style="display:none"></div>
+        <div class="mcqb-weak-actions" id="mcqbWeakActions" style="display:none">
+          <button class="btn secondary" id="mcqbAddWeak" type="button">➕ Add to Weakness Deck</button>
+          <button class="btn" id="mcqbContinueBtn" type="button">Continue ▶</button>
+        </div>
       </div>
       <!-- Result screen (shown after last question) -->
       <div id="mcqbResultScreen" style="display:none">
@@ -2713,6 +3035,7 @@
             <button class="seg" data-tab="notes">📝 Notes</button>
             <button class="seg" data-tab="img">🖼️ Images</button>
             <button class="seg" data-tab="csv">📄 CSV</button>
+            <button class="seg" data-tab="mcq">🗂️ MCQ Bank</button>
           </div>
         </div>
       </div>
@@ -2939,6 +3262,27 @@
       </div>
       <div class="status" id="csvStatus"><span class="spinner"></span><span class="msg"></span></div>
     </div>
+
+    <!-- ===== FROM MCQ BANK ===== -->
+    <div class="panel" id="panel-mcq">
+      <div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:12px 14px;font-size:12px;color:var(--muted);margin-bottom:14px">
+        Pick one or more question sets from the MCQ Bank — including any
+        <b style="color:var(--text)">Practice Weakness</b> decks you've built up — to import as MCQ flashcards.
+      </div>
+      <div class="field-row">
+        <div>
+          <label>Deck name</label>
+          <input type="text" id="mcqImportDeckName" placeholder="My MCQ Bank deck" autocomplete="off" />
+        </div>
+      </div>
+      <label>Question sets</label>
+      <div class="bm-list" id="mcqImportTree" style="max-height:280px;overflow:auto"></div>
+      <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:12px">
+        <button class="btn secondary" id="mcqImportClearBtn" type="button" title="Clear selection">🗑 Clear selection</button>
+        <button class="btn" id="mcqImportGoBtn">📥 Import deck</button>
+      </div>
+      <div class="status" id="mcqImportStatus"><span class="spinner"></span><span class="msg"></span></div>
+    </div>
     </div><!-- /.modal -->
   </div><!-- /.modal-back -->
 </div><!-- /.container -->
@@ -2947,10 +3291,196 @@
 <div class="deck-menu" id="deckMenu">
   <button data-act="rename">✎  Rename deck</button>
   <button data-act="edit">📝  Edit cards</button>
+  <button data-act="condense">🧠  AI Condensation</button>
+  <button data-act="fcexplain" style="display:none">🤖  AI Explainer</button>
   <button data-act="wallpaper">🎨  Change wallpaper</button>
   <button data-act="export">⬇  Export CSV</button>
   <hr/>
   <button data-act="delete" class="danger">🗑  Delete deck</button>
+</div>
+
+<!-- MCQ BANK FILE CONTEXT MENU (one shared dropdown, repositioned per click) -->
+<div class="deck-menu" id="mcqbFileMenu">
+  <button data-act="explain">🤖  AI Explainer</button>
+</div>
+
+<!-- AI EXPLAINER MODAL -->
+<div class="modal-back" id="explainBack" role="dialog" aria-modal="true">
+  <div class="modal" style="max-width:520px">
+    <button class="close" id="explainClose" title="Close (Esc)">✕</button>
+    <h2 style="margin:0 0 4px;font-size:18px">🤖 AI Explainer</h2>
+    <div class="sub" id="explainSub" style="font-size:12px;color:var(--muted);margin-bottom:18px"></div>
+
+    <div id="explainSetup">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
+        <div>
+          <label>Subject</label>
+          <select id="explainSubject">
+            <option value="auto">Auto-detect</option>
+            <option value="zoology">Zoology</option>
+            <option value="botany">Botany</option>
+            <option value="chemistry">Chemistry</option>
+            <option value="physics">Physics</option>
+            <option value="general">General</option>
+          </select>
+        </div>
+        <div>
+          <label>AI Model</label>
+          <select id="explainModel">
+            <option value="gpt-5.5">gpt-5.5</option>
+            <option value="gpt-5.5-instant">gpt-5.5-instant</option>
+            <option value="gpt-5.4-mini">gpt-5.4-mini</option>
+            <option value="gpt-4o">gpt-4o (legacy)</option>
+          </select>
+        </div>
+      </div>
+      <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:16px">
+        <b style="color:var(--text)">What this does:</b><br>
+        Generates a short explanation for every question in this set — why the correct answer is right and why the
+        other options are wrong. Explanations are saved and shown after you answer each question during the quiz.
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end">
+        <button class="btn secondary" id="explainCancel">Cancel</button>
+        <button class="btn" id="explainStart">🤖 Start AI Explainer</button>
+      </div>
+    </div>
+
+    <div id="explainRunning" style="display:none">
+      <div class="status busy" id="explainStatus" style="margin-bottom:12px"><span class="spinner"></span><span class="msg" id="explainMsg">Generating explanations…</span></div>
+      <div id="explainBatchGrid"></div>
+      <div class="cond-progress-wrap">
+        <div class="cond-progress-bar-track"><div class="cond-progress-bar-fill" id="explainPrgFill" style="width:0%"></div></div>
+        <div class="cond-progress-labels"><span id="explainPrgLbl">Starting…</span><span id="explainPrgPct">0%</span></div>
+      </div>
+    </div>
+
+    <div id="explainDone" style="display:none">
+      <div style="text-align:center;padding:20px;color:var(--good);font-size:14px;font-weight:600">✓ Explanations saved!</div>
+      <div style="display:flex;justify-content:flex-end;margin-top:14px">
+        <button class="btn secondary" id="explainDoneBtn">Done</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- AI CONDENSATION MODAL -->
+<div class="modal-back" id="condenseBack" role="dialog" aria-modal="true">
+  <div class="modal" style="max-width:520px">
+    <button class="close" id="condenseClose" title="Close (Esc)">✕</button>
+    <h2 style="margin:0 0 4px;font-size:18px">🧠 AI Condensation</h2>
+    <div class="sub" id="condenseSub" style="font-size:12px;color:var(--muted);margin-bottom:18px"></div>
+
+    <div id="condenseSetup">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
+        <div>
+          <label>Subject</label>
+          <select id="condenseSubject">
+            <option value="auto">Auto-detect</option>
+            <option value="zoology">Zoology</option>
+            <option value="botany">Botany</option>
+            <option value="chemistry">Chemistry</option>
+            <option value="physics">Physics</option>
+            <option value="general">General</option>
+          </select>
+        </div>
+        <div>
+          <label>AI Model</label>
+          <select id="condenseModel">
+            <option value="gpt-5.5">gpt-5.5</option>
+            <option value="gpt-5.5-instant">gpt-5.5-instant</option>
+            <option value="gpt-5.4-mini">gpt-5.4-mini</option>
+            <option value="gpt-4o">gpt-4o (legacy)</option>
+          </select>
+        </div>
+      </div>
+      <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:16px">
+        <b style="color:var(--text)">What this does:</b><br>
+        Analyses every card in your deck against real CEE/MECEE PYQ patterns for the detected subject.
+        Cards that are too vague, too application-heavy, or unlikely to appear in the exam are removed or sharpened.
+        A full history is saved — you can revert any deleted or modified card individually.
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end">
+        <button class="btn secondary" id="condenseCancel">Cancel</button>
+        <button class="btn" id="condenseStart">🧠 Start Condensation</button>
+      </div>
+    </div>
+
+    <div id="condenseRunning" style="display:none">
+      <div class="status busy" id="condenseStatus" style="margin-bottom:12px"><span class="spinner"></span><span class="msg" id="condenseMsg">Analysing cards…</span></div>
+      <div id="condenseBatchGrid"></div>
+      <div class="cond-progress-wrap">
+        <div class="cond-progress-bar-track"><div class="cond-progress-bar-fill" id="condensePrgFill" style="width:0%"></div></div>
+        <div class="cond-progress-labels"><span id="condensePrgLbl">Starting…</span><span id="condensePrgPct">0%</span></div>
+      </div>
+    </div>
+
+    <div id="condenseHistory" style="display:none">
+      <div id="condenseStats" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px"></div>
+      <div style="display:flex;gap:8px;margin-bottom:10px;align-items:center">
+        <span style="font-size:13px;font-weight:600">Change History</span>
+        <button class="btn secondary" id="condenseRevertAll" style="font-size:12px;padding:5px 12px;margin-left:auto">↩ Revert All</button>
+      </div>
+      <div id="condenseHistoryList" style="max-height:340px;overflow-y:auto;display:flex;flex-direction:column;gap:8px"></div>
+      <div style="display:flex;justify-content:flex-end;margin-top:14px">
+        <button class="btn secondary" id="condenseDone">Done</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FLASHCARD AI EXPLAINER MODAL (for decks imported from MCQ Bank) -->
+<div class="modal-back" id="fcExplainBack" role="dialog" aria-modal="true">
+  <div class="modal" style="max-width:520px">
+    <button class="close" id="fcExplainClose" title="Close (Esc)">✕</button>
+    <h2 style="margin:0 0 4px;font-size:18px">🤖 AI Explainer</h2>
+    <div class="sub" id="fcExplainSub" style="font-size:12px;color:var(--muted);margin-bottom:18px"></div>
+
+    <div id="fcExplainSetup">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
+        <div>
+          <label>Subject</label>
+          <select id="fcExplainSubject">
+            <option value="auto">Auto-detect</option>
+            <option value="zoology">Zoology</option>
+            <option value="botany">Botany</option>
+            <option value="chemistry">Chemistry</option>
+            <option value="physics">Physics</option>
+            <option value="general">General</option>
+          </select>
+        </div>
+        <div>
+          <label>AI Model</label>
+          <select id="fcExplainModel">
+            <option value="gpt-5.5">gpt-5.5</option>
+            <option value="gpt-5.5-instant">gpt-5.5-instant</option>
+            <option value="gpt-5.4-mini">gpt-5.4-mini</option>
+            <option value="gpt-4o">gpt-4o (legacy)</option>
+          </select>
+        </div>
+      </div>
+      <div id="fcExplainLinkedNote" style="background:var(--surface-2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:16px"></div>
+      <div style="display:flex;gap:8px;justify-content:flex-end">
+        <button class="btn secondary" id="fcExplainCancel">Cancel</button>
+        <button class="btn" id="fcExplainStart">🤖 Start AI Explainer</button>
+      </div>
+    </div>
+
+    <div id="fcExplainRunning" style="display:none">
+      <div class="status busy" id="fcExplainStatus" style="margin-bottom:12px"><span class="spinner"></span><span class="msg" id="fcExplainMsg">Generating explanations…</span></div>
+      <div id="fcExplainBatchGrid"></div>
+      <div class="cond-progress-wrap">
+        <div class="cond-progress-bar-track"><div class="cond-progress-bar-fill" id="fcExplainPrgFill" style="width:0%"></div></div>
+        <div class="cond-progress-labels"><span id="fcExplainPrgLbl">Starting…</span><span id="fcExplainPrgPct">0%</span></div>
+      </div>
+    </div>
+
+    <div id="fcExplainDone" style="display:none">
+      <div style="text-align:center;padding:20px;color:var(--good);font-size:14px;font-weight:600">✓ Explanations saved!</div>
+      <div style="display:flex;justify-content:flex-end;margin-top:14px">
+        <button class="btn secondary" id="fcExplainDoneBtn">Done</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- DECK COVER WALLPAPER PICKER MODAL -->
@@ -3034,6 +3564,7 @@
     <div class="q" id="studyQ"></div>
     <div class="choices" id="studyChoices"></div>
     <div class="a" id="studyA"></div>
+    <div class="study-explain" id="studyExplain" style="display:none"></div>
     <div class="actions" id="studyActions"></div>
     <div class="keyhint"><kbd>Space</kbd> reveal · <kbd>1</kbd>/<kbd>2</kbd>/<kbd>3</kbd>/<kbd>4</kbd> rate · <kbd>Z</kbd> back · <kbd>Esc</kbd> close</div>
   </div>
@@ -3055,6 +3586,25 @@
     <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:18px;flex-wrap:wrap">
       <button class="btn secondary" id="editCardCancel" type="button">Cancel</button>
       <button class="btn" id="editCardSave" type="button">Save changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT MCQ BANK QUESTION MODAL -->
+<div class="edit-card-back" id="mcqEditBack" role="dialog" aria-modal="true" aria-labelledby="mcqEditTitle">
+  <div class="edit-card-box">
+    <h3 id="mcqEditTitle">✏️ Edit question</h3>
+    <div class="field">
+      <label for="mcqEditQ">Question</label>
+      <textarea id="mcqEditQ" rows="2"></textarea>
+    </div>
+    <div class="field">
+      <label>Choices · click the radio to mark the correct answer</label>
+      <div class="mcq-choices" id="mcqEditChoices"></div>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:18px;flex-wrap:wrap">
+      <button class="btn secondary" id="mcqEditCancel" type="button">Cancel</button>
+      <button class="btn" id="mcqEditSave" type="button">Save changes</button>
     </div>
   </div>
 </div>
@@ -3554,7 +4104,86 @@ document.querySelectorAll('#modeSeg .seg').forEach(t => {
     document.querySelectorAll('.panel').forEach(x => x.classList.remove('active'));
     t.classList.add('active');
     document.getElementById('panel-' + t.dataset.tab).classList.add('active');
+    if (t.dataset.tab === 'mcq') loadMcqImportTree();
   });
+});
+
+/* ===== Import from MCQ Bank ===== */
+let mcqImportTreeData = null;
+
+async function loadMcqImportTree() {
+  const el = document.getElementById('mcqImportTree');
+  if (mcqImportTreeData) { renderMcqImportTree(); return; }
+  el.innerHTML = '<div style="padding:14px;color:var(--muted);font-size:13px">Loading MCQ Bank…</div>';
+  try {
+    const resp = await fetch('/api/mcqbank/tree');
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    mcqImportTreeData = await resp.json();
+    renderMcqImportTree();
+  } catch (e) {
+    el.innerHTML = `<div style="padding:14px;color:var(--bad);font-size:13px">Failed to load MCQ Bank: ${escapeHtml(e.message)}</div>`;
+  }
+}
+
+function mcqImportNodeHtml(node) {
+  const files = (node.files || []).filter(f => f.name.toLowerCase().endsWith('.csv'));
+  const children = node.children || [];
+  if (!files.length && !children.length) return '';
+  let html = '';
+  for (const f of files) {
+    const isWeak = /^Practice Weakness \(/.test(f.name);
+    html += `<label class="mcqi-file${isWeak ? ' weak' : ''}">
+      <input type="checkbox" data-path="${escapeHtml(f.path)}" data-name="${escapeHtml(f.name.replace(/\.csv$/i, ''))}">
+      <span>${isWeak ? '🎯' : '📄'} ${escapeHtml(f.name.replace(/\.csv$/i, ''))}</span>
+    </label>`;
+  }
+  for (const c of children) {
+    const inner = mcqImportNodeHtml(c);
+    if (!inner) continue;
+    html += `<details class="mcqi-folder"><summary>📁 ${escapeHtml(c.name)}</summary>${inner}</details>`;
+  }
+  return html;
+}
+
+function renderMcqImportTree() {
+  const el = document.getElementById('mcqImportTree');
+  const html = mcqImportTreeData ? mcqImportNodeHtml(mcqImportTreeData) : '';
+  el.innerHTML = html || '<div style="padding:14px;color:var(--muted);font-size:13px">No MCQ Bank question sets found.</div>';
+}
+
+document.getElementById('mcqImportClearBtn').addEventListener('click', () => {
+  document.querySelectorAll('#mcqImportTree input[type="checkbox"]').forEach(cb => cb.checked = false);
+  document.getElementById('mcqImportDeckName').value = '';
+  setStatus('mcqImportStatus', '', null);
+});
+
+document.getElementById('mcqImportGoBtn').addEventListener('click', async () => {
+  const checked = [...document.querySelectorAll('#mcqImportTree input[type="checkbox"]:checked')];
+  if (!checked.length) { setStatus('mcqImportStatus', 'Pick at least one question set first.', 'err'); return; }
+  setStatus('mcqImportStatus', `Importing ${checked.length} question set${checked.length !== 1 ? 's' : ''}…`, 'busy');
+
+  let cards = [];
+  for (const cb of checked) {
+    try {
+      const resp = await fetch(`/api/mcqbank/csv?path=${encodeURIComponent(cb.dataset.path)}`);
+      if (!resp.ok) throw new Error('HTTP ' + resp.status);
+      const text = await resp.text();
+      const rows = parseCsv(text);
+      if (rows.length > 1) cards = cards.concat(buildCardsFromCsvRows(rows.slice(1)));
+    } catch (e) {
+      setStatus('mcqImportStatus', `Failed to load "${cb.dataset.name}": ${e.message}`, 'err');
+      return;
+    }
+  }
+  if (!cards.length) { setStatus('mcqImportStatus', 'No valid questions found in the selected sets.', 'err'); return; }
+
+  const defaultName = checked.length === 1
+    ? checked[0].dataset.name
+    : `MCQ Bank import · ${new Date().toLocaleDateString()}`;
+  const name = document.getElementById('mcqImportDeckName').value.trim() || defaultName;
+  const deck = saveDeck({ name, source: `mcqbank:${cards.length}`, cards });
+  setStatus('mcqImportStatus', `✓ Imported "${deck.name}" — ${cards.length} cards.`, 'ok');
+  renderDecks(); renderStats();
 });
 
 /* ===== Model picker — Books / Images / Notes stay in sync =====
@@ -4434,6 +5063,50 @@ function saveDeck({ name, source, cards }) {
   return deck;
 }
 
+/* ===== Batched vision generation =====
+   Sending 20-30 high-detail page images in a single chat-completion both (a)
+   crowds the model's attention so later pages get skimmed, and (b) produces
+   a "cards" JSON array long enough to blow past the per-call max_tokens cap
+   and truncate mid-array. Splitting into small page batches gives every
+   batch its own full token budget and the model's full attention on a
+   handful of pages — then we merge the resulting card arrays. Batches run
+   with a small concurrency limit so this is faster than serial calls without
+   tripping the OpenAI account's per-key requests/tokens-per-minute limits
+   (a free/low tier is typically good for ~3 concurrent vision calls; bump
+   GEN_BATCH_CONCURRENCY if your account's rate limits allow more). */
+const GEN_BATCH_SIZE = 6;
+const GEN_BATCH_CONCURRENCY = 3;
+
+async function generateCardsBatched({ files, promptText, model, apiKey, count, tokenBudgetCap, onBatchStart }) {
+  const batches = [];
+  for (let i = 0; i < files.length; i += GEN_BATCH_SIZE) batches.push(files.slice(i, i + GEN_BATCH_SIZE));
+
+  const results = new Array(batches.length);
+  let nextIdx = 0;
+  async function worker() {
+    while (nextIdx < batches.length) {
+      const bi = nextIdx++;
+      const batch = batches[bi];
+      if (batches.length > 1 && onBatchStart) onBatchStart(bi, batches.length, batch.length);
+      const userContent = [{ type: 'text', text: promptText }];
+      batch.forEach(f => userContent.push({ type: 'image_url', image_url: { url: f.dataUrl, detail: 'high' } }));
+      const tokenBudget = count === 'all' ? Math.min(tokenBudgetCap, 1500 + batch.length * 1200) : 3000;
+      const raw = await callOpenAI({
+        apiKey, model,
+        messages: [
+          { role: 'system', content: 'You are a careful flashcard author. Always return valid JSON.' },
+          { role: 'user',   content: userContent },
+        ],
+        max_tokens: tokenBudget,
+      });
+      results[bi] = parseCards(raw);
+    }
+  }
+  const workerCount = Math.min(GEN_BATCH_CONCURRENCY, batches.length);
+  await Promise.all(Array.from({ length: workerCount }, () => worker()));
+  return results.flat();
+}
+
 /* ===== Generate from bookmark range =====
    Every selected page is sent as an image to a vision-capable model. The
    model OCRs + interprets the page (catching diagrams and labels) and writes
@@ -4459,9 +5132,12 @@ document.getElementById('genGoBtn').addEventListener('click', async () => {
   _flashcardGenerating = true;
   document.getElementById('genGoBtn').disabled = true;
   setStatus('genStatus', `Sending ${included.length} page${included.length === 1 ? '' : 's'} to ${model}…`, 'busy');
-  /* Estimate: ~6s/page baseline + 10s overhead, longer in "all" mode.
-     The curve auto-adjusts if the real call takes longer or finishes early. */
-  const estSec = (count === 'all' ? 18 : 10) + included.length * 6;
+  /* Estimate: ~6s/page baseline + per-batch overhead, divided by the
+     concurrency the batches actually run with. The curve auto-adjusts if the
+     real call takes longer or finishes early. */
+  const genBatchCount = Math.max(1, Math.ceil(included.length / GEN_BATCH_SIZE));
+  const genWaves      = Math.max(1, Math.ceil(genBatchCount / GEN_BATCH_CONCURRENCY));
+  const estSec = (count === 'all' ? 18 : 10) * genWaves + included.length * 6;
   const prog = startProgress('genProgress', estSec, deckName);
   try {
     const promptText = buildPrompt({
@@ -4485,23 +5161,12 @@ document.getElementById('genGoBtn').addEventListener('click', async () => {
       setStatus('genStatus', `✓ Saved on cloud — ${r.card_count} cards. Click ⟳ Sync to download the deck locally.`, 'ok');
       prog.finish();
     } else {
-      const userContent = [{ type: 'text', text: promptText }];
-      included.forEach(p => {
-        userContent.push({ type: 'image_url', image_url: { url: p.dataUrl, detail: 'high' } });
+      const cards = await generateCardsBatched({
+        files: included.map(p => ({ dataUrl: p.dataUrl })),
+        promptText, model, apiKey, count,
+        tokenBudgetCap: 16000,
+        onBatchStart: (bi, total, n) => setStatus('genStatus', `Batch ${bi + 1}/${total} — sending ${n} page${n === 1 ? '' : 's'} to ${model}…`, 'busy'),
       });
-
-      /* 'all' generations can be 30-60+ cards × multiple pages — bump the
-         output ceiling so the JSON doesn't truncate. */
-      const tokenBudget = count === 'all' ? Math.min(16000, 1500 + included.length * 1200) : 3500;
-      const raw = await callOpenAI({
-        apiKey, model,
-        messages: [
-          { role: 'system', content: 'You are a careful flashcard author. Always return valid JSON.' },
-          { role: 'user',   content: userContent }
-        ],
-        max_tokens: tokenBudget
-      });
-      const cards = parseCards(raw);
       if (!cards.length) throw new Error('Got zero usable cards.');
       const deck = saveDeck({
         name: deckName,
@@ -4612,7 +5277,9 @@ document.getElementById('imgGoBtn').addEventListener('click', async () => {
   _flashcardGenerating = true;
   document.getElementById('imgGoBtn').disabled = true;
   setStatus('imgStatus', 'Sending images to the vision model…', 'busy');
-  const estSec = (count === 'all' ? 18 : 10) + imgFiles.length * 6;
+  const imgBatchCount = Math.max(1, Math.ceil(imgFiles.length / GEN_BATCH_SIZE));
+  const imgWaves      = Math.max(1, Math.ceil(imgBatchCount / GEN_BATCH_CONCURRENCY));
+  const estSec = (count === 'all' ? 18 : 10) * imgWaves + imgFiles.length * 6;
   const prog = startProgress('imgProgress', estSec, name);
   try {
     const promptText = buildPrompt({
@@ -4636,17 +5303,11 @@ document.getElementById('imgGoBtn').addEventListener('click', async () => {
       setStatus('imgStatus', `✓ Saved on cloud — ${r.card_count} cards. Click ⟳ Sync to download the deck locally.`, 'ok');
       prog.finish();
     } else {
-      const userContent = [{ type: 'text', text: promptText }];
-      imgFiles.forEach(f => userContent.push({ type: 'image_url', image_url: { url: f.dataUrl, detail: 'high' } }));
-      const tokenBudget = count === 'all' ? Math.min(12000, 1500 + imgFiles.length * 1200) : 3000;
-      const raw = await callOpenAI({
-        apiKey, model: imgModel,
-        messages: [
-          { role: 'system', content: 'You are a careful flashcard author. Always return valid JSON.' },
-          { role: 'user',   content: userContent }
-        ], max_tokens: tokenBudget
+      const cards = await generateCardsBatched({
+        files: imgFiles, promptText, model: imgModel, apiKey, count,
+        tokenBudgetCap: 12000,
+        onBatchStart: (bi, total, n) => setStatus('imgStatus', `Batch ${bi + 1}/${total} — sending ${n} image${n === 1 ? '' : 's'} to the vision model…`, 'busy'),
       });
-      const cards = parseCards(raw);
       if (!cards.length) throw new Error('Got zero usable cards.');
       const deck = saveDeck({ name, source: `images:${imgFiles.length}`, cards });
       setStatus('imgStatus', `✓ Saved "${deck.name}" — ${cards.length} cards.`, 'ok');
@@ -4761,7 +5422,7 @@ async function selectNote(note) {
       for (let i = 0; i < files.length; i++) {
         setStatus('notesStatus', `Loading image ${i + 1} / ${files.length}…`, 'busy');
         const dataUrl = await fileUrlToDataUrl(files[i]);
-        notesFiles.push({ dataUrl, name: files[i].split('/').pop() });
+        notesFiles.push({ dataUrl, name: files[i].split('/').pop(), selected: true });
         renderNotesThumbs();
       }
       setStatus('notesStatus', '', '');
@@ -4793,7 +5454,7 @@ async function selectNote(note) {
             const render = useSvrN
               ? renderPageServer(relFileN, pg).catch(() => renderPageImage(pdf, pg))
               : renderPageImage(pdf, pg);
-            return render.then(dataUrl => ({ dataUrl, name: `${note.title} · p${pg}` }));
+            return render.then(dataUrl => ({ dataUrl, name: `${note.title} · p${pg}`, selected: true }));
           })
         );
         batch.forEach(r => notesFiles.push(r));
@@ -4801,8 +5462,8 @@ async function selectNote(note) {
       }
       setStatus('notesStatus', `✓ Loaded ${pdf.numPages} page(s).`, 'ok');
     }
-    notesSelected.textContent = `Selected: ${note.title} — ${notesFiles.length} page${notesFiles.length === 1 ? '' : 's'} ready.`;
-    notesGoBtn.disabled = notesFiles.length === 0;
+    updateNotesSelectedText();
+    notesGoBtn.disabled = notesFiles.filter(f => f.selected).length === 0;
     /* No auto-tag — pendingTag expects {subj, unit, chIdx} from the SYLLABUS
        map, which a library note can't reliably resolve to. The user can pick
        a chapter via the tag chip if they want filing. */
@@ -4812,21 +5473,113 @@ async function selectNote(note) {
   }
 }
 
+function updateNotesSelectedText() {
+  const total = notesFiles.length;
+  const sel = notesFiles.filter(f => f.selected).length;
+  if (!selectedNote) return;
+  notesSelected.textContent = `${selectedNote.title} — ${sel} of ${total} image${total === 1 ? '' : 's'} selected for generation.`;
+}
+
 function renderNotesThumbs() {
   notesThumbsEl.innerHTML = '';
   notesFiles.forEach((f, i) => {
     const d = document.createElement('div');
-    d.className = 'img-thumb';
-    d.innerHTML = `<img src="${f.dataUrl}" alt="${escapeHtml(f.name)}" /><button class="x" data-i="${i}">×</button>`;
+    d.className = 'img-thumb' + (f.selected ? '' : ' deselected');
+    d.innerHTML = `<img src="${f.dataUrl}" alt="${escapeHtml(f.name)}" data-i="${i}" /><button class="x" data-i="${i}" title="Remove">×</button><div class="thumb-check">${f.selected ? '✓' : '–'}</div>`;
     notesThumbsEl.appendChild(d);
   });
+  notesThumbsEl.querySelectorAll('img[data-i]').forEach(img => {
+    img.addEventListener('click', () => openNotesLightbox(parseInt(img.dataset.i, 10)));
+  });
   notesThumbsEl.querySelectorAll('button.x').forEach(b => {
-    b.addEventListener('click', () => {
+    b.addEventListener('click', e => {
+      e.stopPropagation();
       notesFiles.splice(parseInt(b.dataset.i, 10), 1);
       renderNotesThumbs();
-      notesGoBtn.disabled = notesFiles.length === 0;
+      notesGoBtn.disabled = notesFiles.filter(f => f.selected).length === 0;
+      updateNotesSelectedText();
     });
   });
+}
+
+let _nlbIdx = 0;
+
+function openNotesLightbox(idx) {
+  let lbox = document.getElementById('notes-lbox');
+  if (!lbox) {
+    lbox = document.createElement('div');
+    lbox.id = 'notes-lbox';
+    lbox.className = 'notes-lbox';
+    lbox.innerHTML = `
+      <button class="notes-lbox-close" id="nlbClose" title="Close (Esc)">✕</button>
+      <div class="notes-lbox-img-wrap">
+        <button class="notes-lbox-arrow nlb-prev" id="nlbPrev" title="Previous (←)">‹</button>
+        <img id="nlbImg" alt="Note page" />
+        <button class="notes-lbox-arrow nlb-next" id="nlbNext" title="Next (→)">›</button>
+      </div>
+      <div class="notes-lbox-bar">
+        <span class="notes-lbox-counter" id="nlbCounter"></span>
+        <button class="nlb-btn" id="nlbToggle"></button>
+        <button class="nlb-btn is-remove" id="nlbRemove">🗑 Remove</button>
+      </div>
+    `;
+    document.body.appendChild(lbox);
+
+    document.getElementById('nlbClose').addEventListener('click', () => lbox.classList.remove('open'));
+    document.getElementById('nlbPrev').addEventListener('click', () => _nlbNav(-1));
+    document.getElementById('nlbNext').addEventListener('click', () => _nlbNav(1));
+    document.getElementById('nlbToggle').addEventListener('click', () => {
+      const f = notesFiles[_nlbIdx];
+      if (!f) return;
+      f.selected = !f.selected;
+      renderNotesThumbs();
+      updateNotesSelectedText();
+      notesGoBtn.disabled = notesFiles.filter(f => f.selected).length === 0;
+      _nlbRefresh();
+    });
+    document.getElementById('nlbRemove').addEventListener('click', () => {
+      notesFiles.splice(_nlbIdx, 1);
+      renderNotesThumbs();
+      updateNotesSelectedText();
+      notesGoBtn.disabled = notesFiles.filter(f => f.selected).length === 0;
+      if (!notesFiles.length) { lbox.classList.remove('open'); return; }
+      _nlbIdx = Math.min(_nlbIdx, notesFiles.length - 1);
+      _nlbRefresh();
+    });
+    document.addEventListener('keydown', e => {
+      if (!lbox.classList.contains('open')) return;
+      if (e.key === 'Escape') { lbox.classList.remove('open'); }
+      else if (e.key === 'ArrowLeft')  { e.preventDefault(); _nlbNav(-1); }
+      else if (e.key === 'ArrowRight') { e.preventDefault(); _nlbNav(1); }
+    });
+  }
+  _nlbIdx = Math.max(0, Math.min(idx, notesFiles.length - 1));
+  _nlbRefresh();
+  lbox.classList.add('open');
+}
+
+function _nlbNav(dir) {
+  const next = _nlbIdx + dir;
+  if (next < 0 || next >= notesFiles.length) return;
+  _nlbIdx = next;
+  _nlbRefresh();
+}
+
+function _nlbRefresh() {
+  const f = notesFiles[_nlbIdx];
+  if (!f) return;
+  document.getElementById('nlbImg').src = f.dataUrl;
+  document.getElementById('nlbCounter').textContent = `${_nlbIdx + 1} / ${notesFiles.length}`;
+  const toggle = document.getElementById('nlbToggle');
+  if (f.selected) {
+    toggle.textContent = '✓ Selected';
+    toggle.className = 'nlb-btn is-selected';
+  } else {
+    toggle.textContent = '○ Deselected';
+    toggle.className = 'nlb-btn is-deselected';
+  }
+  document.getElementById('nlbPrev').disabled = _nlbIdx === 0;
+  document.getElementById('nlbNext').disabled = _nlbIdx === notesFiles.length - 1;
 }
 
 async function fileUrlToDataUrl(path) {
@@ -4843,7 +5596,8 @@ async function fileUrlToDataUrl(path) {
 
 notesGoBtn.addEventListener('click', async () => {
   if (_flashcardGenerating) { setStatus('notesStatus', 'Generation already in progress — please wait.', 'err'); return; }
-  if (!notesFiles.length) return;
+  const selectedFiles = notesFiles.filter(f => f.selected);
+  if (!selectedFiles.length) { setStatus('notesStatus', 'No images selected — click images to select them.', 'err'); return; }
   await loadFileOpenAIKey();
   const apiKey = getAiMode() === 'cloud' ? null : getApiKey();
   if (getAiMode() === 'local' && !apiKey) { setStatus('notesStatus', 'No API key — add it to .mecee-secrets/OPENAIAPI.txt and refresh.', 'err'); return; }
@@ -4855,8 +5609,10 @@ notesGoBtn.addEventListener('click', async () => {
 
   _flashcardGenerating = true;
   notesGoBtn.disabled = true;
-  setStatus('notesStatus', 'Sending pages to the vision model…', 'busy');
-  const estSec = (count === 'all' ? 18 : 10) + notesFiles.length * 6;
+  setStatus('notesStatus', `Sending ${selectedFiles.length} selected image${selectedFiles.length === 1 ? '' : 's'} to the vision model…`, 'busy');
+  const notesBatchCount = Math.max(1, Math.ceil(selectedFiles.length / GEN_BATCH_SIZE));
+  const notesWaves      = Math.max(1, Math.ceil(notesBatchCount / GEN_BATCH_CONCURRENCY));
+  const estSec = (count === 'all' ? 18 : 10) * notesWaves + selectedFiles.length * 6;
   const prog = startProgress('notesProgress', estSec, name);
   try {
     const promptText = buildPrompt({
@@ -4868,10 +5624,10 @@ notesGoBtn.addEventListener('click', async () => {
 
     const notesModel = document.getElementById('notesModel').value;
     if (getAiMode() === 'cloud') {
-      setStatus('notesStatus', `Uploading ${notesFiles.length} page${notesFiles.length === 1 ? '' : 's'} to the cloud worker…`, 'busy');
+      setStatus('notesStatus', `Uploading ${selectedFiles.length} image${selectedFiles.length === 1 ? '' : 's'} to the cloud worker…`, 'busy');
       const r = await generateDeckViaWorker({
         prompt:    promptText,
-        dataUrls:  notesFiles.map(f => f.dataUrl),
+        dataUrls:  selectedFiles.map(f => f.dataUrl),
         model:     notesModel,
         deckName:  name,
         tag:       pendingTag,
@@ -4880,18 +5636,11 @@ notesGoBtn.addEventListener('click', async () => {
       setStatus('notesStatus', `✓ Saved on cloud — ${r.card_count} cards. Click ⟳ Sync to download the deck locally.`, 'ok');
       prog.finish();
     } else {
-      const userContent = [{ type: 'text', text: promptText }];
-      notesFiles.forEach(f => userContent.push({ type: 'image_url', image_url: { url: f.dataUrl, detail: 'high' } }));
-      const tokenBudget = count === 'all' ? Math.min(12000, 1500 + notesFiles.length * 1200) : 3000;
-      const raw = await callOpenAI({
-        apiKey, model: notesModel,
-        messages: [
-          { role: 'system', content: 'You are a careful flashcard author. Always return valid JSON.' },
-          { role: 'user',   content: userContent },
-        ],
-        max_tokens: tokenBudget,
+      const cards = await generateCardsBatched({
+        files: selectedFiles, promptText, model: notesModel, apiKey, count,
+        tokenBudgetCap: 12000,
+        onBatchStart: (bi, total, n) => setStatus('notesStatus', `Batch ${bi + 1}/${total} — sending ${n} image${n === 1 ? '' : 's'} to the vision model…`, 'busy'),
       });
-      const cards = parseCards(raw);
       if (!cards.length) throw new Error('Got zero usable cards.');
       const deck = saveDeck({ name, source: `notes:${selectedNote ? selectedNote.id : '?'}`, cards });
       setStatus('notesStatus', `✓ Saved "${deck.name}" — ${cards.length} cards.`, 'ok');
@@ -4905,7 +5654,7 @@ notesGoBtn.addEventListener('click', async () => {
     prog.fail();
   } finally {
     _flashcardGenerating = false;
-    notesGoBtn.disabled = notesFiles.length === 0;
+    notesGoBtn.disabled = notesFiles.filter(f => f.selected).length === 0;
   }
 });
 
@@ -4943,12 +5692,9 @@ function parseCsv(text) {
   if (cur.length || row.length) { row.push(cur); rows.push(row); }
   return rows.filter(r => r.length && r.some(c => c.trim() !== ''));
 }
-document.getElementById('csvGoBtn').addEventListener('click', () => {
-  const text = document.getElementById('csvText').value;
-  if (!text.trim()) { setStatus('csvStatus', 'Paste or upload some CSV first.', 'err'); return; }
-  const rows = parseCsv(text);
-  if (rows.length < 2) { setStatus('csvStatus', 'CSV needs a header row and at least one data row.', 'err'); return; }
-  const data = rows.slice(1);
+/* Shared by the CSV tab and the MCQ Bank import tab: turn parsed CSV rows
+   (header already stripped) into flashcard/MCQ card objects. */
+function buildCardsFromCsvRows(data) {
   const cards = [];
   for (const r of data) {
     const cols = r.map(s => (s || '').trim());
@@ -4961,6 +5707,14 @@ document.getElementById('csvGoBtn').addEventListener('click', () => {
       cards.push({ id: uid(), type: 'flash', q: cols[0], a: cols.slice(1).join(', ') });
     }
   }
+  return cards;
+}
+document.getElementById('csvGoBtn').addEventListener('click', () => {
+  const text = document.getElementById('csvText').value;
+  if (!text.trim()) { setStatus('csvStatus', 'Paste or upload some CSV first.', 'err'); return; }
+  const rows = parseCsv(text);
+  if (rows.length < 2) { setStatus('csvStatus', 'CSV needs a header row and at least one data row.', 'err'); return; }
+  const cards = buildCardsFromCsvRows(rows.slice(1));
   if (!cards.length) { setStatus('csvStatus', 'No valid rows found.', 'err'); return; }
   const name = document.getElementById('csvDeckName').value.trim() || `CSV import · ${new Date().toLocaleDateString()}`;
   const deck = saveDeck({ name, source: `csv:${cards.length}`, cards });
@@ -4975,6 +5729,7 @@ function sourceLabel(src) {
   if (src.startsWith('notes'))    return '📝 Notes';
   if (src.startsWith('images'))   return '🖼️ Images';
   if (src.startsWith('csv'))      return '📄 CSV';
+  if (src.startsWith('mcqbank'))  return '🗂️ MCQ Bank';
   return src;
 }
 
@@ -5198,6 +5953,14 @@ function toggleDeckMenu(deckId, anchor) {
   if (openMenuDeckId === deckId) { closeDeckMenu(); return; }
   const r = anchor.getBoundingClientRect();
   menu.dataset.id = deckId;
+
+  // Decks imported from the MCQ Bank get "AI Explainer" instead of
+  // "AI Condensation" — explanations are generated with cross-deck context.
+  const data = readDecks();
+  const deck = data.decks.find(d => d.id === deckId);
+  const fromMcqBank = !!(deck && (deck.source || '').startsWith('mcqbank'));
+  menu.querySelector('[data-act="condense"]').style.display = fromMcqBank ? 'none' : '';
+  menu.querySelector('[data-act="fcexplain"]').style.display = fromMcqBank ? '' : 'none';
   /* Default: open below the button, right-aligned. Flip up if not enough room. */
   const top  = (r.bottom + 6 + 220 > window.innerHeight) ? (r.top - 6 - 220) : (r.bottom + 6);
   const left = Math.max(8, Math.min(window.innerWidth - 190, r.right - 180));
@@ -5225,11 +5988,13 @@ document.getElementById('deckMenu').addEventListener('click', e => {
   const id  = document.getElementById('deckMenu').dataset.id;
   const act = btn.dataset.act;
   closeDeckMenu();
-  if (act === 'rename') renameDeck(id);
-  if (act === 'edit')   openDeckEditor(id);
+  if (act === 'rename')   renameDeck(id);
+  if (act === 'edit')     openDeckEditor(id);
+  if (act === 'condense') openCondenseModal(id);
+  if (act === 'fcexplain') openFcExplainModal(id);
   if (act === 'wallpaper') openWallpaperPicker(id);
-  if (act === 'export') exportDeck(id);
-  if (act === 'delete') deleteDeck(id);
+  if (act === 'export')   exportDeck(id);
+  if (act === 'delete')   deleteDeck(id);
 });
 
 /* ===== Deck wallpaper picker ===== */
@@ -5873,6 +6638,19 @@ function buildStudyQueue(deck, mode) {
   return idxs;
 }
 
+/* Show the AI Explainer's saved explanation/mnemonic/related-card note
+   for an MCQ flashcard, once the user has answered it. */
+function showStudyExplanation(card) {
+  const el = document.getElementById('studyExplain');
+  if (card.type !== 'mcq' || (!card.explanation && !card.mnemonic && !card.related)) return;
+  let html = '';
+  if (card.explanation) html += `<div><b>Explanation:</b> ${escapeHtml(card.explanation)}</div>`;
+  if (card.related)     html += `<div class="se-related">🔗 ${escapeHtml(card.related)}</div>`;
+  if (card.mnemonic)    html += `<div class="se-mnemonic">🧠 <b>Mnemonic:</b> ${escapeHtml(card.mnemonic)}</div>`;
+  el.innerHTML = html;
+  el.style.display = '';
+}
+
 function openStudy(id, mode = 'srs', opts = {}) {
   cancelAutoTimer();
   const data = readDecks();
@@ -6114,6 +6892,9 @@ function showStudyCard() {
   document.getElementById('studyA').classList.remove('open');
   document.getElementById('studyChoices').innerHTML = '';
   document.getElementById('studyActions').innerHTML = '';
+  const studyExplainEl = document.getElementById('studyExplain');
+  studyExplainEl.style.display = 'none';
+  studyExplainEl.innerHTML = '';
   closeAnswerPanel();
 
   if (card.type === 'mcq') {
@@ -6147,6 +6928,7 @@ function showStudyCard() {
             a.classList.add('open');
           }
         }
+        showStudyExplanation(card);
         /* MCQs self-rate: the click IS the answer. Right → Good (extend),
            Wrong → Again (shorten + re-queue this session). In SRS mode we
            also auto-advance on correct since the user already knows it. */
@@ -6515,7 +7297,58 @@ document.addEventListener('keydown', e => {
   let quiz = {
     questions: [], idx: 0, correct: 0, wrong: 0,
     answered: false, fileName: '', originalQuestions: [],
+    csvPath: '', csvHeader: 'question,answer,wrong1,wrong2,wrong3',
+    history: [], explanations: {},
   };
+
+  /* ---- per-session progress (resume where you left off) ---- */
+  const MCQB_PROGRESS_KEY = 'mecee_mcqb_progress';
+
+  function readMcqbProgress() {
+    try { return JSON.parse(sessionStorage.getItem(MCQB_PROGRESS_KEY) || '{}'); } catch { return {}; }
+  }
+  function writeMcqbProgress(all) {
+    try { sessionStorage.setItem(MCQB_PROGRESS_KEY, JSON.stringify(all)); } catch {}
+  }
+  function saveQuizProgress() {
+    if (!quiz.csvPath) return;
+    const all = readMcqbProgress();
+    all[quiz.csvPath] = {
+      questions: quiz.questions,
+      idx: quiz.idx,
+      correct: quiz.correct,
+      wrong: quiz.wrong,
+      history: quiz.history,
+      isFirstAttempt: quiz.isFirstAttempt,
+      savedAt: Date.now(),
+    };
+    writeMcqbProgress(all);
+  }
+
+  /* ---- "first attempt" tracking (persists across sessions) ---- */
+  const MCQB_ATTEMPTED_KEY = 'mecee_mcqb_attempted';
+
+  function readAttempted() {
+    try { return JSON.parse(localStorage.getItem(MCQB_ATTEMPTED_KEY) || '{}'); } catch { return {}; }
+  }
+  function hasAttempted(csvPath) { return !!readAttempted()[csvPath]; }
+  function markAttempted(csvPath) {
+    const all = readAttempted();
+    if (!all[csvPath]) { all[csvPath] = true; try { localStorage.setItem(MCQB_ATTEMPTED_KEY, JSON.stringify(all)); } catch {} }
+  }
+  /* "Practice Weakness (...)" decks shouldn't feed back into themselves. */
+  function isWeaknessDeck(csvPath) {
+    const base = (csvPath || '').split('/').pop().replace(/\.csv$/i, '');
+    return /^Practice Weakness \(/.test(base);
+  }
+  function loadQuizProgress(csvPath) {
+    const all = readMcqbProgress();
+    return all[csvPath] || null;
+  }
+  function clearQuizProgress(csvPath) {
+    const all = readMcqbProgress();
+    if (all[csvPath]) { delete all[csvPath]; writeMcqbProgress(all); }
+  }
 
   /* ---- elements ---- */
   const navBtn      = document.getElementById('mcqbankNavBtn');
@@ -6547,6 +7380,13 @@ document.addEventListener('keydown', e => {
   const retryBtn        = document.getElementById('mcqbRetryBtn');
   const retryShuffleBtn = document.getElementById('mcqbRetryShuffleBtn');
   const resultCloseBtn  = document.getElementById('mcqbResultCloseBtn');
+  const explainEl       = document.getElementById('mcqbExplain');
+  const quizDeleteBtn   = document.getElementById('mcqbQuizDelete');
+  const quizBackBtn     = document.getElementById('mcqbQuizBackBtn');
+  const quizEditBtn     = document.getElementById('mcqbQuizEdit');
+  const weakActionsEl   = document.getElementById('mcqbWeakActions');
+  const addWeakBtn      = document.getElementById('mcqbAddWeak');
+  const continueBtn     = document.getElementById('mcqbContinueBtn');
 
   /* ---- helpers ---- */
   function shuffle(arr) {
@@ -6567,6 +7407,19 @@ document.addEventListener('keydown', e => {
     let n = (node.files || []).length;
     for (const c of (node.children || [])) n += countFiles(c);
     return n;
+  }
+
+  function csvField(val) {
+    const s = String(val == null ? '' : val);
+    return /[",\r\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+  }
+
+  function buildCsv(header, questions) {
+    const lines = [header];
+    for (const q of questions) {
+      lines.push([q.q, q.answer, ...(q.wrongs || [])].map(csvField).join(','));
+    }
+    return lines.join('\r\n') + '\r\n';
   }
 
   function parseCsv(text) {
@@ -6761,7 +7614,13 @@ document.addEventListener('keydown', e => {
           <div class="mcqb-file-card-top">
             <div class="mcqb-file-icon">📄</div>
             <div class="mcqb-file-name">${prettifyName(file.name)}</div>
+            <button class="deck-menu-btn" data-act="menu" title="More">⋮</button>
           </div>`;
+        const menuBtn = card.querySelector('.deck-menu-btn');
+        menuBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          toggleMcqbFileMenu(file.path, prettifyName(file.name), menuBtn);
+        });
         card.appendChild(startBtn);
         grid.appendChild(card);
       }
@@ -6773,6 +7632,7 @@ document.addEventListener('keydown', e => {
   async function startQuiz(csvPath, displayName) {
     // Open the modal instantly — show a loading pulse while fetch happens
     quiz.fileName = displayName;
+    quiz.csvPath = csvPath;
     quizTitleEl.textContent = displayName;
     quizSubEl.textContent = 'Loading…';
     qScreen.style.display = '';
@@ -6780,6 +7640,7 @@ document.addEventListener('keydown', e => {
     questionEl.textContent = '';
     choicesEl.innerHTML = '<div style="text-align:center;padding:30px;color:var(--muted);font-size:13px">Loading questions…</div>';
     feedbackEl.textContent = '';
+    explainEl.style.display = 'none'; explainEl.textContent = '';
     pbarFill.style.width = '0%';
     progressEl.textContent = '';
     scoreLive.textContent = '';
@@ -6789,10 +7650,40 @@ document.addEventListener('keydown', e => {
     try {
       const resp = await fetch(`/api/mcqbank/csv?path=${encodeURIComponent(csvPath)}`);
       if (!resp.ok) throw new Error('HTTP ' + resp.status);
-      const parsed = parseCsv(await resp.text());
+      const text = await resp.text();
+      const lines = text.trim().split(/\r?\n/);
+      quiz.csvHeader = lines.length ? lines[0] : quiz.csvHeader;
+      const parsed = parseCsv(text);
       if (!parsed.length) { closeQuiz(); alert('No valid questions found in this file.'); return; }
       quiz.originalQuestions = parsed;
-      launchQuiz(shuffle(parsed));
+      quiz.explanations = {};
+      fetch(`/api/mcqbank/explain?path=${encodeURIComponent(csvPath)}`)
+        .then(r => r.ok ? r.json() : {})
+        .then(data => { quiz.explanations = data || {}; })
+        .catch(() => {});
+
+      // Resume a previous in-progress attempt for this file, if any.
+      const saved = loadQuizProgress(csvPath);
+      let resumed = null;
+      if (saved && Array.isArray(saved.questions) && saved.questions.length) {
+        const byText = new Map(parsed.map(p => [p.q, p]));
+        resumed = saved.questions.map(sq => byText.get(sq.q)).filter(Boolean);
+        if (!resumed.length) resumed = null;
+      }
+      if (resumed) {
+        quiz.questions = resumed;
+        quiz.idx = Math.min(saved.idx || 0, resumed.length - 1);
+        quiz.correct = saved.correct || 0;
+        quiz.wrong = saved.wrong || 0;
+        quiz.history = (saved.history || []).filter(h => h.idx < resumed.length);
+        quiz.isFirstAttempt = saved.isFirstAttempt !== undefined ? saved.isFirstAttempt : !hasAttempted(csvPath);
+        markAttempted(csvPath);
+        quiz.answered = false;
+        quizSubEl.textContent = `${resumed.length} question${resumed.length !== 1 ? 's' : ''} · resumed`;
+        renderQuestion();
+      } else {
+        launchQuiz(shuffle(parsed));
+      }
     } catch (e) {
       closeQuiz(); alert('Could not load quiz: ' + e.message);
     }
@@ -6801,14 +7692,34 @@ document.addEventListener('keydown', e => {
   function launchQuiz(questions) {
     quiz.questions = questions; quiz.idx = 0;
     quiz.correct = 0; quiz.wrong = 0; quiz.answered = false;
+    quiz.history = [];
+    quiz.isFirstAttempt = !hasAttempted(quiz.csvPath);
+    markAttempted(quiz.csvPath);
     quizSubEl.textContent = `${questions.length} question${questions.length !== 1 ? 's' : ''}`;
     renderQuestion();
+  }
+
+  /* Persist the current originalQuestions array back to the CSV file. */
+  async function saveQuizCsv() {
+    if (!quiz.csvPath) return;
+    try {
+      await fetch('/api/mcqbank/csv', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ path: quiz.csvPath, content: buildCsv(quiz.csvHeader, quiz.originalQuestions) }),
+      });
+    } catch (e) {
+      console.error('Failed to save MCQ bank CSV:', e);
+    }
   }
 
   function renderQuestion() {
     const q = quiz.questions[quiz.idx], total = quiz.questions.length;
     quiz.answered = false;
     feedbackEl.textContent = ''; feedbackEl.className = 'mcqb-feedback';
+    explainEl.style.display = 'none'; explainEl.textContent = '';
+    weakActionsEl.style.display = 'none';
+    addWeakBtn.disabled = false; addWeakBtn.textContent = '➕ Add to Weakness Deck';
     pbarFill.style.width = (quiz.idx / total * 100) + '%';
     progressEl.textContent = `${quiz.idx + 1} / ${total}`;
     scoreLive.textContent = `✓ ${quiz.correct}  ✗ ${quiz.wrong}`;
@@ -6824,6 +7735,16 @@ document.addEventListener('keydown', e => {
       btn.addEventListener('click', () => handleAnswer(btn, q.answer));
       choicesEl.appendChild(btn);
     });
+    quizBackBtn.disabled = quiz.history.length === 0;
+    saveQuizProgress();
+  }
+
+  function showExplanationIfAny(q) {
+    const text = quiz.explanations && quiz.explanations[q.q];
+    if (text) {
+      explainEl.innerHTML = `<b>Explanation:</b> ${escapeHtml(text)}`;
+      explainEl.style.display = '';
+    }
   }
 
   function handleAnswer(btn, correct) {
@@ -6838,9 +7759,149 @@ document.addEventListener('keydown', e => {
     if (isCorrect) { quiz.correct++; feedbackEl.textContent = '✓ Correct!'; feedbackEl.className = 'mcqb-feedback ok'; }
     else           { quiz.wrong++;   feedbackEl.textContent = `✗ ${correct}`; feedbackEl.className = 'mcqb-feedback err'; }
     scoreLive.textContent = `✓ ${quiz.correct}  ✗ ${quiz.wrong}`;
+    showExplanationIfAny(quiz.questions[quiz.idx]);
+    quiz.history.push({ idx: quiz.idx, correct: quiz.correct, wrong: quiz.wrong });
+    quizBackBtn.disabled = false;
+    saveQuizProgress();
     const isLast = quiz.idx >= quiz.questions.length - 1;
-    setTimeout(() => { quiz.idx++; if (isLast) showResult(); else renderQuestion(); }, isCorrect ? 700 : 1400);
+    if (isCorrect) {
+      setTimeout(() => { quiz.idx++; if (isLast) showResult(); else renderQuestion(); }, 700);
+    } else {
+      // Wrong answers pause here so the user can add the question to their
+      // "weakness deck" or just continue to the next question.
+      weakActionsEl.style.display = '';
+      continueBtn.dataset.isLast = isLast ? '1' : '';
+      // On the very first attempt at a deck, wrong answers are auto-filed
+      // into the weakness deck (no extra click needed).
+      if (quiz.isFirstAttempt && !isWeaknessDeck(quiz.csvPath)) {
+        addToWeaknessDeck(quiz.questions[quiz.idx], true);
+      }
+    }
   }
+
+  continueBtn.addEventListener('click', () => {
+    const isLast = continueBtn.dataset.isLast === '1';
+    quiz.idx++;
+    if (isLast) showResult(); else renderQuestion();
+  });
+
+  /* Add a question to its deck's "Practice Weakness (...)" CSV. When `auto`
+     is true this runs silently for first-attempt wrong answers. */
+  async function addToWeaknessDeck(q, auto) {
+    if (!q || !quiz.csvPath) return;
+    addWeakBtn.disabled = true;
+    addWeakBtn.textContent = auto ? 'Auto-adding…' : 'Adding…';
+    try {
+      const resp = await fetch('/api/mcqbank/weakness', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ path: quiz.csvPath, q: q.q, answer: q.answer, wrongs: q.wrongs }),
+      });
+      const data = await resp.json().catch(() => ({}));
+      if (!resp.ok) throw new Error(data.error || `HTTP ${resp.status}`);
+      addWeakBtn.textContent = data.duplicate
+        ? '✓ Already in Weakness Deck'
+        : (auto ? '✓ Auto-added (first attempt)' : '✓ Added to Weakness Deck');
+      if (!data.duplicate) mcqbTree = null; // force a fresh tree fetch so the new weakness deck shows up
+    } catch (e) {
+      addWeakBtn.disabled = false;
+      addWeakBtn.textContent = '➕ Add to Weakness Deck';
+      if (!auto) alert('Could not add to weakness deck: ' + e.message);
+    }
+  }
+
+  addWeakBtn.addEventListener('click', () => addToWeaknessDeck(quiz.questions[quiz.idx], false));
+
+  /* ---- Back: undo to the previous question ---- */
+  function goBackQuestion() {
+    if (!quiz.history.length) return;
+    const prev = quiz.history.pop();
+    quiz.idx = prev.idx;
+    // Restore the score as it was BEFORE that question was answered.
+    const lastEntry = quiz.history[quiz.history.length - 1];
+    quiz.correct = lastEntry ? lastEntry.correct : 0;
+    quiz.wrong   = lastEntry ? lastEntry.wrong   : 0;
+    renderQuestion();
+  }
+  quizBackBtn.addEventListener('click', goBackQuestion);
+
+  /* ---- Delete current question from the bank ---- */
+  async function deleteCurrentQuestion() {
+    const q = quiz.questions[quiz.idx];
+    if (!q) return;
+    const ok = await themedConfirm({
+      title: 'Delete this question?',
+      message: 'This question will be permanently removed from the question bank file. This can\'t be undone.',
+      confirmText: 'Delete question',
+    });
+    if (!ok) return;
+
+    quiz.questions.splice(quiz.idx, 1);
+    const origIdx = quiz.originalQuestions.indexOf(q);
+    if (origIdx !== -1) quiz.originalQuestions.splice(origIdx, 1);
+    await saveQuizCsv();
+
+    if (!quiz.questions.length) { clearQuizProgress(quiz.csvPath); closeQuiz(); return; }
+    if (quiz.idx >= quiz.questions.length) quiz.idx = quiz.questions.length - 1;
+    quiz.history = quiz.history.filter(h => h.idx < quiz.questions.length);
+    quizSubEl.textContent = `${quiz.questions.length} question${quiz.questions.length !== 1 ? 's' : ''}`;
+    renderQuestion();
+  }
+  quizDeleteBtn.addEventListener('click', deleteCurrentQuestion);
+
+  /* ---- Edit current question ---- */
+  const mcqEditBack    = document.getElementById('mcqEditBack');
+  const mcqEditQ       = document.getElementById('mcqEditQ');
+  const mcqEditChoices = document.getElementById('mcqEditChoices');
+
+  function openEditQuestion() {
+    const q = quiz.questions[quiz.idx];
+    if (!q) return;
+    mcqEditQ.value = q.q;
+    const choices = [q.answer, ...q.wrongs];
+    while (choices.length < 4) choices.push('');
+    mcqEditChoices.innerHTML = choices.map((ch, i) => `
+      <div class="mcq-row${i === 0 ? ' is-correct' : ''}">
+        <input type="radio" name="mcqEditCorrect" data-idx="${i}" ${i === 0 ? 'checked' : ''} title="Mark as correct" />
+        <input type="text" data-choice="${i}" value="${escapeHtml(ch)}" placeholder="Choice ${i + 1}" autocomplete="off" />
+      </div>`).join('');
+    mcqEditChoices.querySelectorAll('input[type="radio"]').forEach(r => {
+      r.addEventListener('change', () => {
+        mcqEditChoices.querySelectorAll('.mcq-row').forEach(row => row.classList.remove('is-correct'));
+        r.closest('.mcq-row').classList.add('is-correct');
+      });
+    });
+    mcqEditBack.classList.add('open');
+  }
+
+  function closeEditQuestion() {
+    mcqEditBack.classList.remove('open');
+  }
+
+  async function saveEditQuestion() {
+    const q = quiz.questions[quiz.idx];
+    if (!q) return closeEditQuestion();
+    const newQ = mcqEditQ.value.trim();
+    const rows = [...mcqEditChoices.querySelectorAll('.mcq-row')];
+    const values = rows.map(r => r.querySelector('input[type="text"]').value.trim()).filter(Boolean);
+    const correctIdx = rows.findIndex(r => r.querySelector('input[type="radio"]').checked);
+    const correctVal = rows[correctIdx]?.querySelector('input[type="text"]').value.trim();
+    if (!newQ || values.length < 2 || !correctVal) {
+      alert('Please provide a question and at least two choices, with one marked correct.');
+      return;
+    }
+    q.q = newQ;
+    q.answer = correctVal;
+    q.wrongs = values.filter(v => v !== correctVal);
+    await saveQuizCsv();
+    closeEditQuestion();
+    renderQuestion();
+  }
+
+  document.getElementById('mcqEditCancel').addEventListener('click', closeEditQuestion);
+  document.getElementById('mcqEditSave').addEventListener('click', saveEditQuestion);
+  mcqEditBack.addEventListener('click', e => { if (e.target === mcqEditBack) closeEditQuestion(); });
+  quizEditBtn.addEventListener('click', openEditQuestion);
 
   function showResult() {
     const total = quiz.questions.length;
@@ -6850,14 +7911,15 @@ document.addEventListener('keydown', e => {
     scoreBig.textContent  = pct + '%';
     scoreLabel.textContent = pct >= 80 ? 'Excellent work!' : pct >= 60 ? 'Good effort!' : pct >= 40 ? 'Keep practising.' : 'Keep going!';
     bdCorrect.textContent = quiz.correct; bdWrong.textContent = quiz.wrong; bdTotal.textContent = total;
+    clearQuizProgress(quiz.csvPath);
   }
 
   function closeQuiz() { quizBack.classList.remove('open'); document.body.style.overflow = ''; }
   quizClose.addEventListener('click', closeQuiz);
   quizBack.addEventListener('click', e => { if (e.target === quizBack) closeQuiz(); });
   resultCloseBtn.addEventListener('click', closeQuiz);
-  retryBtn.addEventListener('click', () => launchQuiz(quiz.originalQuestions.slice()));
-  retryShuffleBtn.addEventListener('click', () => launchQuiz(shuffle(quiz.originalQuestions)));
+  retryBtn.addEventListener('click', () => { clearQuizProgress(quiz.csvPath); launchQuiz(quiz.originalQuestions.slice()); });
+  retryShuffleBtn.addEventListener('click', () => { clearQuizProgress(quiz.csvPath); launchQuiz(shuffle(quiz.originalQuestions)); });
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && quizBack.classList.contains('open')) closeQuiz(); });
 
   const _orig = applyViewFromHash;
@@ -6865,6 +7927,247 @@ document.addEventListener('keydown', e => {
     if (mcqbVisible) { mcqbVisible = false; navBtn.classList.remove('mcqb-active'); viewMcqb.classList.remove('active'); }
     _orig();
   };
+
+  /* =====================================================================
+     MCQ BANK FILE CONTEXT MENU + AI EXPLAINER
+     ===================================================================== */
+  const mcqbFileMenu = document.getElementById('mcqbFileMenu');
+  let openMcqbFilePath = null;
+  let openMcqbFileName = null;
+
+  window.toggleMcqbFileMenu = function (filePath, displayName, anchor) {
+    if (openMcqbFilePath === filePath) { closeMcqbFileMenu(); return; }
+    const r = anchor.getBoundingClientRect();
+    mcqbFileMenu.dataset.path = filePath;
+    mcqbFileMenu.dataset.name = displayName;
+    const top  = (r.bottom + 6 + 80 > window.innerHeight) ? (r.top - 6 - 80) : (r.bottom + 6);
+    const left = Math.max(8, Math.min(window.innerWidth - 190, r.right - 180));
+    mcqbFileMenu.style.top  = top  + 'px';
+    mcqbFileMenu.style.left = left + 'px';
+    mcqbFileMenu.classList.add('open');
+    openMcqbFilePath = filePath;
+    openMcqbFileName = displayName;
+  };
+  function closeMcqbFileMenu() {
+    mcqbFileMenu.classList.remove('open');
+    openMcqbFilePath = null;
+    openMcqbFileName = null;
+  }
+  document.addEventListener('click', e => {
+    if (!openMcqbFilePath) return;
+    if (mcqbFileMenu.contains(e.target)) return;
+    if (e.target.closest && e.target.closest('.deck-menu-btn')) return;
+    closeMcqbFileMenu();
+  });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && openMcqbFilePath) closeMcqbFileMenu(); });
+  mcqbFileMenu.addEventListener('click', e => {
+    const btn = e.target.closest('button');
+    if (!btn) return;
+    const path = mcqbFileMenu.dataset.path;
+    const name = mcqbFileMenu.dataset.name;
+    closeMcqbFileMenu();
+    if (btn.dataset.act === 'explain') openExplainModal(path, name);
+  });
+
+  /* ---- AI Explainer modal ---- */
+  const explainBack    = document.getElementById('explainBack');
+  let _explainPath = null;
+  let _explainName = null;
+
+  function openExplainModal(path, name) {
+    _explainPath = path; _explainName = name;
+    document.getElementById('explainSub').textContent = `"${name}"`;
+    document.getElementById('explainSubject').value = 'auto';
+    const curModel = document.getElementById('notesModel')?.value || 'gpt-5.5';
+    const mSel = document.getElementById('explainModel');
+    [...mSel.options].forEach(o => { if (o.value === curModel) mSel.value = curModel; });
+    document.getElementById('explainSetup').style.display = '';
+    document.getElementById('explainRunning').style.display = 'none';
+    document.getElementById('explainDone').style.display = 'none';
+    explainBack.classList.add('open');
+  }
+  function closeExplainModal() {
+    explainBack.classList.remove('open');
+    _explainPath = null; _explainName = null;
+  }
+  document.getElementById('explainClose').addEventListener('click', closeExplainModal);
+  document.getElementById('explainCancel').addEventListener('click', closeExplainModal);
+  document.getElementById('explainDoneBtn').addEventListener('click', closeExplainModal);
+  explainBack.addEventListener('click', e => { if (e.target === explainBack) closeExplainModal(); });
+
+  function buildExplainPrompt(subject) {
+    return `You are an expert tutor for the Nepal CEE/MECEE-BL medical entrance exam, subject: ${subject}.
+For each multiple-choice question given, write a short (1-3 sentence) explanation of why the correct answer is
+correct, and briefly why the other options are wrong if useful.
+
+Return a JSON object with this exact structure:
+{ "explanations": [ { "idx": <question index>, "explanation": "<text>" }, ... ] }
+
+You MUST include every question index in the explanations array.`;
+  }
+
+  async function explainViaOpenAI(systemPrompt, userMsg, model, apiKey) {
+    const supportsTemperature = /^gpt-4/.test(model);
+    const body = {
+      model,
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user',   content: userMsg },
+      ],
+      response_format: { type: 'json_object' },
+    };
+    if (supportsTemperature) body.temperature = 0.2;
+    const resp = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+      body: JSON.stringify(body),
+    });
+    if (!resp.ok) {
+      const err = await resp.json().catch(() => ({}));
+      throw new Error(err?.error?.message || `API error ${resp.status}`);
+    }
+    const j = await resp.json();
+    return JSON.parse(j.choices[0].message.content);
+  }
+
+  async function explainViaWorker(systemPrompt, userMsg, model) {
+    const endpoint = (typeof WORKER_URL !== 'undefined' ? WORKER_URL : '') + '/api/explain';
+    const resp = await fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ systemPrompt, userMsg, model }),
+    });
+    if (!resp.ok) {
+      const err = await resp.json().catch(() => ({}));
+      throw new Error(err?.error || `Worker error ${resp.status}`);
+    }
+    return await resp.json();
+  }
+
+  document.getElementById('explainStart').addEventListener('click', async () => {
+    if (!_explainPath) return;
+    await runExplainer(_explainPath, _explainName);
+  });
+
+  async function runExplainer(path, name) {
+    await loadFileOpenAIKey();
+    const apiKey = getAiMode() === 'cloud' ? null : getApiKey();
+    if (getAiMode() === 'local' && !apiKey) {
+      alert('No API key found. Add it to .mecee-secrets/OPENAIAPI.txt and refresh.');
+      return;
+    }
+
+    let questions;
+    try {
+      const resp = await fetch(`/api/mcqbank/csv?path=${encodeURIComponent(path)}`);
+      if (!resp.ok) throw new Error('HTTP ' + resp.status);
+      questions = parseCsv(await resp.text());
+    } catch (e) {
+      alert('Could not load questions: ' + e.message);
+      return;
+    }
+    if (!questions.length) { alert('No questions found in this file.'); return; }
+
+    const subjectSel = document.getElementById('explainSubject').value;
+    const subject = subjectSel === 'auto' ? detectSubject({ name, source: '' }) : subjectSel;
+    const model    = document.getElementById('explainModel').value;
+
+    document.getElementById('explainSetup').style.display = 'none';
+    document.getElementById('explainDone').style.display = 'none';
+    document.getElementById('explainRunning').style.display = '';
+
+    const systemPrompt = buildExplainPrompt(subject);
+    const cardList = questions.map((q, idx) => ({ idx, q: q.q, correct: q.answer, wrong: q.wrongs }));
+
+    const CHUNK = 20;
+    const CONCURRENCY = 3;
+    const chunks = [];
+    for (let i = 0; i < cardList.length; i += CHUNK) chunks.push(cardList.slice(i, i + CHUNK));
+
+    const batchStatus  = new Array(chunks.length).fill('pending');
+    const batchResults = new Array(chunks.length).fill(null);
+
+    function renderBatchGrid() {
+      const grid = document.getElementById('explainBatchGrid');
+      if (!grid) return;
+      const icons = { pending: '○', running: '◌', done: '●', error: '✗' };
+      grid.innerHTML = batchStatus.map((s, i) =>
+        `<div class="cond-batch-dot ${s}" title="Batch ${i+1}/${chunks.length}: ${s}">${icons[s]}</div>`
+      ).join('');
+    }
+    function updateProgress() {
+      const done    = batchStatus.filter(s => s === 'done').length;
+      const running = batchStatus.filter(s => s === 'running').length;
+      const pct = chunks.length === 0 ? 0 : Math.round(((done + running * 0.5) / chunks.length) * 100);
+      const label = done === chunks.length
+        ? 'All batches complete!'
+        : `${done} of ${chunks.length} batch${chunks.length > 1 ? 'es' : ''} done${running ? ` · ${running} running` : ''}`;
+      document.getElementById('explainPrgFill').style.width = pct + '%';
+      document.getElementById('explainPrgLbl').textContent = label;
+      document.getElementById('explainPrgPct').textContent = pct + '%';
+    }
+    renderBatchGrid(); updateProgress();
+
+    async function processChunk(ci) {
+      batchStatus[ci] = 'running';
+      renderBatchGrid(); updateProgress();
+      const userMsg = `Here are the questions to explain:\n\n${JSON.stringify(chunks[ci], null, 2)}\n\nReturn a JSON object with an "explanations" array covering every index above.`;
+      let resp;
+      if (getAiMode() === 'cloud') resp = await explainViaWorker(systemPrompt, userMsg, model);
+      else resp = await explainViaOpenAI(systemPrompt, userMsg, model, apiKey);
+      batchResults[ci] = resp.explanations || [];
+      batchStatus[ci] = 'done';
+      renderBatchGrid(); updateProgress();
+    }
+
+    let nextIdx = 0;
+    async function poolWorker() {
+      while (nextIdx < chunks.length) {
+        const ci = nextIdx++;
+        try { await processChunk(ci); }
+        catch (e) {
+          batchStatus[ci] = 'error';
+          renderBatchGrid(); updateProgress();
+          throw e;
+        }
+      }
+    }
+
+    try {
+      await Promise.all(Array.from({ length: Math.min(CONCURRENCY, chunks.length) }, poolWorker));
+    } catch (e) {
+      console.error(e);
+      document.getElementById('explainStatus').className = 'status err';
+      document.getElementById('explainMsg').textContent = `Error: ${e.message || e}`;
+      return;
+    }
+
+    const explanationsByQ = {};
+    batchResults.flat().filter(Boolean).forEach(item => {
+      const q = questions[item.idx];
+      if (q && item.explanation) explanationsByQ[q.q] = item.explanation;
+    });
+
+    try {
+      await fetch('/api/mcqbank/explain', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ path, explanations: explanationsByQ }),
+      });
+    } catch (e) {
+      console.error('Failed to save explanations:', e);
+    }
+
+    // If the quiz for this same file is currently open, refresh its explanations.
+    if (quiz.csvPath === path) Object.assign(quiz.explanations, explanationsByQ);
+
+    document.getElementById('explainPrgFill').style.width = '100%';
+    document.getElementById('explainPrgPct').textContent = '100%';
+    document.getElementById('explainPrgLbl').textContent = 'Done!';
+    await new Promise(r => setTimeout(r, 300));
+    document.getElementById('explainRunning').style.display = 'none';
+    document.getElementById('explainDone').style.display = '';
+  }
 
 })();
 
@@ -7041,6 +8344,842 @@ window.onMeceeSyncApplied = function () {
   renderStats();
   renderBookmarkList();
 };
+
+/* =====================================================================
+   AI CONDENSATION
+   Analyses every card against real CEE/MECEE PYQ patterns per subject
+   and trims/sharpens irrelevant ones. Full history + per-card revert.
+   ===================================================================== */
+
+const CONDENSE_HIST_KEY = 'mecee_condense_history';
+
+/* ---- subject auto-detection ---- */
+function detectSubject(deck) {
+  const text = (deck.name + ' ' + (deck.source || '')).toLowerCase();
+  if (/zoo|frog|earthworm|paramec|plasmo|phylum|chordat|annelid|arthro|mollusc|echino|protozoa|tissue|digesti|circulat|excret|nervous|endocrin|respirat|reproduc|sense|disease|evolution|adaptation/i.test(text)) return 'zoology';
+  if (/bot|plant|cell|gene|algae|fungi|bacteri|virus|bryoph|pterido|gymno|flower|leaf|root|stem|photosyn|respir|ecology|anatom|genetics|chloro|meiosis|mitosis/i.test(text)) return 'botany';
+  if (/chem|organic|inorganic|physical|acid|base|salt|bond|atom|electron|redox|electro|halogen|hydrocarbon|alcohol|ester|carbonyl|polymer|periodic|metal|titrat/i.test(text)) return 'chemistry';
+  if (/phys|mechanic|gravit|optic|wave|sound|heat|thermo|electric|magnet|nuclear|modern|quantum|motion|force|energy|momentum|orbital|lens|refract/i.test(text)) return 'physics';
+  return 'general';
+}
+
+/* ---- subject-specific system prompts ---- */
+function buildCondensePrompt(subject) {
+  const base = `You are an expert tutor for the Nepal CEE/MECEE-BL medical entrance exam. Your job is to analyse flashcards and decide which to KEEP, MODIFY, or DELETE based on real past-year question (PYQ) patterns.
+
+Return a JSON object with this exact structure:
+{
+  "actions": [
+    { "id": "<card id>", "action": "keep" },
+    { "id": "<card id>", "action": "delete", "reason": "<why irrelevant>" },
+    { "id": "<card id>", "action": "modify", "newQ": "<improved question>", "newA": "<improved answer>", "reason": "<what you changed and why>" }
+  ]
+}
+
+Rules:
+- You MUST include every card id in the actions array.
+- "keep" = exam-relevant, well-formed, leave unchanged.
+- "delete" = not worth studying for this exam.
+- "modify" = the fact is testable but the card needs to be sharpened (add exact value, remove vague phrasing, fix wrong info).
+- Do NOT delete a card just because it seems hard. Only delete if it is genuinely unlikely to appear in CEE/MECEE or is too vague to be useful.
+- Be conservative: when in doubt, keep or modify rather than delete.
+
+MCQ cards: cards with type="mcq" have a "choices" array (4 options, A–D) and "correct" (0-based index of correct answer).
+- For MCQ cards you may also include "newChoices" (array of 4 strings) and "newCorrect" (0-based index) in a modify action to improve distractors or fix the correct answer.
+- Keep all 4 choices plausible but only one correct.
+- Improve weak distractors to be exam-style traps (similar values, partial facts, common misconceptions).`;
+
+  const subjects = {
+    zoology: `
+SUBJECT: Zoology (Nepal CEE/MECEE)
+
+DELETE cards that are:
+- Too vague or application-heavy ("Why do animals migrate?", "Explain behavior")
+- About organisms clearly outside the MECEE syllabus
+- General ecology without specific anatomical/classification facts
+- Speculative evolutionary reasoning without named evidence
+
+KEEP or MODIFY cards that test:
+- Exact segment numbers (Clitellum segments 14-16, spermathecae in 5/6-8/9 grooves)
+- Exact organ counts (4 pairs of hearts in earthworm segments 7,9,12,13)
+- Precise anatomical positions ("Notochord dorsal to alimentary canal, ventral to nerve cord")
+- Disease vectors and exact transmission (Anopheles→Malaria, Aedes→Dengue, Culex→Filariasis, Tse-Tse→Sleeping sickness, Sand fly→Kala-azar)
+- Parasite life cycle stages in exact sequence (Sporozoite→Trophozoite→Schizont→Merozoite)
+- Phylum-level distinguishing features (nematocysts in Coelenterata, water vascular system in Echinodermata, radula in Mollusca)
+- Cell/tissue type names and locations (Choanocytes in Porifera, Flame cells in Platyhelminthes)
+- Organ system specifics: enzyme locations, valve positions, SA node, blood type facts, GFR values
+- Exact cranial/spinal nerve counts (12 cranial, 31 spinal pairs)
+- Hormone-gland-effect triples (Beta cells→Insulin, Pineal→Melatonin, Corpus luteum→Progesterone)
+- Human evolution brain capacities (Australopithecus ~450cc, Homo erectus ~900cc, Homo sapiens ~1450cc)
+- Adaptation types with exact organism examples (Echolocation: Bats+Dolphins, Saltatorial: Kangaroo)`,
+
+    botany: `
+SUBJECT: Botany (Nepal CEE/MECEE)
+
+DELETE cards that are:
+- Vague ecological concepts without specific facts
+- Agricultural applications not in MECEE syllabus
+- Speculative evolutionary reasoning
+- Overcomplicated molecular details (LCAO, MO diagrams)
+
+KEEP or MODIFY cards that test:
+- Exact meiosis prophase I substage sequence (Leptotene→Zygotene→Pachytene→Diplotene→Diakinesis) with event at each
+- Organelle marker enzymes (Succinate dehydrogenase = mitochondria; specific enzyme-organelle pairs)
+- Cell wall composition layers (Middle lamella=Pectin/Ca-Mg pectate; Primary=Cellulose; Secondary=Lignin; Cork=Suberin)
+- Chloroplast morphology per species (Spirogyra=spiral; Ulothrix=girdle; Chlamydomonas=cup-shaped)
+- Exact counts (Funaria peristomial teeth=32; Fern archegonium neck canal=1 cell with 2 nuclei; Selaginella=13-celled male gametophyte)
+- Plant virus/bacteria specifics (TMV=RNA rod-shaped; Pox=largest animal virus; Gram+ thicker wall, 80% peptidoglycan)
+- Photosynthesis specifics (C4 initial acceptor=PEP not RuBP; Kranz anatomy; CAM=night CO2 fixation; Chlorophyll contains Mg not Fe)
+- ATP yield (Aerobic=38 ATP; Glycolysis NET=2 ATP; Krebs per turn=3NADH+1FADH2+1GTP)
+- Genetic ratios (Monohybrid F2=3:1; Dihybrid=9:3:3:1; Complementary=9:7; Incomplete dominance=1:2:1; Lethal=2:1)
+- Vascular bundle types (Dicot stem=open collateral endarch; Monocot=closed collateral endarch scattered)
+- Fruit/seed identifications (Coconut edible=endosperm; Coir=mesocarp; Cashew=false fruit)
+- Exact taxonomic features (Gymnosperms: no ovary, no companion cells, no vessels in xylem; tracheids only)
+- Ovule types (Anatropous=most common), Double fertilization (5 nuclei involved, produces 3n endosperm)`,
+
+    chemistry: `
+SUBJECT: Chemistry (Nepal CEE/MECEE)
+
+DELETE cards that are:
+- Full derivations with no testable result
+- Historical development of atomic models (beyond key names)
+- Advanced MO/band theory not directly tested
+- Overcomplicated synthetic routes for obscure compounds
+- Deep quantum mechanical probability beyond exam scope
+
+KEEP or MODIFY cards that test:
+- Quantum number rules and what each means (n, l, m_l, m_s)
+- Hybridization → geometry → exact bond angle (sp=linear 180°; sp2=trigonal 120°; sp3=tetrahedral 109.28°; H2O=104.5°; NH3=107°)
+- Molecular polarity (CCl4=zero dipole; CH3Cl=max dipole among CH4-nCln; CHCl3 has dipole)
+- Stoichiometry calculations: empirical formula from %composition, limiting reagent, STP volume (22.4L/mol)
+- Mole/Avogadro calculations (exact number: 6.022×10^23)
+- Key process conditions (Haber: N2+3H2→2NH3 at 450-500°C, 3-4×10^7 Pa, Fe catalyst; Ostwald: 4NH3+5O2→4NO+6H2O, Pt catalyst; Contact: V2O5 catalyst; Solvay process steps)
+- Half-life and radioactive decay (t½ for 1st order = 0.693/k; remaining = (1/2)^n)
+- Thermodynamics sign rules (ΔG=ΔH-TΔS; spontaneous if ΔG<0; the 4 ΔH/ΔS combinations)
+- Electrochemistry: Faraday laws (1F=96500C=1 mole e-), electrode reactions, E°cell = E°cathode - E°anode
+- Acid strength trends (HClO4>H2SO4>HNO3; FCH2COOH>ClCH2COOH; HF weak despite high EN due to strong H-F bond)
+- Organic reaction outcomes (Markovnikov's rule; anti-Markovnikov with peroxide; Lindlar→cis alkene; haloform test: yellow CHI3 ppt; Tollens=silver mirror; Fehling=brick red Cu2O; Aldol condensation = aldehydes with α-H; Cannizzaro = no α-H)
+- Oxidation states (S in H2SO4=+6; Cr in Cr2O7^2-=+6; Mn in KMnO4=+7→+2 in acid, gains 5e-)
+- Salt solution pH (FeCl3=acidic; Na2CO3=basic; NH4Cl=acidic; NaCl=neutral)
+- Bleaching (Cl2=by oxidation; SO2=by reduction/additive)
+- Polymer types (Nylon/Terylene/Bakelite=condensation; Polyethylene/PVC/Teflon=addition)`,
+
+    physics: `
+SUBJECT: Physics (Nepal CEE/MECEE)
+
+DELETE cards that are:
+- Full derivations without a testable numerical result
+- Purely conceptual "why" questions with no specific value
+- Historical scientist biographies (Newton, Coulomb etc. beyond basic attribution)
+- Edge cases (relativistic corrections, quantum effects at everyday scales)
+- Complex multi-step problem setups with no fixed answer
+
+KEEP or MODIFY cards that test:
+- Exact values that appear as answers (Escape velocity Earth=11.2 km/s; g=9.8 m/s²; Moon g=g/6; Sound in air at 0°C=330 m/s; Speed of light=3×10^8 m/s; h=6.625×10^-34 J·s; 1eV=1.6×10^-19 J)
+- Specific heat and latent heat values (Water Specific heat=4200 J/kg°C; Latent heat fusion=80 cal/g; vaporization=540 cal/g)
+- Formula + when to use + one numerical example (Escape velocity v=√(2gR); Orbital velocity v=√(gR); SHM T=2π√(l/g) or 2π√(m/k))
+- Momentum-KE relationships (If p doubles→KE becomes 4×; If KE doubles→p becomes √2×)
+- Wire resistance rules (Wire stretched 2×→R becomes 4×; diameter halved→R becomes 16×)
+- Transformer ratio (Vs/Vp=Ns/Np)
+- Drop coalescence (n drops of V volts→new voltage V×n^(2/3); 8 drops at 1V→4V)
+- Critical angle for TIR (sin θc=n2/n1; diamond critical angle=24°; water n=4/3; glass n≈1.5)
+- Temperature scales (-40°C=-40°F; 0°C=273K; water max density at 4°C)
+- Faulty thermometer problems (linear interpolation)
+- Resonance frequency (f=1/(2π√LC))
+- Photoelectric effect (hf=W+KE_max; work functions Cs<K<Na<Fe)
+- Nuclear reactions: alpha loses 4 mass 2 proton; beta gains 1 proton same mass; counting α and β from A,Z changes
+- Radioactive decay: remaining=(1/2)^n; 1/8 remaining=3 half-lives
+- Cyclotron radius r=mv/(qB); path in magnetic field
+- Power calculations (P=F·v; pump power P=mgh/t; efficiency)`,
+
+    general: `
+SUBJECT: General / Mixed
+
+DELETE cards that are:
+- Too vague to be tested as a multiple-choice question
+- Require multi-paragraph explanations to answer
+- Speculative or hypothetical with no single correct answer
+
+KEEP or MODIFY cards that:
+- Have a single unambiguous correct answer
+- Test a specific fact, formula, name, value, or sequence
+- Could plausibly appear in a 4-option MCQ`,
+  };
+
+  return base + (subjects[subject] || subjects.general);
+}
+
+/* ---- localStorage history helpers ---- */
+function readCondenseHistory() {
+  try { return JSON.parse(localStorage.getItem(CONDENSE_HIST_KEY) || '{}'); } catch { return {}; }
+}
+function writeCondenseHistory(h) {
+  try { localStorage.setItem(CONDENSE_HIST_KEY, JSON.stringify(h)); } catch {}
+}
+function getCondenseHistory(deckId) {
+  return readCondenseHistory()[deckId] || null;
+}
+function saveCondenseHistory(deckId, entry) {
+  const h = readCondenseHistory();
+  h[deckId] = entry;
+  writeCondenseHistory(h);
+}
+function clearCondenseHistory(deckId) {
+  const h = readCondenseHistory();
+  delete h[deckId];
+  writeCondenseHistory(h);
+}
+
+/* ---- modal state ---- */
+let _condenseDeckId = null;
+
+function openCondenseModal(deckId) {
+  const data = readDecks();
+  const deck = data.decks.find(d => d.id === deckId);
+  if (!deck) return;
+  _condenseDeckId = deckId;
+
+  document.getElementById('condenseSub').textContent =
+    `"${deck.name}" · ${deck.cards.length} card${deck.cards.length === 1 ? '' : 's'}`;
+
+  // Auto-detect subject
+  const detected = detectSubject(deck);
+  document.getElementById('condenseSubject').value = detected === 'general' ? 'auto' : detected;
+
+  // Sync model with current selection
+  const curModel = document.getElementById('notesModel')?.value || 'gpt-5.5';
+  const mSel = document.getElementById('condenseModel');
+  [...mSel.options].forEach(o => { if (o.value === curModel) mSel.value = curModel; });
+
+  // Reset panels
+  document.getElementById('condenseSetup').style.display = '';
+  document.getElementById('condenseRunning').style.display = 'none';
+  document.getElementById('condenseHistory').style.display = 'none';
+
+  // Show existing history if present
+  const hist = getCondenseHistory(deckId);
+  if (hist) showCondenseHistory(hist, deck);
+
+  document.getElementById('condenseBack').classList.add('open');
+}
+
+function closeCondenseModal() {
+  document.getElementById('condenseBack').classList.remove('open');
+  _condenseDeckId = null;
+}
+
+document.getElementById('condenseClose').addEventListener('click', closeCondenseModal);
+document.getElementById('condenseCancel').addEventListener('click', closeCondenseModal);
+document.getElementById('condenseDone').addEventListener('click', closeCondenseModal);
+document.getElementById('condenseBack').addEventListener('click', e => {
+  if (e.target === document.getElementById('condenseBack')) closeCondenseModal();
+});
+
+document.getElementById('condenseRevertAll').addEventListener('click', () => {
+  if (!_condenseDeckId) return;
+  const hist = getCondenseHistory(_condenseDeckId);
+  if (!hist) return;
+  if (!confirm(`Revert ALL changes? This will restore ${hist.deleted.length} deleted card(s) and undo ${hist.modified.length} modification(s).`)) return;
+  revertAllCondenseChanges(_condenseDeckId, hist);
+});
+
+/* ---- start condensation ---- */
+document.getElementById('condenseStart').addEventListener('click', async () => {
+  if (!_condenseDeckId) return;
+  await runCondensation(_condenseDeckId);
+});
+
+async function runCondensation(deckId) {
+  await loadFileOpenAIKey();
+  const apiKey = getAiMode() === 'cloud' ? null : getApiKey();
+  if (getAiMode() === 'local' && !apiKey) {
+    alert('No API key found. Add it to .mecee-secrets/OPENAIAPI.txt and refresh.');
+    return;
+  }
+
+  const data = readDecks();
+  const deck = data.decks.find(d => d.id === deckId);
+  if (!deck || !deck.cards.length) return;
+
+  const subjectSel = document.getElementById('condenseSubject').value;
+  const subject = subjectSel === 'auto' ? detectSubject(deck) : subjectSel;
+  const model   = document.getElementById('condenseModel').value;
+
+  document.getElementById('condenseSetup').style.display = 'none';
+  document.getElementById('condenseHistory').style.display = 'none';
+  document.getElementById('condenseRunning').style.display = '';
+
+  const systemPrompt = buildCondensePrompt(subject);
+  const snapshot = JSON.parse(JSON.stringify(deck.cards));
+
+  const cardList = deck.cards.map(c =>
+    c.type === 'mcq'
+      ? { id: c.id, type: 'mcq', q: c.q, choices: c.choices, correct: c.correct }
+      : { id: c.id, type: c.type || 'flash', q: c.q, a: c.a }
+  );
+
+  const CHUNK = 30;
+  const CONCURRENCY = 3;
+  const chunks = [];
+  for (let i = 0; i < cardList.length; i += CHUNK) chunks.push(cardList.slice(i, i + CHUNK));
+
+  // Per-batch state: pending | running | done | error
+  const batchStatus = new Array(chunks.length).fill('pending');
+  const batchResults = new Array(chunks.length).fill(null);
+
+  function renderBatchGrid() {
+    const grid = document.getElementById('condenseBatchGrid');
+    if (!grid) return;
+    const icons = { pending: '○', running: '◌', done: '●', error: '✗' };
+    grid.innerHTML = batchStatus.map((s, i) =>
+      `<div class="cond-batch-dot ${s}" title="Batch ${i+1}/${chunks.length}: ${s}">${icons[s]}</div>`
+    ).join('');
+  }
+
+  function updateProgress() {
+    const done    = batchStatus.filter(s => s === 'done').length;
+    const running = batchStatus.filter(s => s === 'running').length;
+    const pct = chunks.length === 0 ? 0 : Math.round(((done + running * 0.5) / chunks.length) * 88);
+    const label = done === chunks.length
+      ? 'All batches complete — applying changes…'
+      : `${done} of ${chunks.length} batch${chunks.length > 1 ? 'es' : ''} done${running ? ` · ${running} running` : ''}`;
+    document.getElementById('condensePrgFill').style.width = pct + '%';
+    document.getElementById('condensePrgLbl').textContent = label;
+    document.getElementById('condensePrgPct').textContent = pct + '%';
+  }
+
+  renderBatchGrid();
+  updateProgress();
+
+  async function processChunk(ci) {
+    batchStatus[ci] = 'running';
+    renderBatchGrid(); updateProgress();
+    const userMsg = `Here are the flashcards to analyse:\n\n${JSON.stringify(chunks[ci], null, 2)}\n\nReturn a JSON object with an "actions" array covering every card id above.`;
+    let resp;
+    if (getAiMode() === 'cloud') {
+      resp = await condenseViaWorker(systemPrompt, userMsg, model, deckId);
+    } else {
+      resp = await condenseViaOpenAI(systemPrompt, userMsg, model, apiKey);
+    }
+    batchResults[ci] = resp.actions || [];
+    batchStatus[ci] = 'done';
+    renderBatchGrid(); updateProgress();
+  }
+
+  // Worker-pool concurrency
+  let nextIdx = 0;
+  async function poolWorker() {
+    while (nextIdx < chunks.length) {
+      const ci = nextIdx++;
+      try { await processChunk(ci); }
+      catch (e) {
+        batchStatus[ci] = 'error';
+        renderBatchGrid(); updateProgress();
+        throw e;
+      }
+    }
+  }
+
+  try {
+    await Promise.all(Array.from({ length: Math.min(CONCURRENCY, chunks.length) }, poolWorker));
+  } catch (e) {
+    console.error(e);
+    document.getElementById('condenseStatus').className = 'status err';
+    document.getElementById('condenseMsg').textContent = `Error: ${e.message || e}`;
+    return;
+  }
+
+  const allActions = batchResults.flat().filter(Boolean);
+  const actionMap = {};
+  allActions.forEach(a => { actionMap[a.id] = a; });
+
+  const histDeleted  = [];
+  const histModified = [];
+  const newCards = [];
+
+  deck.cards.forEach(card => {
+    const act = actionMap[card.id];
+    if (!act || act.action === 'keep') { newCards.push(card); return; }
+
+    if (act.action === 'delete') {
+      histDeleted.push({ card: JSON.parse(JSON.stringify(card)), reason: act.reason || '' });
+      return;
+    }
+
+    if (act.action === 'modify') {
+      const isMcq = card.type === 'mcq';
+      histModified.push({
+        id: card.id,
+        type: card.type || 'flash',
+        oldQ: card.q, oldA: card.a,
+        oldChoices: isMcq ? card.choices : undefined,
+        oldCorrect: isMcq ? card.correct : undefined,
+        newQ: act.newQ || card.q,
+        newA: act.newA || card.a,
+        newChoices: isMcq ? (act.newChoices || card.choices) : undefined,
+        newCorrect: isMcq ? (act.newCorrect != null ? act.newCorrect : card.correct) : undefined,
+        reason: act.reason || '',
+      });
+      const updated = { ...card, q: act.newQ || card.q, a: act.newA || card.a };
+      if (isMcq) {
+        updated.choices = act.newChoices || card.choices;
+        updated.correct = act.newCorrect != null ? act.newCorrect : card.correct;
+      }
+      newCards.push(updated);
+      return;
+    }
+    newCards.push(card);
+  });
+
+  const data2 = readDecks();
+  const deck2 = data2.decks.find(d => d.id === deckId);
+  if (deck2) { deck2.cards = newCards; writeDecks(data2); renderDecks(); renderStats(); }
+
+  const histEntry = { date: new Date().toISOString(), subject, model, snapshot, deleted: histDeleted, modified: histModified };
+  saveCondenseHistory(deckId, histEntry);
+
+  document.getElementById('condensePrgFill').style.width = '100%';
+  document.getElementById('condensePrgPct').textContent = '100%';
+  document.getElementById('condensePrgLbl').textContent = 'Done!';
+  await new Promise(r => setTimeout(r, 400));
+  document.getElementById('condenseRunning').style.display = 'none';
+
+  const data3 = readDecks();
+  const deck3 = data3.decks.find(d => d.id === deckId);
+  showCondenseHistory(histEntry, deck3 || deck2);
+}
+
+/* =====================================================================
+   FLASHCARD AI EXPLAINER (for decks imported from MCQ Bank)
+   Generates per-card explanations using cross-deck context: sibling
+   decks tagged to the same chapter are numbered, and their questions
+   are passed along so the AI can reference related questions and
+   suggest mnemonics where useful.
+   ===================================================================== */
+
+let _fcExplainDeckId = null;
+
+/* Assign stable per-deck numbering to MCQ cards (1-based), persisted on
+   the card so cross-deck references stay meaningful between runs. */
+function ensureCardNumbering(deck) {
+  let changed = false, n = 0;
+  deck.cards.forEach(c => {
+    if (c.type === 'mcq') {
+      n++;
+      if (c.num !== n) { c.num = n; changed = true; }
+    }
+  });
+  return changed;
+}
+
+/* Decks sharing the same subject/unit/chapter tag as `deck` (siblings),
+   excluding itself — e.g. an original MCQ deck and its imported
+   "Practice Weakness" deck filed under the same chapter. */
+function siblingDecks(deck) {
+  if (!deck.tag) return [];
+  const data = readDecks();
+  return data.decks.filter(d => d.id !== deck.id && d.tag
+    && d.tag.subj === deck.tag.subj && d.tag.unit === deck.tag.unit && d.tag.chIdx === deck.tag.chIdx
+    && d.cards.some(c => c.type === 'mcq'));
+}
+
+function openFcExplainModal(deckId) {
+  const data = readDecks();
+  const deck = data.decks.find(d => d.id === deckId);
+  if (!deck) return;
+  _fcExplainDeckId = deckId;
+
+  const mcqCount = deck.cards.filter(c => c.type === 'mcq').length;
+  document.getElementById('fcExplainSub').textContent = `"${deck.name}" · ${mcqCount} MCQ card${mcqCount === 1 ? '' : 's'}`;
+
+  const detected = detectSubject(deck);
+  document.getElementById('fcExplainSubject').value = detected === 'general' ? 'auto' : detected;
+
+  const curModel = document.getElementById('notesModel')?.value || 'gpt-5.5';
+  const mSel = document.getElementById('fcExplainModel');
+  [...mSel.options].forEach(o => { if (o.value === curModel) mSel.value = curModel; });
+
+  const sibs = siblingDecks(deck);
+  const note = document.getElementById('fcExplainLinkedNote');
+  note.innerHTML = `<b style="color:var(--text)">What this does:</b><br>
+    Numbers every MCQ card in this deck and writes a short explanation for each — why the
+    correct answer is right, why the others are wrong, and (where useful) a quick mnemonic.` +
+    (sibs.length
+      ? ` It also looks at <b style="color:var(--text)">${sibs.map(s => escapeHtml(s.name)).join(', ')}</b>
+          (same chapter) so explanations can point out how a question relates to one in those decks.`
+      : ` Tag this deck to a chapter — and import a related deck (e.g. its "Practice Weakness" set) into the
+          same chapter — so explanations can also reference related questions.`);
+
+  document.getElementById('fcExplainSetup').style.display = '';
+  document.getElementById('fcExplainRunning').style.display = 'none';
+  document.getElementById('fcExplainDone').style.display = 'none';
+  document.getElementById('fcExplainBack').classList.add('open');
+}
+
+function closeFcExplainModal() {
+  document.getElementById('fcExplainBack').classList.remove('open');
+  _fcExplainDeckId = null;
+}
+document.getElementById('fcExplainClose').addEventListener('click', closeFcExplainModal);
+document.getElementById('fcExplainCancel').addEventListener('click', closeFcExplainModal);
+document.getElementById('fcExplainDoneBtn').addEventListener('click', closeFcExplainModal);
+document.getElementById('fcExplainBack').addEventListener('click', e => {
+  if (e.target === document.getElementById('fcExplainBack')) closeFcExplainModal();
+});
+
+function buildFcExplainPrompt(subject, hasContext) {
+  return `You are an expert tutor for the Nepal CEE/MECEE-BL medical entrance exam, subject: ${subject}.
+For each multiple-choice question given (in "cards"), write:
+- "explanation": a short (2-4 sentence) explanation of why the correct answer is correct, and briefly why the other options are wrong.
+- "mnemonic": OPTIONAL — a short memory aid/mnemonic, ONLY if one would genuinely help recall this fact. Omit or use "" otherwise.
+${hasContext ? `- "related": OPTIONAL — if this question closely relates to one of the questions listed in "context" (same concept, complementary fact, or something the student previously got wrong on this topic), reference it by its deck name and number, e.g. "See #4 in Practice Weakness (...) — same enzyme, opposite reaction." Omit or use "" if nothing is closely related.` : ''}
+
+Return a JSON object with this exact structure:
+{ "explanations": [ { "num": <card number>, "explanation": "<text>", "mnemonic": "<text or "">"${hasContext ? ', "related": "<text or \\"\\">"' : ''} }, ... ] }
+
+You MUST include every card number from "cards" in the explanations array.`;
+}
+
+async function fcExplainViaOpenAI(systemPrompt, userMsg, model, apiKey) {
+  const supportsTemperature = /^gpt-4/.test(model);
+  const body = {
+    model,
+    messages: [
+      { role: 'system', content: systemPrompt },
+      { role: 'user',   content: userMsg },
+    ],
+    response_format: { type: 'json_object' },
+  };
+  if (supportsTemperature) body.temperature = 0.2;
+  const resp = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+    body: JSON.stringify(body),
+  });
+  if (!resp.ok) {
+    const err = await resp.json().catch(() => ({}));
+    throw new Error(err?.error?.message || `API error ${resp.status}`);
+  }
+  const j = await resp.json();
+  return JSON.parse(j.choices[0].message.content);
+}
+
+async function fcExplainViaWorker(systemPrompt, userMsg, model) {
+  const endpoint = (typeof WORKER_URL !== 'undefined' ? WORKER_URL : '') + '/api/explain';
+  const resp = await fetch(endpoint, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ systemPrompt, userMsg, model }),
+  });
+  if (!resp.ok) {
+    const err = await resp.json().catch(() => ({}));
+    throw new Error(err?.error || `Worker error ${resp.status}`);
+  }
+  return await resp.json();
+}
+
+document.getElementById('fcExplainStart').addEventListener('click', async () => {
+  if (!_fcExplainDeckId) return;
+  await runFcExplainer(_fcExplainDeckId);
+});
+
+async function runFcExplainer(deckId) {
+  await loadFileOpenAIKey();
+  const apiKey = getAiMode() === 'cloud' ? null : getApiKey();
+  if (getAiMode() === 'local' && !apiKey) {
+    alert('No API key found. Add it to .mecee-secrets/OPENAIAPI.txt and refresh.');
+    return;
+  }
+
+  const data = readDecks();
+  const deck = data.decks.find(d => d.id === deckId);
+  if (!deck) return;
+  const mcqCards = deck.cards.filter(c => c.type === 'mcq');
+  if (!mcqCards.length) { alert('No MCQ cards in this deck.'); return; }
+
+  // Numbering: stable, persisted per-deck so cross-deck references stay meaningful.
+  let dataChanged = ensureCardNumbering(deck);
+
+  // Build cross-deck context from sibling decks (same chapter tag).
+  const sibs = siblingDecks(deck);
+  let context = [];
+  sibs.forEach(sib => {
+    if (ensureCardNumbering(sib)) dataChanged = true;
+    sib.cards.filter(c => c.type === 'mcq').forEach(c => {
+      context.push({ deck: sib.name, num: c.num, q: c.q, correct: c.choices[c.correct] });
+    });
+  });
+  if (context.length > 120) context = context.slice(0, 120);
+  if (dataChanged) writeDecks(data);
+
+  const subjectSel = document.getElementById('fcExplainSubject').value;
+  const subject = subjectSel === 'auto' ? detectSubject(deck) : subjectSel;
+  const model    = document.getElementById('fcExplainModel').value;
+
+  document.getElementById('fcExplainSetup').style.display = 'none';
+  document.getElementById('fcExplainDone').style.display = 'none';
+  document.getElementById('fcExplainRunning').style.display = '';
+
+  const hasContext = context.length > 0;
+  const systemPrompt = buildFcExplainPrompt(subject, hasContext);
+  const cardList = mcqCards.map(c => ({ num: c.num, q: c.q, choices: c.choices, correct: c.choices[c.correct] }));
+
+  const CHUNK = 20;
+  const CONCURRENCY = 3;
+  const chunks = [];
+  for (let i = 0; i < cardList.length; i += CHUNK) chunks.push(cardList.slice(i, i + CHUNK));
+
+  const batchStatus  = new Array(chunks.length).fill('pending');
+  const batchResults = new Array(chunks.length).fill(null);
+
+  function renderBatchGrid() {
+    const grid = document.getElementById('fcExplainBatchGrid');
+    if (!grid) return;
+    const icons = { pending: '○', running: '◌', done: '●', error: '✗' };
+    grid.innerHTML = batchStatus.map((s, i) =>
+      `<div class="cond-batch-dot ${s}" title="Batch ${i+1}/${chunks.length}: ${s}">${icons[s]}</div>`
+    ).join('');
+  }
+  function updateProgress() {
+    const done    = batchStatus.filter(s => s === 'done').length;
+    const running = batchStatus.filter(s => s === 'running').length;
+    const pct = chunks.length === 0 ? 0 : Math.round(((done + running * 0.5) / chunks.length) * 100);
+    const label = done === chunks.length
+      ? 'All batches complete!'
+      : `${done} of ${chunks.length} batch${chunks.length > 1 ? 'es' : ''} done${running ? ` · ${running} running` : ''}`;
+    document.getElementById('fcExplainPrgFill').style.width = pct + '%';
+    document.getElementById('fcExplainPrgLbl').textContent = label;
+    document.getElementById('fcExplainPrgPct').textContent = pct + '%';
+  }
+  renderBatchGrid(); updateProgress();
+
+  async function processChunk(ci) {
+    batchStatus[ci] = 'running';
+    renderBatchGrid(); updateProgress();
+    const userMsg = `cards (from "${deck.name}"):\n${JSON.stringify(chunks[ci], null, 2)}` +
+      (hasContext ? `\n\ncontext (related questions from other decks in this chapter):\n${JSON.stringify(context, null, 2)}` : '') +
+      `\n\nReturn a JSON object with an "explanations" array covering every card number above.`;
+    let resp;
+    if (getAiMode() === 'cloud') resp = await fcExplainViaWorker(systemPrompt, userMsg, model);
+    else resp = await fcExplainViaOpenAI(systemPrompt, userMsg, model, apiKey);
+    batchResults[ci] = resp.explanations || [];
+    batchStatus[ci] = 'done';
+    renderBatchGrid(); updateProgress();
+  }
+
+  let nextIdx = 0;
+  async function poolWorker() {
+    while (nextIdx < chunks.length) {
+      const ci = nextIdx++;
+      try { await processChunk(ci); }
+      catch (e) {
+        batchStatus[ci] = 'error';
+        renderBatchGrid(); updateProgress();
+        throw e;
+      }
+    }
+  }
+
+  try {
+    await Promise.all(Array.from({ length: Math.min(CONCURRENCY, chunks.length) }, poolWorker));
+  } catch (e) {
+    console.error(e);
+    document.getElementById('fcExplainStatus').className = 'status err';
+    document.getElementById('fcExplainMsg').textContent = `Error: ${e.message || e}`;
+    return;
+  }
+
+  const byNum = {};
+  batchResults.flat().filter(Boolean).forEach(item => { byNum[item.num] = item; });
+
+  const data2 = readDecks();
+  const deck2 = data2.decks.find(d => d.id === deckId);
+  if (deck2) {
+    deck2.cards.forEach(c => {
+      if (c.type !== 'mcq') return;
+      const item = byNum[c.num];
+      if (!item) return;
+      if (item.explanation) c.explanation = item.explanation;
+      if (item.mnemonic) c.mnemonic = item.mnemonic; else delete c.mnemonic;
+      if (item.related) c.related = item.related; else delete c.related;
+    });
+    writeDecks(data2);
+  }
+
+  document.getElementById('fcExplainPrgFill').style.width = '100%';
+  document.getElementById('fcExplainPrgPct').textContent = '100%';
+  document.getElementById('fcExplainPrgLbl').textContent = 'Done!';
+  await new Promise(r => setTimeout(r, 300));
+  document.getElementById('fcExplainRunning').style.display = 'none';
+  document.getElementById('fcExplainDone').style.display = '';
+}
+
+/* ---- API calls ---- */
+async function condenseViaOpenAI(systemPrompt, userMsg, model, apiKey) {
+  const supportsTemperature = /^gpt-4/.test(model);
+  const body = {
+    model,
+    messages: [
+      { role: 'system', content: systemPrompt },
+      { role: 'user',   content: userMsg },
+    ],
+    response_format: { type: 'json_object' },
+  };
+  if (supportsTemperature) body.temperature = 0.2;
+  const resp = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+    body: JSON.stringify(body),
+  });
+  if (!resp.ok) {
+    const err = await resp.json().catch(() => ({}));
+    throw new Error(err?.error?.message || `API error ${resp.status}`);
+  }
+  const j = await resp.json();
+  return JSON.parse(j.choices[0].message.content);
+}
+
+async function condenseViaWorker(systemPrompt, userMsg, model, deckId) {
+  const endpoint = (typeof WORKER_URL !== 'undefined' ? WORKER_URL : '') + '/api/condense';
+  const resp = await fetch(endpoint, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ systemPrompt, userMsg, model, deckId }),
+  });
+  if (!resp.ok) {
+    const err = await resp.json().catch(() => ({}));
+    throw new Error(err?.error || `Worker error ${resp.status}`);
+  }
+  return await resp.json();
+}
+
+/* ---- progress helper ---- */
+
+/* ---- history display ---- */
+function showCondenseHistory(hist, deck) {
+  document.getElementById('condenseSetup').style.display = 'none';
+  document.getElementById('condenseRunning').style.display = 'none';
+  document.getElementById('condenseHistory').style.display = '';
+
+  const kept     = (hist.snapshot?.length || 0) - hist.deleted.length;
+  const statsEl  = document.getElementById('condenseStats');
+  statsEl.innerHTML = `
+    <div class="cond-stat-chip" style="border-color:var(--good)">✓ ${hist.modified.length + kept - hist.modified.length === kept ? kept : kept} kept</div>
+    <div class="cond-stat-chip" style="border-color:#f59e0b">✏ ${hist.modified.length} modified</div>
+    <div class="cond-stat-chip" style="border-color:var(--bad)">🗑 ${hist.deleted.length} deleted</div>
+    <div class="cond-stat-chip" style="font-size:11px;color:var(--muted);border:none">
+      ${hist.subject ? hist.subject.charAt(0).toUpperCase()+hist.subject.slice(1) : ''} · ${new Date(hist.date).toLocaleDateString()}
+    </div>`;
+
+  const list = document.getElementById('condenseHistoryList');
+  list.innerHTML = '';
+
+  if (!hist.deleted.length && !hist.modified.length) {
+    list.innerHTML = '<div style="color:var(--muted);font-size:13px;text-align:center;padding:20px">No changes were made — all cards are exam-relevant!</div>';
+    return;
+  }
+
+  function mcqChoicesHtml(choices, correct) {
+    if (!choices || !choices.length) return '';
+    const letters = ['A','B','C','D'];
+    return `<div class="ch-choices">${choices.map((ch, i) =>
+      `<div class="ch-choice ${i === correct ? 'correct' : 'wrong'}">${letters[i]}. ${escapeHtml(ch)}${i === correct ? ' ✓' : ''}</div>`
+    ).join('')}</div>`;
+  }
+
+  // Deleted cards
+  hist.deleted.forEach((entry, idx) => {
+    const c = entry.card;
+    const isMcq = c.type === 'mcq';
+    const div = document.createElement('div');
+    div.className = 'ch-card ch-del';
+    div.innerHTML = `
+      <span class="ch-tag del">Deleted${isMcq ? ' · MCQ' : ''}</span>
+      <div class="ch-q">${escapeHtml(c.q)}</div>
+      ${isMcq ? mcqChoicesHtml(c.choices, c.correct) : (c.a ? `<div class="ch-a">${escapeHtml(c.a)}</div>` : '')}
+      ${entry.reason ? `<div class="ch-reason">"${escapeHtml(entry.reason)}"</div>` : ''}
+      <button class="ch-restore" data-hist-type="del" data-hist-idx="${idx}">↩ Restore</button>`;
+    list.appendChild(div);
+  });
+
+  // Modified cards
+  hist.modified.forEach((entry, idx) => {
+    const isMcq = entry.type === 'mcq';
+    const div = document.createElement('div');
+    div.className = 'ch-card ch-mod';
+    const qChanged = entry.oldQ !== entry.newQ;
+    const aChanged = !isMcq && entry.oldA !== entry.newA;
+    const choicesChanged = isMcq && JSON.stringify(entry.oldChoices) !== JSON.stringify(entry.newChoices);
+    const correctChanged = isMcq && entry.oldCorrect !== entry.newCorrect;
+    div.innerHTML = `
+      <span class="ch-tag mod">Modified${isMcq ? ' · MCQ' : ''}</span>
+      <div class="ch-diff">
+        ${qChanged ? `<div class="old">Q: ${escapeHtml(entry.oldQ)}</div><div class="new">Q: ${escapeHtml(entry.newQ)}</div>` : `<div style="color:var(--text)">${escapeHtml(entry.newQ)}</div>`}
+        ${aChanged ? `<div class="old">A: ${escapeHtml(entry.oldA)}</div><div class="new">A: ${escapeHtml(entry.newA)}</div>` : (!isMcq && entry.newA ? `<div style="color:var(--muted)">${escapeHtml(entry.newA)}</div>` : '')}
+        ${isMcq && (choicesChanged || correctChanged) ? `
+          <div class="old" style="text-decoration:none;opacity:.7">Before: ${(entry.oldChoices||[]).map((c,i)=>i===entry.oldCorrect?`<b>${c}</b>`:c).join(' / ')}</div>
+          <div class="new">After: ${mcqChoicesHtml(entry.newChoices||entry.oldChoices, entry.newCorrect??entry.oldCorrect)}</div>` : (isMcq ? mcqChoicesHtml(entry.newChoices||entry.oldChoices, entry.newCorrect??entry.oldCorrect) : '')}
+      </div>
+      ${entry.reason ? `<div class="ch-reason">"${escapeHtml(entry.reason)}"</div>` : ''}
+      <button class="ch-restore" data-hist-type="mod" data-hist-idx="${idx}">↩ Revert</button>`;
+    list.appendChild(div);
+  });
+
+  // Attach restore listeners
+  list.querySelectorAll('.ch-restore').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const type = btn.dataset.histType;
+      const idx  = parseInt(btn.dataset.histIdx, 10);
+      revertSingleChange(_condenseDeckId, hist, type, idx, btn);
+    });
+  });
+}
+
+/* ---- revert helpers ---- */
+function revertSingleChange(deckId, hist, type, idx, btn) {
+  const data = readDecks();
+  const deck = data.decks.find(d => d.id === deckId);
+  if (!deck) return;
+
+  if (type === 'del') {
+    const entry = hist.deleted[idx];
+    if (!entry) return;
+    deck.cards.push(entry.card);
+    hist.deleted[idx] = { ...entry, _reverted: true };
+  } else if (type === 'mod') {
+    const entry = hist.modified[idx];
+    if (!entry) return;
+    const card = deck.cards.find(c => c.id === entry.id);
+    if (card) {
+      card.q = entry.oldQ; card.a = entry.oldA;
+      if (entry.type === 'mcq') {
+        if (entry.oldChoices) card.choices = entry.oldChoices;
+        if (entry.oldCorrect != null) card.correct = entry.oldCorrect;
+      }
+    }
+    hist.modified[idx] = { ...entry, _reverted: true };
+  }
+
+  writeDecks(data);
+  saveCondenseHistory(deckId, hist);
+  renderDecks(); renderStats();
+
+  btn.textContent = '✓ Reverted';
+  btn.disabled = true;
+}
+
+function revertAllCondenseChanges(deckId, hist) {
+  const data = readDecks();
+  const deck = data.decks.find(d => d.id === deckId);
+  if (!deck) return;
+
+  // Restore snapshot
+  deck.cards = JSON.parse(JSON.stringify(hist.snapshot));
+  writeDecks(data);
+  clearCondenseHistory(deckId);
+  renderDecks(); renderStats();
+  closeCondenseModal();
+}
 </script>
 <script src="Playlist/tracks.js"></script>
 <script src="player.js"></script>
