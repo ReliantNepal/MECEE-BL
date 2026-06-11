@@ -605,6 +605,24 @@ def _card_progress_score(card: Dict[str, Any]) -> tuple:
     return (srs.get("lastReview") or "", srs.get("reps") or 0)
 
 
+def _card_freshness_ts(card: Dict[str, Any]) -> int:
+    """Epoch-ms "last touched" time for a card, used to decide whether a card
+    is newer than a deletion tombstone (i.e. was restored/edited after the
+    other device deleted it). Considers `_restoredAt` (set when a deleted
+    card is restored) and `srs.lastReview` (an ISO timestamp)."""
+    ts = card.get("_restoredAt") or 0
+    srs = card.get("srs") if isinstance(card, dict) else None
+    if srs and srs.get("lastReview"):
+        try:
+            iso = srs["lastReview"]
+            if iso.endswith("Z"):
+                iso = iso[:-1] + "+00:00"
+            ts = max(ts, int(datetime.datetime.fromisoformat(iso).timestamp() * 1000))
+        except (ValueError, TypeError):
+            pass
+    return ts
+
+
 def merge_deck_data(
     local_deck: Dict[str, Any],
     remote_deck: Dict[str, Any],
@@ -616,9 +634,17 @@ def merge_deck_data(
     Deck metadata (name, tags, etc.) comes from whichever side has the higher
     updatedAt.  Cards are merged by ID: the union of both sides is kept, with
     each card resolved to whichever version shows more SRS progress (higher
-    reps count; lastReview ISO string breaks ties).  Cards only present on one
-    side are kept as-is — this means a card deleted on one device is brought
-    back if the other device still has it (progress-preservation wins).
+    reps count; lastReview ISO string breaks ties).
+
+    `deletedCardIds` is a per-deck {cardId: deletedAtMs} tombstone map: when a
+    card is deleted on one device it disappears from that side's `cards`, but
+    without a tombstone the merge can't tell that apart from "the other device
+    just hasn't created this card yet" and would resurrect it from whichever
+    side still has it. For a card present on only one side, if that id has a
+    tombstone newer than the card's own freshness (_card_freshness_ts), the
+    deletion wins and the card is dropped. Otherwise (no tombstone, or the
+    card was restored/reviewed after the tombstone was recorded) the card is
+    kept and its tombstone is cleared.
     """
     meta_winner = local_deck if local_ts >= remote_ts else remote_deck
 
@@ -628,16 +654,24 @@ def merge_deck_data(
     lc_map = card_map(local_deck)
     rc_map = card_map(remote_deck)
 
+    merged_tomb: Dict[str, int] = dict(local_deck.get("deletedCardIds") or {})
+    for cid, ts in (remote_deck.get("deletedCardIds") or {}).items():
+        if ts > merged_tomb.get(cid, 0):
+            merged_tomb[cid] = ts
+
     merged_by_id: Dict[str, Any] = {}
     for cid in set(lc_map) | set(rc_map):
         lc = lc_map.get(cid)
         rc = rc_map.get(cid)
-        if lc is None:
-            merged_by_id[cid] = rc
-        elif rc is None:
-            merged_by_id[cid] = lc
-        else:
+        if lc is not None and rc is not None:
             merged_by_id[cid] = lc if _card_progress_score(lc) >= _card_progress_score(rc) else rc
+            continue
+        present = lc if lc is not None else rc
+        tomb_ts = merged_tomb.get(cid)
+        if tomb_ts is not None and _card_freshness_ts(present) <= tomb_ts:
+            continue  # deletion wins — card stays out, tombstone stays
+        merged_by_id[cid] = present
+        merged_tomb.pop(cid, None)  # restored/never-deleted — clear stale tombstone
 
     # Preserve card order from the metadata winner; append any extras at the end.
     winner_order = [c["id"] for c in (meta_winner.get("cards") or []) if c and c.get("id")]
@@ -653,6 +687,10 @@ def merge_deck_data(
 
     result = dict(meta_winner)
     result["cards"] = merged_cards
+    if merged_tomb:
+        result["deletedCardIds"] = merged_tomb
+    elif "deletedCardIds" in result:
+        del result["deletedCardIds"]
     return result
 
 

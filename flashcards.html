@@ -3908,6 +3908,24 @@ function recordDeletedCard(deckId, deckName, card, cardIdx) {
 function removeDeletedHistoryEntry(id) {
   writeDeletedHistory(readDeletedHistory().filter(e => e.id !== id));
 }
+
+/* ===== Card-deletion tombstones (sync) =====
+   Deleting a card just removes it from deck.cards, which a card-level sync
+   merge (mecee_sync.py merge_deck_data) can't tell apart from "the other
+   device just hasn't created this card yet" — so it brings the deleted card
+   back from whichever device still has it. Recording a {cardId: deletedAt}
+   tombstone on the deck lets the merge know the deletion is intentional and
+   propagate it, while restoring a card clears its tombstone and stamps
+   _restoredAt so a later restore wins over an older tombstone synced in from
+   another device. */
+function markCardDeletedTombstone(deck, cardId) {
+  if (!deck.deletedCardIds) deck.deletedCardIds = {};
+  deck.deletedCardIds[cardId] = Date.now();
+}
+function clearCardDeletedTombstone(deck, card) {
+  if (deck.deletedCardIds) delete deck.deletedCardIds[card.id];
+  card._restoredAt = Date.now();
+}
 function clearSessionFor(deckId) {
   const all = readSessions();
   if (deckId in all) { delete all[deckId]; writeSessions(all); }
@@ -6424,6 +6442,7 @@ async function deleteCard(cid) {
   if (!ok) return;
   recordDeletedCard(deck.id, deck.name, card, cardIdx);
   deck.cards = deck.cards.filter(c => c.id !== cid);
+  markCardDeletedTombstone(deck, cid);
   persistEditingDeck(data);
   renderEditCards();
 }
@@ -6484,6 +6503,7 @@ function restoreDeletedCard(id) {
   const deck = data.decks.find(d => d.id === entry.deckId);
   if (!deck) return;
   const idx = Math.min(entry.cardIdx, deck.cards.length);
+  clearCardDeletedTombstone(deck, entry.card);
   deck.cards.splice(idx, 0, entry.card);
   writeDecks(data);
   removeDeletedHistoryEntry(id);
@@ -6847,6 +6867,7 @@ function undoCardDeletion(snap) {
   const deck = data.decks.find(d => d.id === snap.deckId);
   if (deck) {
     const idx = Math.min(snap.cardIdxInDeck, deck.cards.length);
+    clearCardDeletedTombstone(deck, snap.card);
     deck.cards.splice(idx, 0, snap.card);
     writeDecks(data);
     if (studyDeck && studyDeck.id === deck.id) studyDeck = deck;
@@ -7043,10 +7064,12 @@ async function deleteCurrentStudyCard() {
   const historyId = recordDeletedCard(targetDeck.id, targetDeck.name, card, cardIdxInDeck);
   if (deck) {
     deck.cards = deck.cards.filter(c => c.id !== cardId);
+    markCardDeletedTombstone(deck, cardId);
     writeDecks(data);
     studyDeck = deck;
   } else {
     studyDeck.cards = studyDeck.cards.filter(c => c.id !== cardId);
+    markCardDeletedTombstone(studyDeck, cardId);
   }
   /* Drop the current position and shift later deck-indices down by one. studyIdx stays put so the next card slides in. */
   studyQueue = studyQueue
