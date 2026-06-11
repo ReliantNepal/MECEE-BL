@@ -3532,6 +3532,7 @@
       <button class="btn secondary" id="editWallpaper" type="button">🎨 Wallpaper</button>
       <button class="btn secondary" id="editAddFlash" type="button">+ Flash card</button>
       <button class="btn secondary" id="editAddMcq" type="button">+ MCQ</button>
+      <button class="btn secondary" id="editDeletedHistory" type="button">🗑 Deleted cards</button>
     </div>
     <div class="edit-search-bar">
       <div class="edit-search-wrap">
@@ -3545,12 +3546,26 @@
   </div>
 </div>
 
+<!-- DELETED CARDS HISTORY MODAL -->
+<div class="modal-back" id="deletedHistBack" role="dialog" aria-modal="true">
+  <div class="modal">
+    <button class="close" id="deletedHistClose" title="Close (Esc)">✕</button>
+    <div class="section-head" style="margin-bottom:14px">
+      <div>
+        <h2 style="margin:0">🗑 Deleted cards</h2>
+        <div class="sub" id="deletedHistSub">Cards you've deleted, newest first</div>
+      </div>
+    </div>
+    <div id="deletedHistList"></div>
+  </div>
+</div>
+
 <!-- STUDY MODAL -->
 <div class="study-back" id="studyBack">
   <div class="study" id="study">
     <button class="close" id="studyClose" title="Close (Esc)">✕</button>
     <button class="del-current" id="studyDelete" title="Delete this card from the deck">🗑 Delete</button>
-    <button class="del-current" id="studyUndo" style="right: 142px" title="Undo last rating (go back to previous card)" disabled>↶ Back</button>
+    <button class="del-current" id="studyUndo" style="right: 142px" title="Go back to the previous card, undoing its rating (Ctrl+Z also restores deleted cards)" disabled>↶ Back</button>
     <button class="edit-current-btn" id="studyEdit" title="Edit this card (desktop only)">✏️ Edit</button>
     <div class="mode-toggle" id="studyModeToggle" title="SRS schedules cards by recall difficulty · Cram reviews every card without affecting the schedule">
       <button data-mode="srs"  class="active">🧠 SRS</button>
@@ -3817,6 +3832,82 @@ function readSessions() {
   catch (_) { return {}; }
 }
 function writeSessions(s) { localStorage.setItem(SESSION_KEY, JSON.stringify(s)); }
+
+/* ===== Persisted undo history =====
+   Mirrors studyUndoStack to localStorage, per deck, so Ctrl+Z still works
+   after closing the study popup, switching tabs, or reloading the page —
+   not just within the current in-memory session. Capped per deck so it
+   can't grow unbounded across long study habits. */
+const STUDY_UNDO_KEY = 'mecee_study_undo_v1';
+const STUDY_UNDO_CAP = 20;
+function readUndoStore() {
+  try { return JSON.parse(localStorage.getItem(STUDY_UNDO_KEY) || '{}'); }
+  catch (_) { return {}; }
+}
+function writeUndoStore(store) {
+  try { localStorage.setItem(STUDY_UNDO_KEY, JSON.stringify(store)); } catch (_) {}
+}
+/* Persist the current studyUndoStack under the active deck's id. */
+function saveUndoStack() {
+  if (!studyDeck) return;
+  const store = readUndoStore();
+  if (studyUndoStack.length) {
+    store[studyDeck.id] = { mode: studyMode, stack: studyUndoStack.slice(-STUDY_UNDO_CAP) };
+  } else {
+    delete store[studyDeck.id];
+  }
+  writeUndoStore(store);
+}
+function clearUndoStackFor(deckId) {
+  const store = readUndoStore();
+  if (deckId in store) { delete store[deckId]; writeUndoStore(store); }
+}
+/* Find the deck (across the whole undo store) whose top undo entry is most
+   recent — that's the deck Ctrl+Z should act on when no study popup is open. */
+function findMostRecentUndo() {
+  const store = readUndoStore();
+  let best = null;
+  Object.keys(store).forEach(deckId => {
+    const entry = store[deckId];
+    const stack = entry && entry.stack;
+    if (!Array.isArray(stack) || !stack.length) return;
+    const top = stack[stack.length - 1];
+    if (!best || (top.ts || 0) > (best.top.ts || 0)) {
+      best = { deckId, mode: entry.mode || 'srs', stack, top };
+    }
+  });
+  return best;
+}
+
+/* ===== Deleted-card history =====
+   Every card removed via the deck editor or the study modal's delete button
+   gets a copy stashed here (newest first, capped at 200) so it can be
+   restored later from the "Deleted cards" panel. */
+const DELETED_KEY = 'mecee_deleted_cards_v1';
+function readDeletedHistory() {
+  try { return JSON.parse(localStorage.getItem(DELETED_KEY) || '[]'); }
+  catch (_) { return []; }
+}
+function writeDeletedHistory(list) {
+  try { localStorage.setItem(DELETED_KEY, JSON.stringify(list)); } catch (_) {}
+}
+function recordDeletedCard(deckId, deckName, card, cardIdx) {
+  const hist = readDeletedHistory();
+  const entry = {
+    id: uid(),
+    deckId, deckName,
+    card: JSON.parse(JSON.stringify(card)),
+    cardIdx,
+    deletedAt: Date.now(),
+  };
+  hist.unshift(entry);
+  if (hist.length > 200) hist.length = 200;
+  writeDeletedHistory(hist);
+  return entry.id;
+}
+function removeDeletedHistoryEntry(id) {
+  writeDeletedHistory(readDeletedHistory().filter(e => e.id !== id));
+}
 function clearSessionFor(deckId) {
   const all = readSessions();
   if (deckId in all) { delete all[deckId]; writeSessions(all); }
@@ -6321,19 +6412,102 @@ function saveCardField(cid, el) {
 async function deleteCard(cid) {
   const { data, deck } = getEditingDeck();
   if (!deck) return;
-  const card = deck.cards.find(c => c.id === cid);
-  if (!card) return;
+  const cardIdx = deck.cards.findIndex(c => c.id === cid);
+  if (cardIdx === -1) return;
+  const card = deck.cards[cardIdx];
   const kind = card.type === 'mcq' ? 'MCQ' : 'flash card';
   const ok = await themedConfirm({
     title: `Delete this ${kind}?`,
-    message: 'This card will be removed from the deck. This can\'t be undone.',
+    message: 'This card will be removed from the deck. You can restore it later from "Deleted cards".',
     confirmText: 'Delete card'
   });
   if (!ok) return;
+  recordDeletedCard(deck.id, deck.name, card, cardIdx);
   deck.cards = deck.cards.filter(c => c.id !== cid);
   persistEditingDeck(data);
   renderEditCards();
 }
+
+/* ===== Deleted-cards history modal ===== */
+function mcqChoicesHtmlFor(choices, correct) {
+  if (!choices || !choices.length) return '';
+  const letters = ['A','B','C','D'];
+  return `<div class="ch-choices">${choices.map((ch, i) =>
+    `<div class="ch-choice ${i === correct ? 'correct' : 'wrong'}">${letters[i]}. ${escapeHtml(ch)}${i === correct ? ' ✓' : ''}</div>`
+  ).join('')}</div>`;
+}
+
+function renderDeletedHistory() {
+  const list = document.getElementById('deletedHistList');
+  const hist = readDeletedHistory();
+  list.innerHTML = '';
+  if (!hist.length) {
+    list.innerHTML = '<div style="color:var(--muted);font-size:13px;text-align:center;padding:20px">No deleted cards yet.</div>';
+    return;
+  }
+  const data = readDecks();
+  hist.forEach(entry => {
+    const c = entry.card;
+    const isMcq = c.type === 'mcq';
+    const deckExists = data.decks.some(d => d.id === entry.deckId);
+    const div = document.createElement('div');
+    div.className = 'ch-card ch-del';
+    div.innerHTML = `
+      <span class="ch-tag del">Deleted${isMcq ? ' · MCQ' : ''} · ${escapeHtml(entry.deckName)}</span>
+      <div class="ch-q">${escapeHtml(c.q || '(empty)')}</div>
+      ${isMcq ? mcqChoicesHtmlFor(c.choices, c.correct) : (c.a ? `<div class="ch-a">${escapeHtml(c.a)}</div>` : '')}
+      <div class="ch-reason">${new Date(entry.deletedAt).toLocaleString()}</div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px">
+        <button class="ch-restore" data-id="${entry.id}" data-action="remove">✕ Remove</button>
+        <button class="ch-restore" data-id="${entry.id}" data-action="restore" ${deckExists ? '' : 'disabled title="Deck no longer exists"'}>↩ Restore</button>
+      </div>`;
+    list.appendChild(div);
+  });
+  list.querySelectorAll('.ch-restore').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = btn.dataset.id;
+      if (btn.dataset.action === 'restore') {
+        restoreDeletedCard(id);
+      } else {
+        removeDeletedHistoryEntry(id);
+        renderDeletedHistory();
+      }
+    });
+  });
+}
+
+function restoreDeletedCard(id) {
+  const hist = readDeletedHistory();
+  const entry = hist.find(e => e.id === id);
+  if (!entry) return;
+  const data = readDecks();
+  const deck = data.decks.find(d => d.id === entry.deckId);
+  if (!deck) return;
+  const idx = Math.min(entry.cardIdx, deck.cards.length);
+  deck.cards.splice(idx, 0, entry.card);
+  writeDecks(data);
+  removeDeletedHistoryEntry(id);
+  renderDeletedHistory();
+  renderDecks(); renderStats();
+  /* If the editor for this deck is open, refresh it too. */
+  if (document.getElementById('editBack').classList.contains('open')) renderEditCards();
+}
+
+document.getElementById('editDeletedHistory').addEventListener('click', () => {
+  renderDeletedHistory();
+  document.getElementById('deletedHistBack').classList.add('open');
+});
+document.getElementById('deletedHistClose').addEventListener('click', () => {
+  document.getElementById('deletedHistBack').classList.remove('open');
+});
+document.getElementById('deletedHistBack').addEventListener('click', e => {
+  if (e.target === document.getElementById('deletedHistBack')) document.getElementById('deletedHistBack').classList.remove('open');
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && document.getElementById('deletedHistBack').classList.contains('open')) {
+    document.getElementById('deletedHistBack').classList.remove('open');
+  }
+});
 
 function addCard(kind) {
   const { data, deck } = getEditingDeck();
@@ -6572,8 +6746,18 @@ let studyMode = 'srs';       // 'srs' | 'cram'
 let studyAutoTimer = null;   // pending auto-advance after a correct MCQ
 function cancelAutoTimer() { if (studyAutoTimer) { clearTimeout(studyAutoTimer); studyAutoTimer = null; } }
 
-/* Undo stack: each entry snapshots the state right BEFORE a rating was committed,
-   so popping it cleanly reverts the card's SRS schedule and replays that card. */
+/* Undo stack: holds two kinds of entries —
+   - 'rating': a snapshot taken right BEFORE a rating was committed, so
+     popping it cleanly reverts the card's SRS schedule and replays that card
+     (this is the "go back to previous card" behaviour).
+   - 'delete': a snapshot taken right BEFORE a card was removed from the
+     study session, so popping it re-inserts the card into the deck and
+     restores the queue.
+   Ctrl/Cmd+Z (or Z) pops whichever is on top, so an accidental delete is
+   undone first.
+   The "↶ Back" button (goBackOneCard) only ever reverts 'rating' entries —
+   it discards any 'delete' entries it passes over (the deletion stays in
+   effect) and steps back to the previous *rated* card. */
 let studyUndoStack = [];
 function snapshotForUndo() {
   if (!studyDeck || studyIdx >= studyQueue.length) return;
@@ -6581,6 +6765,8 @@ function snapshotForUndo() {
   const card = studyDeck.cards[cardIdxInDeck];
   if (!card) return;
   studyUndoStack.push({
+    type: 'rating',
+    ts: Date.now(),
     cardId: card.id,
     prevSrs: card.srs ? JSON.parse(JSON.stringify(card.srs)) : null,
     prevQueue: studyQueue.slice(),
@@ -6591,16 +6777,16 @@ function snapshotForUndo() {
 }
 function refreshUndoBtn() {
   const btn = document.getElementById('studyUndo');
-  if (!btn) return;
-  btn.disabled = studyUndoStack.length === 0;
-  btn.style.display = studyMode === 'srs' ? '' : 'none';
+  if (btn) btn.disabled = studyUndoStack.length === 0;
   refreshEditBtn();
+  saveUndoStack();
 }
-function undoLastRating() {
-  if (!studyUndoStack.length) return;
-  cancelAutoTimer();
-  const snap = studyUndoStack.pop();
-  // Restore the card's SRS state both in the in-memory deck and on disk.
+/* Restore the card's SRS state right before a rating, both in the in-memory
+   deck and on disk, and rewind the queue/index to that moment. Shared by
+   the "Back" button (which only ever steps through 'rating' snapshots) and
+   Ctrl+Z (which can also land on a 'rating' snapshot after skipping or
+   undoing 'delete' ones). */
+function revertRatingSnapshot(snap) {
   if (studyDeck) {
     const card = studyDeck.cards.find(c => c.id === snap.cardId);
     if (card) card.srs = snap.prevSrs;
@@ -6612,6 +6798,60 @@ function undoLastRating() {
       writeDecks(data);
     }
   }
+  studyQueue = snap.prevQueue;
+  studyIdx = snap.prevIdx;
+  studyReviewed = snap.prevReviewed;
+}
+
+/* Ctrl+Z / Z: undo the single most recent action, whatever it was — a
+   rating (revert SRS, go back one card) or a deletion (restore the card to
+   the deck and queue at its original spot). */
+function undoLastRating() {
+  if (!studyUndoStack.length) return;
+  cancelAutoTimer();
+  const snap = studyUndoStack.pop();
+  if (snap.type === 'delete') {
+    undoCardDeletion(snap);
+    return;
+  }
+  revertRatingSnapshot(snap);
+  refreshUndoBtn();
+  renderStats(); renderDecks();
+  showStudyCard();
+}
+
+/* "↶ Back" button: step back to the previous *rated* card, undoing its
+   rating so it can be answered again. Unlike Ctrl+Z, this never resurrects
+   a deleted card — any 'delete' snapshots in the way are discarded (the
+   deletion stays in effect) so Back simply skips over them. */
+function goBackOneCard() {
+  if (!studyUndoStack.length) return;
+  cancelAutoTimer();
+  let snap;
+  while (studyUndoStack.length) {
+    snap = studyUndoStack.pop();
+    if (snap.type !== 'delete') break;
+    snap = null;
+  }
+  if (!snap) { refreshUndoBtn(); return; }
+  revertRatingSnapshot(snap);
+  refreshUndoBtn();
+  renderStats(); renderDecks();
+  showStudyCard();
+}
+
+/* Re-insert a card removed via the study modal's delete button, restoring
+   it to its original position in the deck and the study queue. */
+function undoCardDeletion(snap) {
+  const data = readDecks();
+  const deck = data.decks.find(d => d.id === snap.deckId);
+  if (deck) {
+    const idx = Math.min(snap.cardIdxInDeck, deck.cards.length);
+    deck.cards.splice(idx, 0, snap.card);
+    writeDecks(data);
+    if (studyDeck && studyDeck.id === deck.id) studyDeck = deck;
+  }
+  removeDeletedHistoryEntry(snap.historyId);
   studyQueue = snap.prevQueue;
   studyIdx = snap.prevIdx;
   studyReviewed = snap.prevReviewed;
@@ -6694,8 +6934,22 @@ function openStudy(id, mode = 'srs', opts = {}) {
   document.querySelectorAll('#studyModeToggle button').forEach(b => {
     b.classList.toggle('active', b.dataset.mode === mode);
   });
-  /* Each opened session starts with a clean undo history. */
-  studyUndoStack = [];
+  /* Restore the persisted undo history for this deck, so Ctrl+Z still works
+     after closing the popup, switching tabs, or reloading the page. A
+     forced restart wipes it (matches the session wipe above). Stale history
+     (older than a few hours — e.g. a different day's session) is discarded
+     so reopening a deck tomorrow doesn't unexpectedly offer to revert
+     yesterday's ratings. */
+  const UNDO_STALE_MS = 3 * 60 * 60 * 1000;
+  if (opts.restart) {
+    studyUndoStack = [];
+    clearUndoStackFor(id);
+  } else {
+    const persisted = readUndoStore()[id];
+    const top = persisted && persisted.stack && persisted.stack[persisted.stack.length - 1];
+    studyUndoStack = (top && (Date.now() - (top.ts || 0)) < UNDO_STALE_MS) ? persisted.stack : [];
+    if (!studyUndoStack.length) clearUndoStackFor(id);
+  }
   refreshUndoBtn();
   studyBack.classList.add('open');
   setSyncFabVisible(false);
@@ -6748,7 +7002,7 @@ function closeStudy() {
 }
 document.getElementById('studyClose').addEventListener('click', closeStudy);
 document.getElementById('studyDelete').addEventListener('click', deleteCurrentStudyCard);
-document.getElementById('studyUndo').addEventListener('click', undoLastRating);
+document.getElementById('studyUndo').addEventListener('click', goBackOneCard);
 
 async function deleteCurrentStudyCard() {
   if (!studyDeck) return;
@@ -6759,13 +7013,19 @@ async function deleteCurrentStudyCard() {
   const kind = card.type === 'mcq' ? 'MCQ' : 'flash card';
   const ok = await themedConfirm({
     title: `Delete this ${kind}?`,
-    message: `It will be removed from "${studyDeck.name}". This can't be undone.`,
+    message: `It will be removed from "${studyDeck.name}". Press Ctrl+Z (or ↶ Back) to undo, or restore it later from "Deleted cards".`,
     confirmText: 'Delete card'
   });
   if (!ok) return;
+  cancelAutoTimer();
   const cardId = card.id;
+  const prevQueue = studyQueue.slice();
+  const prevIdx = studyIdx;
+  const prevReviewed = studyReviewed;
   const data = readDecks();
   const deck = data.decks.find(d => d.id === studyDeck.id);
+  const targetDeck = deck || studyDeck;
+  const historyId = recordDeletedCard(targetDeck.id, targetDeck.name, card, cardIdxInDeck);
   if (deck) {
     deck.cards = deck.cards.filter(c => c.id !== cardId);
     writeDecks(data);
@@ -6777,8 +7037,19 @@ async function deleteCurrentStudyCard() {
   studyQueue = studyQueue
     .filter((_, i) => i !== studyIdx)
     .map(origIdx => origIdx > cardIdxInDeck ? origIdx - 1 : origIdx);
-  /* Snapshots captured pre-delete reference shifted indices; safest to drop them. */
-  studyUndoStack = [];
+  /* Push a 'delete' undo entry so Ctrl+Z can re-insert the card and restore
+     the queue to exactly how it looked before this deletion. */
+  studyUndoStack.push({
+    type: 'delete',
+    ts: Date.now(),
+    deckId: targetDeck.id,
+    card: JSON.parse(JSON.stringify(card)),
+    cardIdxInDeck,
+    historyId,
+    prevQueue,
+    prevIdx,
+    prevReviewed,
+  });
   refreshUndoBtn();
   renderDecks(); renderStats();
   showStudyCard();
@@ -6812,11 +7083,31 @@ document.addEventListener('keydown', e => {
     rateCurrentCard(map[e.key]);
     e.preventDefault();
   }
-  /* Z → undo last rating (also Ctrl/Cmd+Z). */
+  /* Z → undo last action: re-inserts a just-deleted card, or otherwise
+     goes back to the previous card (also Ctrl/Cmd+Z). */
   if ((e.key === 'z' || e.key === 'Z') && studyUndoStack.length) {
     undoLastRating();
     e.preventDefault();
   }
+});
+
+/* Global Ctrl/Cmd+Z: undo the last study action even with the popup closed
+   (or after a reload — the stack is persisted, see saveUndoStack). Reopens
+   the study popup for whichever deck has the most recent undo entry, then
+   reverts it. The in-modal 'Z'/Ctrl+Z handler above takes priority while the
+   popup is open. */
+document.addEventListener('keydown', e => {
+  if (!(e.key === 'z' || e.key === 'Z') || !(e.ctrlKey || e.metaKey)) return;
+  if (studyBack.classList.contains('open')) return; // handled above
+  const tag = (document.activeElement && document.activeElement.tagName) || '';
+  if (['INPUT', 'TEXTAREA', 'SELECT'].includes(tag) || (document.activeElement && document.activeElement.isContentEditable)) return;
+  /* Don't hijack Ctrl+Z while some other modal/editor is open. */
+  if (document.querySelectorAll('.modal-back.open, .study-back.open').length) return;
+  const found = findMostRecentUndo();
+  if (!found) return;
+  e.preventDefault();
+  openStudy(found.deckId, found.mode);
+  if (studyDeck && studyUndoStack.length) undoLastRating();
 });
 
 /* Wire the SRS/Cram toggle in the study modal. Changing mode restarts the

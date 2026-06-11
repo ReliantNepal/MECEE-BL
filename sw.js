@@ -32,7 +32,7 @@
    To force every client to drop its cached copies, bump CACHE_VERSION below —
    the activate handler deletes any cache whose name doesn't match. */
 
-const CACHE_VERSION = 'mecee-v57'; // bumped: enlarged the rank-info (i) button (15px -> 22px, given a visible surface-2 circle background) so it's easier to spot and tap
+const CACHE_VERSION = 'mecee-v58'; // bumped: flashcards SRS sync-merge fix + study undo (Back vs Ctrl+Z, persisted across reload/close)
 
 const SHELL = [
   '/',
