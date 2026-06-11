@@ -723,6 +723,97 @@ def count_changes(before: Dict[str, Any], after: Dict[str, Any]) -> int:
     return changed
 
 
+# ---------- Sync history logging ----------
+
+def _deck_srs_counts(deck_data: Dict[str, Any]) -> Dict[str, int]:
+    """Mirror of flashcards.html's isCardNew/isCardDue/deckDueCount, used to
+    summarize each deck's due/new/total counts in the sync history log so
+    cross-device count discrepancies can be debugged from the server side."""
+    today = datetime.date.today()
+    due = new = 0
+    cards = (deck_data or {}).get("cards") or []
+    for c in cards:
+        srs = (c or {}).get("srs")
+        if not srs or not srs.get("reps"):
+            new += 1
+            continue
+        due_str = srs.get("due")
+        if not due_str:
+            due += 1
+            continue
+        try:
+            due_date = datetime.date.fromisoformat(due_str)
+            if due_date <= today:
+                due += 1
+        except (ValueError, TypeError):
+            due += 1
+    return {"total": len(cards), "due": due, "new": new}
+
+
+def summarize_flashcard_decks(snapshot: Dict[str, Any]) -> Dict[str, Dict[str, int]]:
+    """{deckId: {total, due, new}} for every live (non-tombstoned) deck in a
+    flashcards snapshot. Used to attach before/after counts to sync history
+    entries."""
+    out: Dict[str, Dict[str, int]] = {}
+    for key, item in ((snapshot or {}).get("items") or {}).items():
+        if not item or item.get("deletedAt") or not item.get("data"):
+            continue
+        out[key] = _deck_srs_counts(item["data"])
+    return out
+
+
+def log_sync_event(root_dir: str, entry: Dict[str, Any]) -> None:
+    """Append one JSON line to <root_dir>/../.mecee-sync-log/sync_history.jsonl
+    recording a sync push (category, device, item counts, per-deck SRS
+    summaries for flashcards). Best-effort: logging failures never break a
+    sync. The log is trimmed to the most recent 5000 lines on each write to
+    avoid unbounded growth."""
+    try:
+        log_dir = os.path.normpath(os.path.join(root_dir, "..", ".mecee-sync-log"))
+        os.makedirs(log_dir, exist_ok=True)
+        log_path = os.path.join(log_dir, "sync_history.jsonl")
+        entry = dict(entry)
+        entry.setdefault("ts", int(time.time() * 1000))
+        entry.setdefault("time", datetime.datetime.now().isoformat(timespec="seconds"))
+        line = json.dumps(entry, separators=(",", ":"))
+        with open(log_path, "a", encoding="utf-8") as f:
+            f.write(line + "\n")
+        # Trim occasionally so the file doesn't grow forever.
+        if os.path.getsize(log_path) > 5_000_000:
+            with open(log_path, "r", encoding="utf-8") as f:
+                lines = f.readlines()
+            with open(log_path, "w", encoding="utf-8") as f:
+                f.writelines(lines[-5000:])
+    except Exception:
+        pass
+
+
+def read_sync_history(root_dir: str, limit: int = 200,
+                       category: Optional[str] = None) -> List[Dict[str, Any]]:
+    """Return up to `limit` most recent sync history entries (newest last),
+    optionally filtered to one category."""
+    log_path = os.path.normpath(os.path.join(root_dir, "..", ".mecee-sync-log", "sync_history.jsonl"))
+    if not os.path.exists(log_path):
+        return []
+    out: List[Dict[str, Any]] = []
+    try:
+        with open(log_path, "r", encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    entry = json.loads(line)
+                except Exception:
+                    continue
+                if category and entry.get("category") != category:
+                    continue
+                out.append(entry)
+    except Exception:
+        return []
+    return out[-limit:]
+
+
 # ---------- Misc helpers ----------
 
 def sha256_file(path: str) -> str:

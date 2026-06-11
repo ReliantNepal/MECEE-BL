@@ -33,6 +33,41 @@
 
   /* ---------- Storage helpers ---------- */
 
+  /* ---------- Device identity (for server-side sync history) ---------- */
+
+  const DEVICE_ID_KEY   = 'mecee_device_id';
+  const DEVICE_NAME_KEY = 'mecee_device_name';
+
+  function getDeviceId() {
+    let id = localStorage.getItem(DEVICE_ID_KEY);
+    if (!id) {
+      id = 'dev-' + Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
+      localStorage.setItem(DEVICE_ID_KEY, id);
+    }
+    return id;
+  }
+
+  function getDeviceName() {
+    let name = localStorage.getItem(DEVICE_NAME_KEY);
+    if (!name) {
+      const ua = navigator.userAgent || '';
+      const platform = navigator.platform || '';
+      let label = platform || 'device';
+      if (/Android/i.test(ua)) label = 'Android';
+      else if (/iPhone|iPad|iPod/i.test(ua)) label = 'iOS';
+      else if (/Windows/i.test(ua)) label = 'Windows';
+      else if (/Mac/i.test(ua)) label = 'Mac';
+      else if (/Linux/i.test(ua)) label = 'Linux';
+      const browser = /Edg\//.test(ua) ? 'Edge'
+        : /Chrome\//.test(ua) ? 'Chrome'
+        : /Firefox\//.test(ua) ? 'Firefox'
+        : /Safari\//.test(ua) ? 'Safari' : '';
+      name = browser ? `${label} (${browser})` : label;
+      localStorage.setItem(DEVICE_NAME_KEY, name);
+    }
+    return name;
+  }
+
   function readJSON(key, fallback) {
     try { return JSON.parse(localStorage.getItem(key) || 'null') ?? fallback; }
     catch (_) { return fallback; }
@@ -222,7 +257,11 @@
   async function postJSON(path, body) {
     const res = await fetch(path, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Mecee-Device': getDeviceId(),
+        'X-Mecee-Device-Name': getDeviceName()
+      },
       body: JSON.stringify(body)
     });
     const text = await res.text();

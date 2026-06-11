@@ -6915,13 +6915,28 @@ function openStudy(id, mode = 'srs', opts = {}) {
     let queue = saved.cardIds
       .map(cid => idxByCardId[cid])
       .filter(i => i !== undefined);
+    const savedIdx = Math.min(saved.idx || 0, queue.length);
+    /* Drop not-yet-reached cards that are no longer due/new. This happens
+       when another device reviews the same deck mid-session and that
+       progress syncs in here: those cards are already "done" elsewhere, so
+       the deck's due/new badge no longer counts them, but they'd otherwise
+       linger in this device's queue and inflate the "X / Y" total past
+       (due + new). Cram mode and already-reached cards are left untouched. */
+    if (mode !== 'cram') {
+      const done = queue.slice(0, savedIdx);
+      const upcoming = queue.slice(savedIdx).filter(i => {
+        const c = deck.cards[i];
+        return isCardNew(c) || isCardDue(c);
+      });
+      queue = done.concat(upcoming);
+    }
     /* Append newly-eligible cards not already in the saved queue (new cards
        added today, or cards whose intervals expired mid-session). */
     const eligible = buildStudyQueue(deck, mode);
     const inQueue = new Set(queue);
     eligible.forEach(i => { if (!inQueue.has(i)) queue.push(i); });
     studyQueue = queue;
-    studyIdx = Math.min(saved.idx || 0, queue.length);
+    studyIdx = Math.min(savedIdx, queue.length);
     studyReviewed = saved.reviewed || 0;
   } else {
     studyQueue = buildStudyQueue(deck, mode);

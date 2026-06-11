@@ -313,6 +313,8 @@ class QuietHandler(http.server.SimpleHTTPRequestHandler):
             return self._api_render_status()
         if parsed.path == "/api/sync/status":
             return self._sync_status()
+        if parsed.path == "/api/sync/history":
+            return self._sync_history(urllib.parse.parse_qs(parsed.query))
         if parsed.path == "/api/worker-config":
             return self._worker_config()
         if parsed.path == "/api/openai-key":
@@ -1280,6 +1282,21 @@ class QuietHandler(http.server.SimpleHTTPRequestHandler):
             "account": R2_CONFIG.account_id,
         })
 
+    def _sync_history(self, qs) -> None:
+        """Recent sync push history (newest last) for debugging cross-device
+        merge issues. ?limit=N caps the count (default 200, max 2000);
+        ?category=flashcards filters to one category."""
+        try:
+            limit = int((qs.get("limit") or ["200"])[0])
+        except (ValueError, TypeError):
+            limit = 200
+        limit = max(1, min(limit, 2000))
+        category = (qs.get("category") or [None])[0]
+        if category and not mecee_sync.safe_category(category):
+            return self._json(400, {"error": f"unknown category: {category}"})
+        entries = mecee_sync.read_sync_history(ROOT, limit=limit, category=category)
+        self._json(200, {"entries": entries, "count": len(entries)})
+
     def _worker_config(self) -> None:
         """Hand the flashcards page everything it needs to talk to the
         Cloudflare Worker in 'cloud' mode. We read .mecee-secrets/worker.json
@@ -1588,6 +1605,24 @@ class QuietHandler(http.server.SimpleHTTPRequestHandler):
             if pushed > 0:
                 R2_CLIENT.put_object(key, json.dumps(merged, separators=(",", ":")).encode("utf-8"),
                                      content_type="application/json")
+
+            # Record this sync in the history log so cross-device issues
+            # (e.g. a deck's due/new counts not matching its study queue)
+            # can be debugged after the fact.
+            log_entry = {
+                "category":   category,
+                "device":     self.headers.get("X-Mecee-Device", ""),
+                "deviceName": self.headers.get("X-Mecee-Device-Name", ""),
+                "pushed":     pushed,
+                "pulled":     pulled,
+                "items":      len(merged.get("items") or {}),
+            }
+            if category == "flashcards":
+                log_entry["decksLocal"]  = mecee_sync.summarize_flashcard_decks(local)
+                log_entry["decksRemote"] = mecee_sync.summarize_flashcard_decks(remote)
+                log_entry["decksMerged"] = mecee_sync.summarize_flashcard_decks(merged)
+            mecee_sync.log_sync_event(ROOT, log_entry)
+
             self._json(200, {"snapshot": merged, "pushed": pushed, "pulled": pulled})
         except mecee_sync.R2Error as e:
             self._json(502, {"error": "r2 push failed", "status": e.status})
