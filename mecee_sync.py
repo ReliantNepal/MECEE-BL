@@ -587,12 +587,22 @@ def merge_snapshots(local: Dict[str, Any], remote: Dict[str, Any]) -> Dict[str, 
 
 
 def _card_progress_score(card: Dict[str, Any]) -> tuple:
-    """Comparable score for how far along a card is in SRS.
-    Returns (reps, lastReview) — higher reps wins; lastReview breaks ties."""
+    """Comparable score for how "fresh" a card's SRS state is.
+
+    Primarily compares `lastReview` (an ISO timestamp string, so it sorts
+    correctly) — the most recently reviewed side wins. `reps` is only a
+    tiebreaker for cards that have never been reviewed.
+
+    This intentionally does NOT use `reps` as the primary signal: rating a
+    mature card "Again" is a lapse and legitimately resets `reps` to 0. If
+    `reps` were primary, that fresh lapse (reps=0) would look like *less*
+    progress than a stale pre-lapse copy (reps>0) on the other side, and the
+    merge would resurrect the old, already-superseded schedule — making a
+    card you just relearned reappear as due/new after syncing."""
     srs = card.get("srs") if isinstance(card, dict) else None
     if not srs:
-        return (0, "")
-    return (srs.get("reps") or 0, srs.get("lastReview") or "")
+        return ("", 0)
+    return (srs.get("lastReview") or "", srs.get("reps") or 0)
 
 
 def merge_deck_data(
